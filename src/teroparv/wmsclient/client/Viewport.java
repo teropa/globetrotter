@@ -1,5 +1,6 @@
 package teroparv.wmsclient.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -11,7 +12,9 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -32,10 +35,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	
 	private HandlerRegistration preventDefaultMouseEventsRegistration = null;
 	
-	// size cache
-	private Size size = null;
-	private Size viewSize = null;
-	
 	public Viewport(Widget view) {
 		this.view = view;
 		initWidget(container);
@@ -46,11 +45,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		focusPanel.addMouseDownHandler(this);
 		focusPanel.addMouseMoveHandler(this);
 		focusPanel.addMouseUpHandler(this);
-	}
-	
-	public Size getSize() {
-		populateSizeCache();
-		return size;
 	}
 	
 	public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -73,7 +67,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	}
 	
 	public void onMouseDown(MouseDownEvent event) {
-		clearSizeCache();
 		dragging = true;
 		xOffset = event.getX();
 		yOffset = event.getY();
@@ -92,11 +85,13 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		if (dragging) {
 			dragging = false;
 			DOM.releaseCapture(focusPanel.getElement());
+			fireEvent(new ViewPannedEvent(getViewCenterPoint()));
 		}
 	}
 	
 	private void repositionView(int newX, int newY) {
-		populateSizeCache();
+		final Size size = getSize();
+		final Size viewSize = getViewSize();
 		if (newX > size.getWidth()) {
 			newX = 0;
 		} else if (newX < 0 - viewSize.getWidth()) {
@@ -112,15 +107,35 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		container.setWidgetPosition(focusPanel, newX, newY);
 	}
 
-	private void populateSizeCache() {
-		if (size == null) {
-			size = new Size(container.getOffsetWidth(), container.getOffsetHeight());
-			viewSize = new Size(view.getOffsetWidth(), container.getOffsetHeight());
-		}
+	public Point getViewTopLeftPoint() {
+		return new Point(
+				-container.getWidgetLeft(focusPanel), 
+				-container.getWidgetTop(focusPanel));
+	}
+	
+	public Point getViewCenterPoint() {
+		final Size size = getSize();
+		final Point topLeft = getViewTopLeftPoint();
+		return new Point(topLeft.getX() + size.getWidth() / 2, topLeft.getY() + size.getHeight() / 2);
 	}
 
-	private void clearSizeCache() {
-		size = viewSize = null;
+	public Size getViewSize() {
+		return new Size(view.getOffsetWidth(), view.getOffsetHeight());
 	}
 
+	public Size getSize() {
+		return new Size(container.getOffsetWidth(), container.getOffsetHeight());
+	}
+
+
+	public void addViewPannedEventHandler(ViewPannedEvent.Handler handler) {
+		addHandler(handler, ViewPannedEvent.TYPE);
+	}
+
+	public void positionView(Point newCenterPoint) {
+		final Size size = getSize();
+		repositionView(
+				-(newCenterPoint.getX() - size.getWidth() / 2),
+				-(newCenterPoint.getY() - size.getHeight() / 2));
+	}
 }

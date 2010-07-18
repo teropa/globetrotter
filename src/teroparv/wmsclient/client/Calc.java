@@ -2,6 +2,7 @@ package teroparv.wmsclient.client;
 
 import com.google.gwt.core.client.GWT;
 
+
 public class Calc {
 
 	public static Size getPixelSize(Bounds bounds, double resolution) {
@@ -44,7 +45,6 @@ public class Calc {
 		final boolean narrowHeight = fromHeight > toHeight;
 		
 		if (narrowWidth || narrowHeight) {
-			
 			double widthDiff = narrowWidth ? (fromWidth - toWidth) / 2 : 0;
 			double heightDiff = narrowHeight ? (fromHeight - toHeight) / 2 : 0;
 			return new Bounds(
@@ -57,4 +57,23 @@ public class Calc {
 		}
 	}
 	
+	public static LonLat getLonLat(Point point, Bounds extent, Size area) {
+		final double horizRatio = extent.getWidth() / area.getWidth();
+		final double vertRatio = extent.getHeight() / area.getHeight();
+		
+		GWT.log("Point: " + point, null);
+		
+		return new LonLat(
+				extent.getLowerLeftX() + (point.getX() * horizRatio),
+				extent.getUpperRightY() - (point.getY() * vertRatio));
+	}
+	
+	public static Point getPoint(LonLat lonLat, Bounds extent, Size area) {
+		final double horizRatio = area.getWidth() / extent.getWidth();
+		final double vertRatio = area.getHeight() / extent.getHeight();
+		
+		return new Point(
+				lonLat.getLon() - extent.getLowerLeftX() * horizRatio,
+				lonLat.getLat() - extent.getLowerLeftY() * vertRatio);
+	}
 }

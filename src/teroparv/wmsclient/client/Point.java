@@ -10,11 +10,21 @@ public class Point {
 		this.y = y;
 	}
 	
+	public Point(double x, double y) {
+		this.x = (int)Math.floor(x);
+		this.y = (int)Math.floor(y);
+	}
+	
 	public int getX() {
 		return x;
 	}
 	
 	public int getY() {
 		return y;
+	}
+	
+	@Override
+	public String toString() {
+		return "[x: " + x + ", y: " + y + "]";
 	}
 }
