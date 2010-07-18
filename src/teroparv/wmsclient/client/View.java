@@ -14,8 +14,8 @@ public class View extends Composite {
 	
 	public void setSize(Size size) {
 		this.size = size;
-		String widthPx = size.getWidth() + "px";
-		String heightPx = size.getHeight() + "px";
+		final String widthPx = size.getWidth() + "px";
+		final String heightPx = size.getHeight() + "px";
 		setSize(widthPx, heightPx);
 		for (int i=0 ; i<container.getWidgetCount() ; i++) {
 			container.getWidget(i).setSize(widthPx, heightPx);

@@ -65,16 +65,9 @@ public class Map extends Composite implements ViewPannedEvent.Handler {
 		});
 	}
 
-	public void clear() {
-		for (Layer eachLayer : layers) {
-			eachLayer.clear();
-		}
-	}
-	
 	@Override
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
-		clear();
 		draw();
 	}
 	
