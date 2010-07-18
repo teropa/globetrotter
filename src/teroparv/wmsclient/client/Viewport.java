@@ -89,16 +89,15 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	private void repositionView(int newX, int newY) {
 		final Size size = getSize();
 		final Size viewSize = getViewSize();
-		if (newX > size.getWidth()) {
+		if (newX > 0) {
 			newX = 0;
-		} else if (newX < 0 - viewSize.getWidth()) {
-			newX = size.getWidth();
+		} else if (newX < 0 - viewSize.getWidth() + size.getWidth()) {
+			newX = 0 - viewSize.getWidth() + size.getWidth();
 		}
-		if (newY > size.getHeight()) {
+		if (newY > 0) {
 			newY = 0;
-		}
-		else if (newY < 0 - viewSize.getHeight()) {
-			newY = size.getHeight();
+		} else if (newY < 0 - viewSize.getHeight() + size.getHeight()) {
+			newY = 0 - viewSize.getHeight() + size.getHeight();
 		}
 		
 		container.setWidgetPosition(focusPanel, newX, newY);
