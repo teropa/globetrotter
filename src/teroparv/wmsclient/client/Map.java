@@ -9,11 +9,9 @@ import static teroparv.wmsclient.client.Calc.narrow;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
 
 public class Map extends Composite implements ViewPannedEvent.Handler {
 
@@ -41,6 +39,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler {
 	public void addLayer(Layer layer) {
 		layers.add(layer);
 		layer.setMap(this);
+		view.addLayer(layer);
 	}
 	
 	public void setCenter(LonLat center) {
@@ -58,22 +57,24 @@ public class Map extends Composite implements ViewPannedEvent.Handler {
 				final Size portSize = viewport.getSize();
 				final Bounds extent = narrow(getExtent(center, resolution, portSize), maxExtent);
 				final Size imageSize = getPixelSize(extent, resolution);
+				final Point topLeft = viewport.getViewTopLeftPoint();
 				for (Layer eachLayer : layers) {
-					final String url = eachLayer.constructUrl(extent, imageSize);
-					GWT.log(url, null);
-					Image image = new Image(url);
-					image.setWidth(imageSize.getWidth()+"px");
-					image.setHeight(imageSize.getHeight()+"px");
-					view.add(image, viewport.getViewTopLeftPoint());
+					eachLayer.draw(extent, imageSize, topLeft);
 				}				
 			}
 		});
 	}
 
+	public void clear() {
+		for (Layer eachLayer : layers) {
+			eachLayer.clear();
+		}
+	}
+	
 	@Override
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
-		view.clear();
+		clear();
 		draw();
 	}
 	
