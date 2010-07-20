@@ -6,7 +6,7 @@ public interface Layer {
 
 	public void setMap(Map map);
 	public void setLayers(String layers);
-	public void draw(Bounds extent, Size imageSize, Point topLeft);
+	public void draw();
 
 	public Widget asWidget();
 }

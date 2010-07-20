@@ -41,4 +41,8 @@ public class Bounds {
 		return Math.abs(upperRightY - lowerLeftY);
 	}
 	
+	@Override
+	public String toString() {
+		return "[" + getLowerLeftX() + "," + getLowerLeftY() + "," + getUpperRightX() + "," + getUpperRightY() + "]";
+	}
 }

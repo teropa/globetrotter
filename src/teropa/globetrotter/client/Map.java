@@ -1,12 +1,12 @@
 package teropa.globetrotter.client;
 
-import static teropa.globetrotter.client.Calc.getExtent;
 import static teropa.globetrotter.client.Calc.getLonLat;
 import static teropa.globetrotter.client.Calc.getPixelSize;
 import static teropa.globetrotter.client.Calc.getPoint;
 import static teropa.globetrotter.client.Calc.narrow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.Command;
@@ -25,6 +25,9 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 	private int resolutionIndex = 4;
 	
 	private Size tileSize = new Size(256, 256);
+	
+	// A different grid for each resolution
+	private final HashMap<Integer, Grid> grids = new HashMap<Integer, Grid>();
 	
 	public Map(String width, String height) {
 		initWidget(viewport);
@@ -66,6 +69,29 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 		return maxExtent;
 	}
 
+	public Bounds getExtent() {
+		return narrow(Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize()), maxExtent);
+	}
+
+	public double getResolution() {
+		return resolutions[resolutionIndex];
+	}
+
+	public Size getViewportSize() {
+		return viewport.getSize();
+	}
+
+	public Point getViewportLocation() {
+		return viewport.getViewTopLeftPoint();
+	}
+	
+	public Grid getCurrentGrid() {
+		if (grids.get(resolutionIndex) == null) {
+			grids.put(resolutionIndex, new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution()));
+		}
+		return grids.get(resolutionIndex);
+	}
+	
 	public void zoomIn() {
 		if (resolutionIndex < resolutions.length - 1) {
 			resolutionIndex++;
@@ -85,12 +111,8 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 	public void draw() {
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
-				final Size portSize = viewport.getSize();
-				final Bounds extent = narrow(getExtent(center, resolutions[resolutionIndex], portSize), maxExtent);
-				final Size imageSize = getPixelSize(extent, resolutions[resolutionIndex]);
-				final Point topLeft = viewport.getViewTopLeftPoint();
 				for (Layer eachLayer : layers) {
-					eachLayer.draw(extent, imageSize, topLeft);
+					eachLayer.draw();
 				}				
 			}
 		});
@@ -126,6 +148,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 	public String getSRS() {
 		return "EPSG:4326";
 	}
+
 
 }
 

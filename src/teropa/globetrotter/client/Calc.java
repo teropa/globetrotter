@@ -80,6 +80,22 @@ public class Calc {
 		
 		return new Point(x, y);
 	}
+
+	public static Point getCenterPoint(Point topLeft, Size areaSize) {
+		return new Point(
+				topLeft.getX() + areaSize.getWidth() / 2,
+				topLeft.getY() + areaSize.getHeight() / 2);
+	}
+
+	public static boolean intersect(Bounds lhs, Bounds rhs) {
+		return
+			lhs.getLowerLeftX() < rhs.getUpperRightX() &&
+			lhs.getUpperRightX() > rhs.getLowerLeftX() &&
+			lhs.getLowerLeftY() < rhs.getUpperRightY() &&
+			lhs.getUpperRightY() > rhs.getLowerLeftY();
+			
+			
+	}
 	
 	// getLonLat(getPoint(center, maxExtent, view.getSize()), maxExtent, view.getSize())
 }
