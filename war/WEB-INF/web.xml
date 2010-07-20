@@ -6,7 +6,7 @@
 <web-app>
   
   <welcome-file-list>
-    <welcome-file>WmsClient.html</welcome-file>
+    <welcome-file>GlobeTrotter.html</welcome-file>
   </welcome-file-list>
 
 </web-app>
