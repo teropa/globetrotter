@@ -1,5 +1,9 @@
 package teroparv.wmsclient.client;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -20,13 +24,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Viewport extends Composite implements MouseOverHandler, MouseOutHandler, MouseDownHandler, MouseMoveHandler, MouseUpHandler, NativePreviewHandler {
+public class Viewport extends Composite implements MouseOverHandler, MouseOutHandler, MouseDownHandler, MouseMoveHandler, MouseUpHandler, DoubleClickHandler, NativePreviewHandler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
-	private final FocusPanel focusPanel = new FocusPanel();
+	private final FocusPanelWithDoubleClicks focusPanel = new FocusPanelWithDoubleClicks();
 	private final Widget view;
 	
-	private boolean dragging = false;	
+	private boolean dragging = false;
+	private boolean hasMoved = false;
 	private int xOffset;
 	private int yOffset;
 	
@@ -42,6 +47,8 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		focusPanel.addMouseDownHandler(this);
 		focusPanel.addMouseMoveHandler(this);
 		focusPanel.addMouseUpHandler(this);
+		focusPanel.addDoubleClickHandler(this);
+		addStyleName("moveCursor");
 	}
 	
 	public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -72,6 +79,7 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
+			hasMoved = true;
 			int newX = event.getX() + container.getWidgetLeft(focusPanel) - xOffset;
 			int newY = event.getY() + container.getWidgetTop(focusPanel) - yOffset;
 			repositionView(newX, newY);
@@ -82,8 +90,18 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		if (dragging) {
 			dragging = false;
 			DOM.releaseCapture(focusPanel.getElement());
-			fireEvent(new ViewPannedEvent(getViewCenterPoint()));
+			if (hasMoved) {
+				fireEvent(new ViewPannedEvent(getViewCenterPoint()));
+				hasMoved = false;
+			}
 		}
+	}
+	
+	public void onDoubleClick(DoubleClickEvent event) {
+		final int eventX = event.getNativeEvent().getClientX() - getAbsoluteLeft();
+		final int eventY = event.getNativeEvent().getClientY() - getAbsoluteTop();
+		final Point topLeft = getViewTopLeftPoint();
+		fireEvent(new ViewZoomedEvent(new Point(topLeft.getX() + eventX, topLeft.getY() + eventY)));
 	}
 	
 	private void repositionView(int newX, int newY) {
@@ -99,7 +117,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		} else if (newY < 0 - viewSize.getHeight() + size.getHeight()) {
 			newY = 0 - viewSize.getHeight() + size.getHeight();
 		}
-		
 		container.setWidgetPosition(focusPanel, newX, newY);
 	}
 
@@ -123,9 +140,12 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		return new Size(container.getOffsetWidth(), container.getOffsetHeight());
 	}
 
-
 	public void addViewPannedEventHandler(ViewPannedEvent.Handler handler) {
 		addHandler(handler, ViewPannedEvent.TYPE);
+	}
+
+	public void addViewZoomedEventHandler(ViewZoomedEvent.Handler handler) {
+		addHandler(handler, ViewZoomedEvent.TYPE);
 	}
 
 	public void positionView(Point newCenterPoint) {
@@ -133,5 +153,13 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		repositionView(
 				-(newCenterPoint.getX() - size.getWidth() / 2),
 				-(newCenterPoint.getY() - size.getHeight() / 2));
+	}
+
+	private static class FocusPanelWithDoubleClicks extends FocusPanel implements HasDoubleClickHandlers {
+		
+		@Override
+		public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
+			return addDomHandler(handler, DoubleClickEvent.getType());
+		}
 	}
 }

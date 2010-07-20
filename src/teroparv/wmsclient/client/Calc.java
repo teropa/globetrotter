@@ -1,6 +1,5 @@
 package teroparv.wmsclient.client;
 
-import com.google.gwt.core.client.GWT;
 
 
 public class Calc {
@@ -17,17 +16,17 @@ public class Calc {
 		return (int)Math.floor(bounds.getHeight() / resolution);
 	}
 	
-	public static int getCoordinateWidth(Size size, double resolution) {
-		return (int)Math.floor(size.getWidth() * resolution);
+	public static double getCoordinateWidth(Size size, double resolution) {
+		return size.getWidth() * resolution;
 	}
 	
-	public static int getCoordinateHeight(Size size, double resolution) {
-		return (int)Math.floor(size.getHeight() * resolution);
+	public static double getCoordinateHeight(Size size, double resolution) {
+		return size.getHeight() * resolution;
 	}
 	
 	public static Bounds getExtent(LonLat center, double resolution, Size viewportSize) {
-		final int halfWidth = getCoordinateWidth(viewportSize, resolution) / 2;
-		final int halfHeight = getCoordinateHeight(viewportSize, resolution) / 2;
+		final double halfWidth = getCoordinateWidth(viewportSize, resolution) / 2.0;
+		final double halfHeight = getCoordinateHeight(viewportSize, resolution) / 2.0;
 		
 		return new Bounds(
 				center.getLon() - halfWidth,
@@ -58,22 +57,29 @@ public class Calc {
 	}
 	
 	public static LonLat getLonLat(Point point, Bounds extent, Size area) {
-		final double horizRatio = extent.getWidth() / area.getWidth();
-		final double vertRatio = extent.getHeight() / area.getHeight();
+		double ratioFromLeft = ((double)point.getX()) / ((double)area.getWidth());
+		double fromBottom = area.getHeight() - point.getY();
+		double ratioFromBottom = fromBottom / ((double)area.getHeight());
 		
-		GWT.log("Point: " + point, null);
+		double lon = extent.getLowerLeftX() + ratioFromLeft * extent.getWidth();
+		double lat = extent.getLowerLeftY() + ratioFromBottom * extent.getHeight();
 		
-		return new LonLat(
-				extent.getLowerLeftX() + (point.getX() * horizRatio),
-				extent.getUpperRightY() - (point.getY() * vertRatio));
+		return new LonLat(lon, lat);
 	}
 	
 	public static Point getPoint(LonLat lonLat, Bounds extent, Size area) {
-		final double horizRatio = area.getWidth() / extent.getWidth();
-		final double vertRatio = area.getHeight() / extent.getHeight();
+		double fromLeft = lonLat.getLon() - extent.getLowerLeftX();
+		double fromBottom = lonLat.getLat() - extent.getLowerLeftY();
+		double fromTop = extent.getHeight() - fromBottom;
 		
-		return new Point(
-				lonLat.getLon() - extent.getLowerLeftX() * horizRatio,
-				lonLat.getLat() - extent.getLowerLeftY() * vertRatio);
+		double ratioFromLeft = fromLeft / extent.getWidth();
+		double ratioFromTop = fromTop / extent.getHeight();
+		
+		int x = (int)Math.floor(ratioFromLeft * area.getWidth());
+		int y = (int)Math.floor(ratioFromTop * area.getHeight());
+		
+		return new Point(x, y);
 	}
+	
+	// getLonLat(getPoint(center, maxExtent, view.getSize()), maxExtent, view.getSize())
 }

@@ -18,4 +18,8 @@ public class LonLat {
 		return lat;
 	}
 	
+	@Override
+	public String toString() {
+		return "[lon: " + lon + ", lat: " + lat + "]";
+	}
 }
