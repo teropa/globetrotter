@@ -6,7 +6,9 @@ public interface Layer {
 
 	public void setMap(Map map);
 	public void setLayers(String layers);
-	public void draw();
-
+	
+	public void onMapPanned();
+	public void onMapPanEnded();
+	
 	public Widget asWidget();
 }

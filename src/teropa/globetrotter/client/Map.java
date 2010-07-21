@@ -117,14 +117,16 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				for (Layer eachLayer : layers) {
-					eachLayer.draw();
+					eachLayer.onMapPanned();
 				}				
 			}
 		});
 	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
-		
+		for (Layer eachLayer : layers) {
+			eachLayer.onMapPanEnded();
+		}	
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {

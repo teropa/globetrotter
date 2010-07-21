@@ -26,10 +26,12 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		initImageBuffer();
 	}
 	
-	public void draw() {
+	public void onMapPanned() {
 		final String url = constructUrl(map.getExtent(), map.getViewportSize());
-		GWT.log(url, null);
 		addImage(map.getViewportSize(), map.getViewportLocation(), url);
+	}
+	
+	public void onMapPanEnded() {		
 	}
 	
 	private void addImage(Size imageSize, final Point topLeft, final String url) {

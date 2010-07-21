@@ -13,6 +13,7 @@ public class TiledWMS extends WMSBase {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final HashMap<Grid.Tile, Image> currentContents = new HashMap<Grid.Tile, Image>();
+	private Set<Grid.Tile> latestTiles;
 	
 	private int buffer = 2;
 	
@@ -21,29 +22,38 @@ public class TiledWMS extends WMSBase {
 		initWidget(container);
 	}
 	
-	public void draw() {
-		Grid grid = map.getCurrentGrid();
-		Bounds extent = widenToBuffer(map.getExtent());
-		Set<Grid.Tile> newTiles = grid.getTiles(extent);
-		removeOldTiles(newTiles);
-		addNewTiles(newTiles);
+	public void onMapPanned() {
+		draw();
 	}
 
-	private void removeOldTiles(Set<Grid.Tile> newTiles) {
+	private void draw() {
+		Grid grid = map.getCurrentGrid();
+		Bounds extent = widenToBuffer(map.getExtent());
+		latestTiles = grid.getTiles(extent);
+		addNewTiles();
+	}
+
+	public void onMapPanEnded() {
+		removeOrphanTiles();
+	}
+
+	private void removeOrphanTiles() {
 		Iterator<Map.Entry<Grid.Tile, Image>> oldTileIterator = currentContents.entrySet().iterator();
 		while (oldTileIterator.hasNext()) {
 			Map.Entry<Grid.Tile, Image> old = oldTileIterator.next();
-			if (!newTiles.contains(old.getKey())) {
+			if (latestTiles == null || !latestTiles.contains(old.getKey())) {
 				container.remove(old.getValue());
+				ImagePool.release(old.getValue());
 				oldTileIterator.remove();
 			}
 		}
 	}
 
-	private void addNewTiles(Set<Grid.Tile> newTiles) {
-		for (Grid.Tile eachTile : newTiles) {
+	private void addNewTiles() {
+		for (Grid.Tile eachTile : latestTiles) {
 			if (!currentContents.containsKey(eachTile)) {
-				Image image = new Image(constructUrl(eachTile.getExtent(), eachTile.getSize()));
+				Image image = ImagePool.get();
+				image.setUrl(constructUrl(eachTile.getExtent(), eachTile.getSize()));
 				currentContents.put(eachTile, image);
 				container.add(image, eachTile.getTopLeft().getX(), eachTile.getTopLeft().getY());
 			}
