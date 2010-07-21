@@ -19,6 +19,20 @@ public class Size {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		Size o = (Size)obj;
+		return o.width == width && o.height == height;
+	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 51;
+		hash += width * 31;
+		hash += height * 31;
+		return hash;
+	}
+	
+	@Override
 	public String toString() {
 		return "[width: " + width + ", height: " + height + "]";
 	}

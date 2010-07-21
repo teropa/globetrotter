@@ -9,11 +9,11 @@ public class Calc {
 	}
 	
 	public static int getPixelWidth(Bounds bounds, double resolution) {
-		return (int)Math.floor(bounds.getWidth() / resolution);		
+		return (int)Math.round(bounds.getWidth() / resolution);		
 	}
 	
 	public static int getPixelHeight(Bounds bounds, double resolution) {
-		return (int)Math.floor(bounds.getHeight() / resolution);
+		return (int)Math.round(bounds.getHeight() / resolution);
 	}
 	
 	public static double getCoordinateWidth(Size size, double resolution) {
@@ -75,8 +75,8 @@ public class Calc {
 		double ratioFromLeft = fromLeft / extent.getWidth();
 		double ratioFromTop = fromTop / extent.getHeight();
 		
-		int x = (int)Math.floor(ratioFromLeft * area.getWidth());
-		int y = (int)Math.floor(ratioFromTop * area.getHeight());
+		int x = (int)Math.round(ratioFromLeft * area.getWidth());
+		int y = (int)Math.round(ratioFromTop * area.getHeight());
 		
 		return new Point(x, y);
 	}

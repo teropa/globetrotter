@@ -42,6 +42,29 @@ public class Bounds {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		Bounds o = (Bounds)obj;
+		return hashDouble(lowerLeftX) == hashDouble(o.lowerLeftX) &&
+			hashDouble(lowerLeftY) == hashDouble(o.lowerLeftY) &&
+			hashDouble(upperRightX) == hashDouble(o.upperRightX) &&
+			hashDouble(upperRightY) == hashDouble(o.upperRightY);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash += hashDouble(lowerLeftX) * 31;
+		hash += hashDouble(lowerLeftY) * 31;
+		hash += hashDouble(upperRightX) * 31;
+		hash += hashDouble(upperRightY) * 31;
+		return hash;
+	}
+	
+	private int hashDouble(double val) {
+		return (int)(val * 1000000);
+	}
+	
+	@Override
 	public String toString() {
 		return "[" + getLowerLeftX() + "," + getLowerLeftY() + "," + getUpperRightX() + "," + getUpperRightY() + "]";
 	}

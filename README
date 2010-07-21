@@ -1,0 +1,34 @@
+ToDo
+====
+
+- Cancel tiles still loading which aren't needed anymore?
+
+
+
+
+getTiles
+- 146 calls
+- 12.34 percent
+- 330 own time
+- 1403 time
+- 9.614 avg
+
+- 170 calls
+- 12.35 percent
+- 370 own time
+- 1581 time
+- 9.314 avg
+
+
+2938 / 636470
+2573 / 570306
+2783 / 611851
+2646 / 588575
+2873 / 646662
+2084 / 449344
+2144 / 485592
+1854 / 399184
+1868 / 406672
+1560 / 314601
+1488 / 288579
+1873 / 402417

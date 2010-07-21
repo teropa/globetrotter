@@ -13,7 +13,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoomedEvent.Handler {
+public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
 	private final View view = new View();
 	private final Viewport viewport = new Viewport(view);
@@ -34,6 +34,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 		setWidth(width);
 		setHeight(height);
 		viewport.addViewPannedEventHandler(this);
+		viewport.addViewPanEndedEventHandler(this);
 		viewport.addViewZoomedEventHandler(this);
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
@@ -85,6 +86,10 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 		return viewport.getViewTopLeftPoint();
 	}
 	
+	public LonLat getCenter() {
+		return center;
+	}
+
 	public Grid getCurrentGrid() {
 		if (grids.get(resolutionIndex) == null) {
 			grids.put(resolutionIndex, new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution()));
@@ -118,6 +123,10 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 		});
 	}
 
+	public void onViewPanEnded(ViewPanEndedEvent event) {
+		
+	}
+	
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
 		draw();
@@ -149,6 +158,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewZoome
 		return "EPSG:4326";
 	}
 
+	
 
 }
 

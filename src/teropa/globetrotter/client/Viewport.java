@@ -1,6 +1,5 @@
 package teropa.globetrotter.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
@@ -31,7 +30,10 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	private final Widget view;
 	
 	private boolean dragging = false;
+	private Size cachedSizeWhileDragging = null;
 	private boolean hasMoved = false;
+	private int movedToX;
+	private int movedToY;
 	private int xOffset;
 	private int yOffset;
 	
@@ -72,6 +74,7 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	
 	public void onMouseDown(MouseDownEvent event) {
 		dragging = true;
+		cachedSizeWhileDragging = getSize();
 		xOffset = event.getX();
 		yOffset = event.getY();
 		DOM.setCapture(focusPanel.getElement());
@@ -80,20 +83,22 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
 			hasMoved = true;
-			int newX = event.getX() + container.getWidgetLeft(focusPanel) - xOffset;
-			int newY = event.getY() + container.getWidgetTop(focusPanel) - yOffset;
-			repositionView(newX, newY);
+			movedToX = event.getX() + container.getWidgetLeft(focusPanel) - xOffset;
+			movedToY = event.getY() + container.getWidgetTop(focusPanel) - yOffset;
+			repositionView(movedToX, movedToY);
+			fireEvent(new ViewPannedEvent(getViewCenterPoint()));
 		}
 	}
 	
 	public void onMouseUp(MouseUpEvent event) {
 		if (dragging) {
-			dragging = false;
 			DOM.releaseCapture(focusPanel.getElement());
 			if (hasMoved) {
-				fireEvent(new ViewPannedEvent(getViewCenterPoint()));
+				fireEvent(new ViewPanEndedEvent(getViewCenterPoint()));
 				hasMoved = false;
 			}
+			dragging = false;
+			cachedSizeWhileDragging = null;
 		}
 	}
 	
@@ -122,14 +127,15 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 
 	public Point getViewTopLeftPoint() {
 		return new Point(
-				-container.getWidgetLeft(focusPanel), 
-				-container.getWidgetTop(focusPanel));
+				dragging ? -movedToX : -container.getWidgetLeft(focusPanel), 
+				dragging ? -movedToY : -container.getWidgetTop(focusPanel));
 	}
 	
 	public Point getViewCenterPoint() {
-		final Size size = getSize();
-		final Point topLeft = getViewTopLeftPoint();
-		return new Point(topLeft.getX() + size.getWidth() / 2, topLeft.getY() + size.getHeight() / 2);
+		final Size size = dragging ? cachedSizeWhileDragging : getSize();
+		final int topLeftX = dragging ? -movedToX : -container.getWidgetLeft(focusPanel);
+		final int topLeftY = dragging ? -movedToY : -container.getWidgetTop(focusPanel);
+		return new Point(topLeftX + size.getWidth() / 2, topLeftY + size.getHeight() / 2);
 	}
 
 	public Size getViewSize() {
@@ -142,6 +148,10 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 
 	public void addViewPannedEventHandler(ViewPannedEvent.Handler handler) {
 		addHandler(handler, ViewPannedEvent.TYPE);
+	}
+
+	public void addViewPanEndedEventHandler(ViewPanEndedEvent.Handler handler) {
+		addHandler(handler, ViewPanEndedEvent.TYPE);
 	}
 
 	public void addViewZoomedEventHandler(ViewZoomedEvent.Handler handler) {
@@ -162,4 +172,5 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 			return addDomHandler(handler, DoubleClickEvent.getType());
 		}
 	}
+
 }
