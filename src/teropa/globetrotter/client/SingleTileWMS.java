@@ -1,6 +1,5 @@
 package teropa.globetrotter.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -26,12 +25,15 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		initImageBuffer();
 	}
 	
-	public void onMapPanned() {
+	public void onMapPanned(ViewPannedEvent evt) {
 		final String url = constructUrl(map.getExtent(), map.getViewportSize());
 		addImage(map.getViewportSize(), map.getViewportLocation(), url);
 	}
 	
-	public void onMapPanEnded() {		
+	public void onMapPanEnded(ViewPanEndedEvent evt) {		
+	}
+	
+	public void onMapZoomed(ViewZoomedEvent event) {
 	}
 	
 	private void addImage(Size imageSize, final Point topLeft, final String url) {

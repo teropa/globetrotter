@@ -1,7 +1,7 @@
 package teropa.globetrotter.client;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Grid {
 
@@ -29,6 +29,14 @@ public class Grid {
 		tileCache = new Tile[tileXs.length][tileYs.length];
 	}
 
+	public int getNumCols() {
+		return tileXs.length;
+	}
+
+	public int getNumRows() {
+		return tileYs.length;
+	}
+
 	private double[] initTileXs(Bounds maxExtent) {
 		double[] res = new double[(int)(maxExtent.getWidth() / tileCoordWidth) + 1];
 		int idx = 0;
@@ -47,16 +55,18 @@ public class Grid {
 		return res;
 	}
 
-	public Set<Tile> getTiles(Bounds extent) {
-		final Set<Tile> result = new HashSet<Tile>();
+	public List<Tile> getTiles(Bounds extent) {
+		final List<Tile> result = new ArrayList<Tile>();
 		
 		int xIdx = 0;
 		while (tileXs[xIdx] < extent.getLowerLeftX())
 			xIdx++;
+		if (xIdx > 0) xIdx--;
 
 		int yIdx = 0;
 		while (tileYs[yIdx] < extent.getLowerLeftY())
 			yIdx++;
+		if (yIdx > 0) yIdx--;
 		
 		while (xIdx < tileXs.length && tileXs[xIdx] < extent.getUpperRightX()) {
 			int innerYIdx = yIdx;
@@ -75,7 +85,7 @@ public class Grid {
 						tileSize =  Calc.getPixelSize(tileBounds, resolution);
 					}
 					Point topLeft = Calc.getPoint(new LonLat(lowerLeftX, upperRightY), maxExtent, viewSize);
-					Tile tile = new Tile(tileBounds, tileSize, topLeft);
+					Tile tile = new Tile(tileBounds, tileSize, topLeft, xIdx, innerYIdx);
 					result.add(tile);
 					tileCache[xIdx][innerYIdx] = tile;
 				}
@@ -91,11 +101,15 @@ public class Grid {
 		private final Bounds extent;
 		private final Size size;
 		private final Point topLeft;
-
-		public Tile(Bounds extent, Size size, Point topLeft) {
+		private final int col;
+		private final int row;
+		
+		public Tile(Bounds extent, Size size, Point topLeft, int col, int row) {
 			this.extent = extent;
 			this.size = size;
 			this.topLeft = topLeft;
+			this.col = col;
+			this.row = row;
 		}
 		
 		public Bounds getExtent() {
@@ -108,6 +122,14 @@ public class Grid {
 		
 		public Point getTopLeft() {
 			return topLeft;
+		}
+
+		public int getCol() {
+			return col;
+		}
+
+		public int getRow() {
+			return row;
 		}
 		
 	}

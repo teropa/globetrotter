@@ -10,10 +10,11 @@ public class ImagePool {
 	private static final List<Image> pool = new ArrayList<Image>();
 	
 	public static Image get() {
-		if (pool.isEmpty()) {
+		int size = pool.size();
+		if (size == 0) {
 			return new Image();
 		} else {
-			return pool.remove(0);
+			return pool.remove(size - 1);
 		}
 	}
 	

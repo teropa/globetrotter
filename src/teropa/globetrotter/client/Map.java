@@ -6,7 +6,6 @@ import static teropa.globetrotter.client.Calc.getPoint;
 import static teropa.globetrotter.client.Calc.narrow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.Command;
@@ -16,7 +15,7 @@ import com.google.gwt.user.client.ui.Composite;
 public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
 	private final View view = new View();
-	private final Viewport viewport = new Viewport(view);
+	private final Viewport viewport = new Viewport(this, view);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
@@ -27,20 +26,18 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	private Size tileSize = new Size(256, 256);
 	
 	// A different grid for each resolution
-	private final HashMap<Integer, Grid> grids = new HashMap<Integer, Grid>();
+	private Grid[] grids;
 	
 	public Map(String width, String height) {
 		initWidget(viewport);
 		setWidth(width);
 		setHeight(height);
-		viewport.addViewPannedEventHandler(this);
-		viewport.addViewPanEndedEventHandler(this);
-		viewport.addViewZoomedEventHandler(this);
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				resizeView();				
 			}
 		});
+		grids = new Grid[resolutions.length];
 	}
 	
 	public void addLayer(Layer layer) {
@@ -91,56 +88,60 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	}
 
 	public Grid getCurrentGrid() {
-		if (grids.get(resolutionIndex) == null) {
-			grids.put(resolutionIndex, new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution()));
+		if (grids[resolutionIndex] == null) {
+			grids[resolutionIndex] = new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution());
 		}
-		return grids.get(resolutionIndex);
+		return grids[resolutionIndex];
 	}
 	
 	public void zoomIn() {
-		if (resolutionIndex < resolutions.length - 1) {
-			resolutionIndex++;
-			resizeView();
-			draw();	
-		}
+		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), 1));
 	}
 	
 	public void zoomOut() {
-		if (resolutionIndex > 0) {
-			resolutionIndex--;
-			resizeView();
-			draw();	
-		}
+		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), -1));
 	}
 
 	public void draw() {
-		DeferredCommand.addCommand(new Command() {
-			public void execute() {
-				for (Layer eachLayer : layers) {
-					eachLayer.onMapPanned();
-				}				
-			}
-		});
+		ViewPannedEvent evt = new ViewPannedEvent(viewport.getViewCenterPoint());
+		notifyLayersMapPanned(evt);
+	}
+
+	private void notifyLayersMapPanned(ViewPannedEvent evt) {
+		for (Layer eachLayer : layers) {
+			eachLayer.onMapPanned(evt);
+		}
 	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
 		for (Layer eachLayer : layers) {
-			eachLayer.onMapPanEnded();
+			eachLayer.onMapPanEnded(event);
 		}	
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
-		draw();
+		notifyLayersMapPanned(event);
 	}
 	
 	public void onViewZoomed(ViewZoomedEvent event) {
 		LonLat pointedAt = getLonLat(event.point, maxExtent, view.getSize());
-		if (resolutionIndex < resolutions.length - 1) {
-			resolutionIndex++;
+		if (newResolutionInBounds(event)) {
+			resolutionIndex += event.levels;
 			resizeView(pointedAt);
 		}
+		for (Layer eachLayer : layers) {
+			eachLayer.onMapZoomed(event);
+		}
 		draw();
+	}
+
+	private boolean newResolutionInBounds(ViewZoomedEvent event) {
+		if (event.levels > 0) {
+			return resolutionIndex + event.levels < resolutions.length;
+		} else {
+			return resolutionIndex + event.levels >= 0;
+		}
 	}
 	
 	private void resizeView() {

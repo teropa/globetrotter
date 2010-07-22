@@ -1,61 +1,103 @@
 package teropa.globetrotter.client;
 
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
 
 public class TiledWMS extends WMSBase {
 
+	private static class TileAndImage {
+
+		public TileAndImage(Grid.Tile tile, Image image) {
+			this.tile = tile;
+			this.image = image;
+		}
+
+		public Grid.Tile tile;
+		public Image image;
+
+	}
+
 	private final AbsolutePanel container = new AbsolutePanel();
-	private final HashMap<Grid.Tile, Image> currentContents = new HashMap<Grid.Tile, Image>();
-	private Set<Grid.Tile> latestTiles;
-	
+	private TileAndImage[][] imageGrid;	
 	private int buffer = 2;
+	private double ignoreEventsBuffer = buffer / 4.0;
+	private Point lastDrawnAtPoint = null;
 	
 	public TiledWMS(String name, String url) {
 		super(name, url);
 		initWidget(container);
 	}
+
+	public void onMapZoomed(ViewZoomedEvent evt) {
+		removeTiles(true);
+		imageGrid = null;
+		lastDrawnAtPoint = null;
+	}
 	
-	public void onMapPanned() {
-		draw();
+	public void onMapPanned(ViewPannedEvent evt) {
+		if (imageGrid == null) {
+			imageGrid = new TileAndImage[map.getCurrentGrid().getNumCols()][map.getCurrentGrid().getNumRows()];
+		}
+		if (shouldDraw(evt)) {
+			addNewTiles();
+		}
 	}
 
-	private void draw() {
-		Grid grid = map.getCurrentGrid();
-		Bounds extent = widenToBuffer(map.getExtent());
-		latestTiles = grid.getTiles(extent);
-		addNewTiles();
+	private boolean shouldDraw(ViewPannedEvent evt) {
+		Point newCenter = evt.newCenterPoint;
+		if (lastDrawnAtPoint == null || distanceExceedsBuffer(newCenter, lastDrawnAtPoint)) {
+			lastDrawnAtPoint = newCenter;
+			return true;
+		}
+		return false;
 	}
 
-	public void onMapPanEnded() {
-		removeOrphanTiles();
+	private boolean distanceExceedsBuffer(Point lhs, Point rhs) {
+		int xDist = Math.abs(lhs.getX() - rhs.getX());
+		if (xDist > ignoreEventsBuffer * map.getTileSize().getWidth()) return true;
+		int yDist = Math.abs(lhs.getY() - rhs.getY());
+		if (yDist > ignoreEventsBuffer * map.getTileSize().getHeight()) return true;
+		return false;
 	}
 
-	private void removeOrphanTiles() {
-		Iterator<Map.Entry<Grid.Tile, Image>> oldTileIterator = currentContents.entrySet().iterator();
-		while (oldTileIterator.hasNext()) {
-			Map.Entry<Grid.Tile, Image> old = oldTileIterator.next();
-			if (latestTiles == null || !latestTiles.contains(old.getKey())) {
-				container.remove(old.getValue());
-				ImagePool.release(old.getValue());
-				oldTileIterator.remove();
+	public void onMapPanEnded(ViewPanEndedEvent evt) {
+		removeTiles(false);
+	}
+
+	private void removeTiles(boolean removeAll) {
+		Bounds bufferedExtent = widenToBuffer(map.getExtent());
+		for (int i=0 ; i<imageGrid.length ; i++) {
+			for (int j=0 ; j<imageGrid[i].length ; j++) {
+				TileAndImage entry = imageGrid[i][j];
+				if (entry == null) continue;
+				if (removeAll || !Calc.intersect(bufferedExtent, entry.tile.getExtent())) {
+					container.remove(entry.image);
+					ImagePool.release(entry.image);
+					imageGrid[i][j] = null;
+				}
 			}
 		}
 	}
 
 	private void addNewTiles() {
-		for (Grid.Tile eachTile : latestTiles) {
-			if (!currentContents.containsKey(eachTile)) {
+		Grid grid = map.getCurrentGrid();
+		Bounds extent = widenToBuffer(map.getExtent());
+		List<Grid.Tile> tiles = grid.getTiles(extent);
+		int length = tiles.size();
+		for (int i=0 ; i<length ; i++) {
+			Grid.Tile eachTile = tiles.get(i);
+			TileAndImage[] col = imageGrid[eachTile.getCol()];
+			if (col[eachTile.getRow()] == null) {
 				Image image = ImagePool.get();
 				image.setUrl(constructUrl(eachTile.getExtent(), eachTile.getSize()));
-				currentContents.put(eachTile, image);
-				container.add(image, eachTile.getTopLeft().getX(), eachTile.getTopLeft().getY());
+				col[eachTile.getRow()] = new TileAndImage(eachTile, image);
+				container.add(image);
+				fastSetElementPosition(image.getElement(), eachTile.getTopLeft().getX(), eachTile.getTopLeft().getY());				
 			}
 		}
 	}
@@ -63,7 +105,7 @@ public class TiledWMS extends WMSBase {
 	private Bounds widenToBuffer(Bounds extent) {
 		if (buffer > 0) {
 			Size viewportSize = map.getViewportSize();
-			Size widenedSize = new Size(viewportSize.getWidth() + buffer * map.getTileSize().getWidth(), viewportSize.getHeight() + 2 * map.getTileSize().getHeight());
+			Size widenedSize = new Size(viewportSize.getWidth() + 2 * buffer * map.getTileSize().getWidth(), viewportSize.getHeight() + 2 * buffer * map.getTileSize().getHeight());
 			Bounds widenedExtent = Calc.getExtent(map.getCenter(), map.getResolution(), widenedSize);
 			return Calc.narrow(widenedExtent, map.getMaxExtent());
 		} else {
@@ -71,5 +113,10 @@ public class TiledWMS extends WMSBase {
 		}
 	}
 
-	
+	private void fastSetElementPosition(Element elem, int left, int top) {
+		elem.getStyle().setProperty("position", "absolute");
+		elem.getStyle().setPropertyPx("left", left);
+		elem.getStyle().setPropertyPx("top", top);
+	}
+
 }

@@ -13,9 +13,11 @@ public class ViewZoomedEvent extends GwtEvent<ViewZoomedEvent.Handler> {
 	}
 	
 	public final Point point;
+	public final int levels;
 	
-	public ViewZoomedEvent(Point point) {
+	public ViewZoomedEvent(Point point, int levels) {
 		this.point = point;
+		this.levels = levels;
 	}
 	
 	public Type<Handler> getAssociatedType() {

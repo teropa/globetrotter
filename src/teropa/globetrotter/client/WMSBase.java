@@ -14,7 +14,8 @@ public abstract class WMSBase extends Composite implements Layer {
 	protected boolean transparent = false;
 	
 	protected Map map;
-			
+	protected String urlBase;
+	
 	public WMSBase(String name, String url) {
 		this.name = name;
 		this.url = url;
@@ -22,6 +23,7 @@ public abstract class WMSBase extends Composite implements Layer {
 	
 	public void setMap(Map map) {
 		this.map = map;
+		this.urlBase = constructUrlBase();
 	}
 
 	public void setLayers(String layers) {
@@ -32,13 +34,23 @@ public abstract class WMSBase extends Composite implements Layer {
 		return this;
 	}
 
-	protected String constructUrl(Bounds forBounds, Size imageSize) {
+	private String constructUrlBase() {
 		StringBuilder res = new StringBuilder();
 		res.append(this.url);
 		res.append("?VERSION=1.1.0&REQUEST=GetMap&LAYERS=");
 		res.append(layers);
 		res.append("&STYLES=&SRS=");
 		res.append(URL.encodeComponent(map.getSRS()));
+		res.append("&FORMAT=");
+		res.append(URL.encodeComponent(format));
+		res.append("&TRANSPARENT=");
+		res.append(transparent);
+		return res.toString();
+	}
+
+	protected String constructUrl(Bounds forBounds, Size imageSize) {
+		StringBuilder res = new StringBuilder();
+		res.append(this.urlBase);
 		res.append("&BBOX=");
 		res.append(forBounds.getLowerLeftX());
 		res.append(",");
@@ -51,10 +63,6 @@ public abstract class WMSBase extends Composite implements Layer {
 		res.append(imageSize.getWidth());
 		res.append("&HEIGHT=");
 		res.append(imageSize.getHeight());
-		res.append("&FORMAT=");
-		res.append(URL.encodeComponent(format));
-		res.append("&TRANSPARENT=");
-		res.append(transparent);
 		return res.toString();
 	}
 
