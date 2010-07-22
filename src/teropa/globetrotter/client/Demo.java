@@ -1,11 +1,17 @@
 package teropa.globetrotter.client;
 
 
+import teropa.globetrotter.client.common.LonLat;
+import teropa.globetrotter.client.marker.MarkerLayer;
+import teropa.globetrotter.client.wms.TiledWMS;
+import teropa.globetrotter.client.wms.WMSBase;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -23,6 +29,14 @@ public class Demo implements EntryPoint {
 		canada.setTransparent(true);
 		canada.setIsVisible(false);
 		map.addLayer(canada);
+		
+		MarkerLayer markers = new MarkerLayer(map);
+		for (int i=0 ; i<300 ; i++) {
+			double lon = Random.nextDouble() * 360 - 180;
+			double lat = Random.nextDouble() * 180 - 90;
+			markers.addMarker(new LonLat(lon, lat));
+		}
+		map.addLayer(markers);
 		
 		RootPanel.get("container").add(map);
 		

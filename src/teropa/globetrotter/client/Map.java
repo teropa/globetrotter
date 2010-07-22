@@ -1,12 +1,21 @@
 package teropa.globetrotter.client;
 
-import static teropa.globetrotter.client.Calc.getLonLat;
-import static teropa.globetrotter.client.Calc.getPixelSize;
-import static teropa.globetrotter.client.Calc.getPoint;
-import static teropa.globetrotter.client.Calc.narrow;
+import static teropa.globetrotter.client.common.Calc.getLonLat;
+import static teropa.globetrotter.client.common.Calc.getPixelSize;
+import static teropa.globetrotter.client.common.Calc.getPoint;
+import static teropa.globetrotter.client.common.Calc.narrow;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import teropa.globetrotter.client.common.Bounds;
+import teropa.globetrotter.client.common.Calc;
+import teropa.globetrotter.client.common.LonLat;
+import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.ViewPanEndedEvent;
+import teropa.globetrotter.client.event.ViewPannedEvent;
+import teropa.globetrotter.client.event.ViewZoomedEvent;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;

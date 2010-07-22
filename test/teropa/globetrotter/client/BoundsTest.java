@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import teropa.globetrotter.client.Bounds;
+import teropa.globetrotter.client.common.Bounds;
 
 
 public class BoundsTest {

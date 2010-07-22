@@ -1,4 +1,9 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.wms;
+
+import teropa.globetrotter.client.Layer;
+import teropa.globetrotter.client.Map;
+import teropa.globetrotter.client.common.Bounds;
+import teropa.globetrotter.client.common.Size;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.Composite;

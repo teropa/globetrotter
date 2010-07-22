@@ -1,4 +1,11 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.wms;
+
+import teropa.globetrotter.client.Map;
+import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.ViewPanEndedEvent;
+import teropa.globetrotter.client.event.ViewPannedEvent;
+import teropa.globetrotter.client.event.ViewZoomedEvent;
 
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;

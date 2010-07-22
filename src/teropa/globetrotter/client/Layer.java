@@ -1,10 +1,13 @@
 package teropa.globetrotter.client;
 
+import teropa.globetrotter.client.event.ViewPanEndedEvent;
+import teropa.globetrotter.client.event.ViewPannedEvent;
+import teropa.globetrotter.client.event.ViewZoomedEvent;
+
 import com.google.gwt.user.client.ui.Widget;
 
 public interface Layer {
 
-	public void setLayers(String layers);
 	public void setIsVisible(boolean visible);
 	public boolean isVisible();
 	

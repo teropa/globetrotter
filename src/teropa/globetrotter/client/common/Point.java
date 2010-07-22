@@ -1,4 +1,4 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.common;
 
 public class Point {
 

@@ -1,5 +1,7 @@
 package teropa.globetrotter.client;
 
+import teropa.globetrotter.client.common.Size;
+
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;

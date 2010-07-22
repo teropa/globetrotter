@@ -1,5 +1,11 @@
 package teropa.globetrotter.client;
 
+import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.ViewPanEndedEvent;
+import teropa.globetrotter.client.event.ViewPannedEvent;
+import teropa.globetrotter.client.event.ViewZoomedEvent;
+
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;

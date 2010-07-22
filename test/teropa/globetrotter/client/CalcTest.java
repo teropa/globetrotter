@@ -4,11 +4,11 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import teropa.globetrotter.client.Bounds;
-import teropa.globetrotter.client.Calc;
-import teropa.globetrotter.client.LonLat;
-import teropa.globetrotter.client.Point;
-import teropa.globetrotter.client.Size;
+import teropa.globetrotter.client.common.Bounds;
+import teropa.globetrotter.client.common.Calc;
+import teropa.globetrotter.client.common.LonLat;
+import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Size;
 
 public class CalcTest {
 

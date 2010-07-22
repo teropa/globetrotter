@@ -1,4 +1,6 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.event;
+
+import teropa.globetrotter.client.common.Point;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;

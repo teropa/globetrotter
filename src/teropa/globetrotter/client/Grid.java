@@ -3,6 +3,12 @@ package teropa.globetrotter.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import teropa.globetrotter.client.common.Bounds;
+import teropa.globetrotter.client.common.Calc;
+import teropa.globetrotter.client.common.LonLat;
+import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Size;
+
 public class Grid {
 
 	private final Size viewSize;
