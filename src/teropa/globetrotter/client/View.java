@@ -48,7 +48,7 @@ public class View extends AbsolutePanel implements HasAllMouseHandlers, HasDoubl
 	}
 
 	public void addLayer(Layer layer) {
-		add(layer.asWidget());
+		add(layer.asWidget(), 0, 0);
 	}
 
 	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {

@@ -1,9 +1,7 @@
 package teropa.globetrotter.client;
 
-
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
@@ -28,11 +26,18 @@ public class TiledWMS extends WMSBase {
 	private double ignoreEventsBuffer = buffer / 4.0;
 	private Point lastDrawnAtPoint = null;
 	
-	public TiledWMS(String name, String url) {
-		super(name, url);
+	public TiledWMS(Map map, String name, String url) {
+		super(map, name, url);
 		initWidget(container);
 	}
 
+	protected void onVisibilityChanged() {
+		if (visible) {
+			maybeInitGrid();
+			addNewTiles();
+		}
+	}
+	
 	public void onMapZoomed(ViewZoomedEvent evt) {
 		removeTiles(true);
 		imageGrid = null;
@@ -40,11 +45,17 @@ public class TiledWMS extends WMSBase {
 	}
 	
 	public void onMapPanned(ViewPannedEvent evt) {
-		if (imageGrid == null) {
-			imageGrid = new TileAndImage[map.getCurrentGrid().getNumCols()][map.getCurrentGrid().getNumRows()];
-		}
+		if (!visible) return;
+		
+		maybeInitGrid();
 		if (shouldDraw(evt)) {
 			addNewTiles();
+		}
+	}
+
+	private void maybeInitGrid() {
+		if (imageGrid == null) {
+			imageGrid = new TileAndImage[map.getCurrentGrid().getNumCols()][map.getCurrentGrid().getNumRows()];
 		}
 	}
 
@@ -70,6 +81,8 @@ public class TiledWMS extends WMSBase {
 	}
 
 	private void removeTiles(boolean removeAll) {
+		if (imageGrid == null) return;
+		
 		Bounds bufferedExtent = widenToBuffer(map.getExtent());
 		for (int i=0 ; i<imageGrid.length ; i++) {
 			for (int j=0 ; j<imageGrid[i].length ; j++) {

@@ -8,6 +8,7 @@ public abstract class WMSBase extends Composite implements Layer {
 
 	protected String name;
 	protected String url;
+	protected boolean visible = true;
 	
 	protected String layers;
 	protected String format = "image/png";
@@ -16,18 +17,33 @@ public abstract class WMSBase extends Composite implements Layer {
 	protected Map map;
 	protected String urlBase;
 	
-	public WMSBase(String name, String url) {
+	protected WMSBase(Map map, String name, String url) {
+		this.map = map;
 		this.name = name;
 		this.url = url;
-	}
-	
-	public void setMap(Map map) {
-		this.map = map;
 		this.urlBase = constructUrlBase();
 	}
 
 	public void setLayers(String layers) {
 		this.layers = layers;
+		this.urlBase = constructUrlBase();
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+	
+	public void setIsVisible(boolean visible) {
+		super.setVisible(visible);
+		this.visible = visible;
+		onVisibilityChanged();
+	}
+	
+	protected abstract void onVisibilityChanged();
+
+	public void setTransparent(boolean transparent) {
+		this.transparent = transparent;
+		this.urlBase = constructUrlBase();
 	}
 
 	public Widget asWidget() {
@@ -65,5 +81,6 @@ public abstract class WMSBase extends Composite implements Layer {
 		res.append(imageSize.getHeight());
 		return res.toString();
 	}
+
 
 }

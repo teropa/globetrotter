@@ -19,10 +19,14 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	private int imageBufferIdx = 0;
 	private int requestedIdx = 0;
 	
-	public SingleTileWMS(String name, String url) {
-		super(name, url);
+	public SingleTileWMS(Map map, String name, String url) {
+		super(map, name, url);
 		initWidget(container);
 		initImageBuffer();
+	}
+	
+	protected void onVisibilityChanged() {
+
 	}
 	
 	public void onMapPanned(ViewPannedEvent evt) {

@@ -42,7 +42,6 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	
 	public void addLayer(Layer layer) {
 		layers.add(layer);
-		layer.setMap(this);
 		view.addLayer(layer);
 	}
 	
