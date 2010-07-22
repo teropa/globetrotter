@@ -2,6 +2,7 @@ package teropa.globetrotter.client;
 
 
 import teropa.globetrotter.client.common.LonLat;
+import teropa.globetrotter.client.marker.Marker;
 import teropa.globetrotter.client.marker.MarkerLayer;
 import teropa.globetrotter.client.wms.TiledWMS;
 import teropa.globetrotter.client.wms.WMSBase;
@@ -34,7 +35,7 @@ public class Demo implements EntryPoint {
 		for (int i=0 ; i<300 ; i++) {
 			double lon = Random.nextDouble() * 360 - 180;
 			double lat = Random.nextDouble() * 180 - 90;
-			markers.addMarker(new LonLat(lon, lat));
+			markers.addMarker(new Marker(new LonLat(lon, lat)));
 		}
 		map.addLayer(markers);
 		

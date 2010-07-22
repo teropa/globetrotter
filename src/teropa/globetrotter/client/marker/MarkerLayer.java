@@ -3,24 +3,19 @@ package teropa.globetrotter.client.marker;
 import java.util.ArrayList;
 import java.util.List;
 
-import teropa.globetrotter.client.Images;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Calc;
-import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MarkerLayer extends Composite implements Layer {
-
-	private final Images images = GWT.create(Images.class);
 	
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final Map map;
@@ -44,8 +39,7 @@ public class MarkerLayer extends Composite implements Layer {
 		super.setVisible(visible);
 	}
 	
-	public void addMarker(LonLat at) {
-		Marker marker = new Marker(at, images.markerRed().createImage());
+	public void addMarker(Marker marker) {
 		markers.add(marker);
 		container.add(marker.getImage());
 	}
@@ -63,7 +57,7 @@ public class MarkerLayer extends Composite implements Layer {
 
 	private void positionMarkers() {
 		for (Marker each : markers) {
-			Point point = Calc.getPoint(each.getLoc(), map.getMaxExtent(), map.getViewSize());
+			Point point = each.translate(Calc.getPoint(each.getLoc(), map.getMaxExtent(), map.getViewSize()));
 			container.setWidgetPosition(each.getImage(), point.getX(), point.getY());
 		}
 	}
