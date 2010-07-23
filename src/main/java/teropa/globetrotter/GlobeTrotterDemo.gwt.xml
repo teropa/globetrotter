@@ -4,4 +4,5 @@
 <module rename-to='globetrotterdemo'>
   <inherits name='teropa.globetrotter.GlobeTrotter'/>
   <entry-point class='teropa.globetrotter.client.Demo'/>
+  <source path='client' excludes="**/*Test.java"/>
 </module>

@@ -3,4 +3,5 @@
 
 <module>
   <inherits name='com.google.gwt.user.User'/>
+  <source path='client' excludes="**/*Test.java"/>
 </module>
