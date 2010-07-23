@@ -1,11 +1,14 @@
 package teropa.globetrotter.client.wms;
 
+import java.util.Date;
+
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Size;
 
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -22,6 +25,9 @@ public abstract class WMSBase extends Composite implements Layer {
 	protected Map map;
 	protected String urlBase;
 	
+	
+	protected String time;
+
 	protected WMSBase(Map map, String name, String url) {
 		this.map = map;
 		this.name = name;
@@ -34,6 +40,11 @@ public abstract class WMSBase extends Composite implements Layer {
 		this.urlBase = constructUrlBase();
 	}
 
+	public void setFormat(String format) {
+		this.format = format;
+		this.urlBase = constructUrlBase();
+	}
+	
 	public boolean isVisible() {
 		return visible;
 	}
@@ -41,6 +52,12 @@ public abstract class WMSBase extends Composite implements Layer {
 	public void setIsVisible(boolean visible) {
 		super.setVisible(visible);
 		this.visible = visible;
+		onVisibilityChanged();
+	}
+	
+	public void setTime(String time) {
+		this.time = time;
+		this.urlBase = constructUrlBase();
 		onVisibilityChanged();
 	}
 	
@@ -58,7 +75,14 @@ public abstract class WMSBase extends Composite implements Layer {
 	private String constructUrlBase() {
 		StringBuilder res = new StringBuilder();
 		res.append(this.url);
-		res.append("?VERSION=1.1.0&REQUEST=GetMap&LAYERS=");
+		
+		if (!this.url.contains("?")) {
+			res.append("?");
+		}
+		if (!this.url.contains("VERSION=")) {
+			res.append("&VERSION=1.1.0");
+		}
+		res.append("&REQUEST=GetMap&LAYERS=");
 		res.append(layers);
 		res.append("&STYLES=&SRS=");
 		res.append(URL.encodeComponent(map.getSRS()));
@@ -66,6 +90,10 @@ public abstract class WMSBase extends Composite implements Layer {
 		res.append(URL.encodeComponent(format));
 		res.append("&TRANSPARENT=");
 		res.append(transparent);
+		if (time != null) {
+			res.append("&TIME=");
+			res.append(time);
+		}
 		return res.toString();
 	}
 
@@ -86,6 +114,5 @@ public abstract class WMSBase extends Composite implements Layer {
 		res.append(imageSize.getHeight());
 		return res.toString();
 	}
-
 
 }

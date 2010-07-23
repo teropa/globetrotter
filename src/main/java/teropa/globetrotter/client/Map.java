@@ -13,6 +13,7 @@ import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
@@ -31,6 +32,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	private LonLat center = new LonLat(0, 0);
 	private double[] resolutions = new double[] { 1.0, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005 };
 	private int resolutionIndex = 4;
+	private boolean drawn;
 	
 	private Size tileSize = new Size(256, 256);
 	
@@ -58,9 +60,18 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 		this.center = center;
 	}
 
+	public void setResolutions(double[] resolutions) {
+		this.resolutions = resolutions;
+	}
+	
+	public double[] getResolutions() {
+		return resolutions;
+	}
+	
 	public void setResolutionIndex(int index) {
 		this.resolutionIndex = index;
 		resizeView();
+		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), 1));
 	}
 	
 	public Size getTileSize() {
@@ -74,6 +85,10 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	public Bounds getMaxExtent() {
 		return maxExtent;
 	}
+	
+	public void setMaxExtent(Bounds maxExtent) {
+		this.maxExtent = maxExtent;
+	}
 
 	public Bounds getExtent() {
 		return narrow(Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize()), maxExtent);
@@ -82,6 +97,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	public double getResolution() {
 		return resolutions[resolutionIndex];
 	}
+	
 
 	public Size getViewportSize() {
 		return viewport.getSize();
@@ -110,8 +126,9 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), -1));
 	}
 
-	public void draw() {
+	private void draw() {
 		ViewPannedEvent evt = new ViewPannedEvent(viewport.getViewCenterPoint());
+		drawn = true;
 		notifyLayersMapPanned(evt);
 	}
 
@@ -168,14 +185,25 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	public String getSRS() {
 		return "EPSG:4326";
 	}
-
 	
+	public boolean isDrawn() {
+		return drawn;
+	}
+
+	public void addControl(Zoomer zoomer) {
+		viewport.addControl(zoomer);
+	}
+
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+		DeferredCommand.addCommand(new Command() {
+			public void execute() {
+				draw();
+			}
+		});
+	}
+
 
 }
 
-// bbox, size, resolution
-
-// extent -> näkyvillä oleva osa kartasta
-// size -> viewportin ikkuna, bboxin mahduttava tähän
-// view size > extentin ja maxextentin suhteen mukaan
-// resolution = map units per pixel

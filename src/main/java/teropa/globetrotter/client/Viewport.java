@@ -2,6 +2,7 @@ package teropa.globetrotter.client;
 
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
@@ -145,16 +146,20 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	}
 
 	public Size getSize() {
-		if (size == null) {
-			size = new Size(container.getOffsetWidth(), container.getOffsetHeight());
-		}
-		return size;
+//		if (size == null) {
+			return new Size(container.getOffsetWidth(), container.getOffsetHeight());
+//		}
+//		return size;
 	}
 
 	public void positionView(Point newCenterPoint) {
 		repositionView(
 				-(newCenterPoint.getX() - getSize().getWidth() / 2),
 				-(newCenterPoint.getY() - getSize().getHeight() / 2));
+	}
+
+	public void addControl(Zoomer zoomer) {
+		container.add(zoomer, 10, 10);
 	}
 
 }

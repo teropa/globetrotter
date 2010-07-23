@@ -5,7 +5,6 @@ import java.util.List;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
 import teropa.globetrotter.client.Map;
-import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
@@ -29,7 +28,6 @@ public class TiledWMS extends WMSBase {
 
 		public Grid.Tile tile;
 		public Image image;
-
 	}
 
 	private final AbsolutePanel container = new AbsolutePanel();
@@ -44,7 +42,7 @@ public class TiledWMS extends WMSBase {
 	}
 
 	protected void onVisibilityChanged() {
-		if (visible) {
+		if (visible && map.isDrawn()) {
 			maybeInitGrid();
 			addNewTiles();
 		}

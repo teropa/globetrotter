@@ -33,18 +33,26 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	}
 	
 	protected void onVisibilityChanged() {
-
+		if (visible && map.isDrawn()) {
+			draw();
+		}
 	}
 	
 	public void onMapPanned(ViewPannedEvent evt) {
-		final String url = constructUrl(map.getExtent(), map.getViewportSize());
-		addImage(map.getViewportSize(), map.getViewportLocation(), url);
 	}
 	
 	public void onMapPanEnded(ViewPanEndedEvent evt) {		
+		draw();
 	}
-	
+
 	public void onMapZoomed(ViewZoomedEvent event) {
+		draw();
+	}
+
+
+	private void draw() {
+		final String url = constructUrl(map.getExtent(), map.getViewportSize());
+		addImage(map.getViewportSize(), map.getViewportLocation(), url);
 	}
 	
 	private void addImage(Size imageSize, final Point topLeft, final String url) {
@@ -61,12 +69,12 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	public void onLoad(LoadEvent event) {
 		BufferedImage requested = imageBuffer[requestedIdx];
 		if (event.getSource() == requested) {
-			container.setWidgetPosition(requested, requested.desiredPosition.getX(), requested.desiredPosition.getY());
 			for (int i=0 ; i<IMAGE_BUFFER_SIZE ; i++) {
 				if (i != requestedIdx) {
 					container.remove(imageBuffer[i]);
 				}
 			}
+			container.setWidgetPosition(requested, requested.desiredPosition.getX(), requested.desiredPosition.getY());
 		}
 	}
 	
