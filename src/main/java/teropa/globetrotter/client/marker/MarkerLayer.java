@@ -15,12 +15,15 @@ import teropa.globetrotter.client.event.ViewZoomedEvent;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MarkerLayer extends Composite implements Layer, ClickHandler {
+public class MarkerLayer extends Composite implements Layer, ClickHandler, DoubleClickHandler {
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
 	private final Map map;
@@ -31,6 +34,7 @@ public class MarkerLayer extends Composite implements Layer, ClickHandler {
 		this.map = map;
 		initWidget(container);
 		container.addClickHandler(this);
+		container.addDoubleClickHandler(this);
 	}
 
 	public Widget asWidget() {
@@ -76,12 +80,18 @@ public class MarkerLayer extends Composite implements Layer, ClickHandler {
 	public void onClick(ClickEvent event) {
 		Integer idx = getMarkerIdx(event);
 		if (idx != null) {
-//			Window.alert("Clicked "+markers.get(idx).toString());
 			event.stopPropagation();
 		}
 	}
 
-	private Integer getMarkerIdx(ClickEvent event) {
+	public void onDoubleClick(DoubleClickEvent event) {
+		Integer idx = getMarkerIdx(event);
+		if (idx != null) {
+			event.stopPropagation();
+		}		
+	}
+	
+	private Integer getMarkerIdx(DomEvent<?> event) {
 		Element target = Element.as(event.getNativeEvent().getEventTarget());
 		String itemId = null;
 		while (isBlank(itemId) && target != container.getElement()) {

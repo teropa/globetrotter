@@ -30,12 +30,10 @@ public class Demo implements EntryPoint {
 		canada.setTransparent(true);
 		canada.setIsVisible(false);
 		map.addLayer(canada);
-		
+
 		MarkerLayer markers = new MarkerLayer(map);
-		for (int i=0 ; i<300 ; i++) {
-			double lon = Random.nextDouble() * 360 - 180;
-			double lat = Random.nextDouble() * 180 - 90;
-			markers.addMarker(new Marker(new LonLat(lon, lat)));
+		for (DemoCities.City city : DemoCities.CITIES) {
+			markers.addMarker(new Marker(city.getLonLat()));
 		}
 		map.addLayer(markers);
 		

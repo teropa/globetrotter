@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Image;
 public class ImagePool {
 
 	private static final List<Image> pool = new ArrayList<Image>();
-	
+
 	public static Image get() {
 		int size = pool.size();
 		if (size == 0) {
@@ -20,7 +20,7 @@ public class ImagePool {
 	
 	public static void release(Image image) {
 		image.setUrl(null);
-		pool.add(image);
+		pool.add(0, image);
 	}
 	
 }
