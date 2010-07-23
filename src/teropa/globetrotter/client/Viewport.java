@@ -55,7 +55,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 		view.addMouseMoveHandler(this);
 		view.addMouseUpHandler(this);
 		view.addDoubleClickHandler(this);
-		addStyleName("moveCursor");
 	}
 	
 	public void onPreviewNativeEvent(NativePreviewEvent event) {
@@ -86,6 +85,7 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
+			if (!hasMoved) addStyleName("moveCursor");
 			hasMoved = true;
 			movedToX = event.getX() + container.getWidgetLeft(view) - xOffset;
 			movedToY = event.getY() + container.getWidgetTop(view) - yOffset;
@@ -96,6 +96,7 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	
 	public void onMouseUp(MouseUpEvent event) {
 		if (dragging) {
+			removeStyleName("moveCursor");
 			DOM.releaseCapture(view.getElement());
 			if (hasMoved) {
 				map.onViewPanEnded(new ViewPanEndedEvent(getViewCenterPoint()));

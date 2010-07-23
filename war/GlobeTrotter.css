@@ -1,3 +1,6 @@
 .moveCursor {
 	cursor: move;
 }
+.pointerCursor {
+	cursor: pointer;
+}
