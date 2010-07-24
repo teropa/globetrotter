@@ -22,7 +22,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
+public class Map extends Composite implements ViewContext, ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
 	private final View view = new View();
 	private final Viewport viewport = new Viewport(this, view);
@@ -52,6 +52,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 	}
 	
 	public void addLayer(Layer layer) {
+		layer.init(this);
 		layers.add(layer);
 		view.addLayer(layer);
 	}
@@ -111,7 +112,7 @@ public class Map extends Composite implements ViewPannedEvent.Handler, ViewPanEn
 		return center;
 	}
 
-	public Grid getCurrentGrid() {
+	public Grid getGrid() {
 		if (grids[resolutionIndex] == null) {
 			grids[resolutionIndex] = new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution());
 		}

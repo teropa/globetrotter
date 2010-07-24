@@ -6,17 +6,39 @@ import teropa.globetrotter.client.event.ViewZoomedEvent;
 
 import com.google.gwt.user.client.ui.Widget;
 
-public interface Layer {
+public abstract class Layer {
 
-	public void setIsVisible(boolean visible);
-	public boolean isVisible();
-	
-	public void onMapPanned(ViewPannedEvent evt);
-	public void onMapPanEnded(ViewPanEndedEvent evt);
-	public void onMapZoomed(ViewZoomedEvent event);
-	
-	
-	public Widget asWidget();
+	protected String name;
+	protected ViewContext context;
+	protected boolean visible = true;
 
+	protected boolean initialized = false;
+	
+	public Layer(String name) {
+		this.name = name;
+	}
+	
+	public void init(ViewContext ctx) {
+		this.context = ctx;
+		this.initialized = true;
+	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
+	
+	public final void setIsVisible(boolean visible) {
+		this.visible = visible;
+		this.asWidget().setVisible(visible);
+		onVisibilityChanged();
+	}
 
+	protected void onVisibilityChanged() {
+	}
+	
+	public abstract Widget asWidget();
+	
+	public abstract void onMapPanned(ViewPannedEvent evt);
+	public abstract void onMapPanEnded(ViewPanEndedEvent evt);
+	public abstract void onMapZoomed(ViewZoomedEvent evt);
 }

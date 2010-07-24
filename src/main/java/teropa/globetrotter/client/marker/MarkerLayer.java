@@ -5,7 +5,6 @@ import java.util.List;
 
 import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.Layer;
-import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
@@ -19,34 +18,18 @@ import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MarkerLayer extends Composite implements Layer, ClickHandler, DoubleClickHandler {
+public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler {
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
-	private final Map map;
 	private final List<Marker> markers = new ArrayList<Marker>();
 	private boolean positioned = false;
 	
-	public MarkerLayer(Map map) {
-		this.map = map;
-		initWidget(container);
+	public MarkerLayer(String name) {
+		super(name);
 		container.addClickHandler(this);
 		container.addDoubleClickHandler(this);
-	}
-
-	public Widget asWidget() {
-		return this;
-	}
-	
-	public boolean isVisible() {
-		return super.isVisible();
-	}
-	
-	public void setIsVisible(boolean visible) {
-		super.setVisible(visible);
 	}
 	
 	public void addMarker(Marker marker) {
@@ -69,7 +52,7 @@ public class MarkerLayer extends Composite implements Layer, ClickHandler, Doubl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), map.getMaxExtent(), map.getViewSize());
+			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize());
 			each.appendMarkup(markup, String.valueOf(i), loc);
 		}
 		DOM.setInnerHTML(container.getElement(), markup.toString());
@@ -110,4 +93,10 @@ public class MarkerLayer extends Composite implements Layer, ClickHandler, Doubl
 	private boolean isBlank(String str) {
 		return str == null || "".equals(str);
 	}
+
+	@Override
+	public Widget asWidget() {
+		return container;
+	}
+	
 }

@@ -18,20 +18,20 @@ public class Demo implements EntryPoint {
 	public void onModuleLoad() {
 		final Map map = new Map("100%", "100%");
 		
-		WMSBase base = new TiledWMS(map, "Metacarta", "http://labs.metacarta.com/wms/vmap0");
+		WMSBase base = new TiledWMS("Metacarta", "http://labs.metacarta.com/wms/vmap0");
 		base.setLayers("basic");
 		base.setIsVisible(true);
 		map.addLayer(base);
 		
 		RootPanel.get("container").add(map);
 		
-		WMSBase canada = new TiledWMS(map, "Canada", "http://www2.dmsolutions.ca/cgi-bin/mswms_gmap");
+		WMSBase canada = new TiledWMS("Canada", "http://www2.dmsolutions.ca/cgi-bin/mswms_gmap");
 		canada.setLayers("bathymetry,land_fn,park,drain_fn,drainage,prov_bound,fedlimit,rail,road,popplace");
 		canada.setTransparent(true);
 		canada.setIsVisible(false);
 		map.addLayer(canada);
 
-		MarkerLayer markers = new MarkerLayer(map);
+		MarkerLayer markers = new MarkerLayer("Capitals");
 		for (DemoCities.City city : DemoCities.CITIES) {
 			markers.addMarker(new Marker(city.getLonLat()));
 		}

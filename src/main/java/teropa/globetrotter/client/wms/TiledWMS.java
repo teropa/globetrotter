@@ -4,7 +4,6 @@ import java.util.List;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
-import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
@@ -14,8 +13,10 @@ import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
 
 public class TiledWMS extends WMSBase {
 
@@ -26,8 +27,9 @@ public class TiledWMS extends WMSBase {
 			this.image = image;
 		}
 
-		public Grid.Tile tile;
-		public Image image;
+		public final Grid.Tile tile;
+		public final Image image;
+		
 	}
 
 	private final AbsolutePanel container = new AbsolutePanel();
@@ -36,13 +38,12 @@ public class TiledWMS extends WMSBase {
 	private double ignoreEventsBuffer = buffer / 4.0;
 	private Point lastDrawnAtPoint = null;
 	
-	public TiledWMS(Map map, String name, String url) {
-		super(map, name, url);
-		initWidget(container);
+	public TiledWMS(String name, String url) {
+		super(name, url);
 	}
 
 	protected void onVisibilityChanged() {
-		if (visible && map.isDrawn()) {
+		if (visible && initialized && context.isDrawn()) {
 			maybeInitGrid();
 			addNewTiles();
 		}
@@ -65,7 +66,7 @@ public class TiledWMS extends WMSBase {
 
 	private void maybeInitGrid() {
 		if (imageGrid == null) {
-			imageGrid = new TileAndImage[map.getCurrentGrid().getNumCols()][map.getCurrentGrid().getNumRows()];
+			imageGrid = new TileAndImage[context.getGrid().getNumCols()][context.getGrid().getNumRows()];
 		}
 	}
 
@@ -80,9 +81,9 @@ public class TiledWMS extends WMSBase {
 
 	private boolean distanceExceedsBuffer(Point lhs, Point rhs) {
 		int xDist = Math.abs(lhs.getX() - rhs.getX());
-		if (xDist > ignoreEventsBuffer * map.getTileSize().getWidth()) return true;
+		if (xDist > ignoreEventsBuffer * context.getTileSize().getWidth()) return true;
 		int yDist = Math.abs(lhs.getY() - rhs.getY());
-		if (yDist > ignoreEventsBuffer * map.getTileSize().getHeight()) return true;
+		if (yDist > ignoreEventsBuffer * context.getTileSize().getHeight()) return true;
 		return false;
 	}
 
@@ -93,7 +94,7 @@ public class TiledWMS extends WMSBase {
 	private void removeTiles(boolean removeAll) {
 		if (imageGrid == null) return;
 		
-		Bounds bufferedExtent = widenToBuffer(map.getExtent());
+		Bounds bufferedExtent = widenToBuffer(context.getExtent());
 		for (int i=0 ; i<imageGrid.length ; i++) {
 			for (int j=0 ; j<imageGrid[i].length ; j++) {
 				TileAndImage entry = imageGrid[i][j];
@@ -108,8 +109,8 @@ public class TiledWMS extends WMSBase {
 	}
 
 	private void addNewTiles() {
-		Grid grid = map.getCurrentGrid();
-		Bounds extent = widenToBuffer(map.getExtent());
+		Grid grid = context.getGrid();
+		Bounds extent = widenToBuffer(context.getExtent());
 		List<Grid.Tile> tiles = grid.getTiles(extent);
 		int length = tiles.size();
 		for (int i=0 ; i<length ; i++) {
@@ -127,19 +128,24 @@ public class TiledWMS extends WMSBase {
 
 	private Bounds widenToBuffer(Bounds extent) {
 		if (buffer > 0) {
-			Size viewportSize = map.getViewportSize();
-			Size widenedSize = new Size(viewportSize.getWidth() + 2 * buffer * map.getTileSize().getWidth(), viewportSize.getHeight() + 2 * buffer * map.getTileSize().getHeight());
-			Bounds widenedExtent = Calc.getExtent(map.getCenter(), map.getResolution(), widenedSize);
-			return Calc.narrow(widenedExtent, map.getMaxExtent());
+			Size viewportSize = context.getViewportSize();
+			Size widenedSize = new Size(viewportSize.getWidth() + 2 * buffer * context.getTileSize().getWidth(), viewportSize.getHeight() + 2 * buffer * context.getTileSize().getHeight());
+			Bounds widenedExtent = Calc.getExtent(context.getCenter(), context.getResolution(), widenedSize);
+			return Calc.narrow(widenedExtent, context.getMaxExtent());
 		} else {
 			return extent;
 		}
 	}
 
 	private void fastSetElementPosition(Element elem, int left, int top) {
-		elem.getStyle().setProperty("position", "absolute");
-		elem.getStyle().setPropertyPx("left", left);
-		elem.getStyle().setPropertyPx("top", top);
+		Style style = elem.getStyle();
+		style.setProperty("position", "absolute");
+		style.setPropertyPx("left", left);
+		style.setPropertyPx("top", top);
 	}
 
+	@Override
+	public Widget asWidget() {
+		return container;
+	}
 }

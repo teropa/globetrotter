@@ -1,6 +1,5 @@
 package teropa.globetrotter.client.wms;
 
-import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
@@ -11,6 +10,7 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
 
 public class SingleTileWMS extends WMSBase implements LoadHandler {
 
@@ -26,14 +26,13 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	private int imageBufferIdx = 0;
 	private int requestedIdx = 0;
 	
-	public SingleTileWMS(Map map, String name, String url) {
-		super(map, name, url);
-		initWidget(container);
+	public SingleTileWMS(String name, String url) {
+		super(name, url);
 		initImageBuffer();
 	}
 	
 	protected void onVisibilityChanged() {
-		if (visible && map.isDrawn()) {
+		if (visible && initialized && context.isDrawn()) {
 			draw();
 		}
 	}
@@ -49,10 +48,9 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		draw();
 	}
 
-
 	private void draw() {
-		final String url = constructUrl(map.getExtent(), map.getViewportSize());
-		addImage(map.getViewportSize(), map.getViewportLocation(), url);
+		final String url = constructUrl(context.getExtent(), context.getViewportSize());
+		addImage(context.getViewportSize(), context.getViewportLocation(), url);
 	}
 	
 	private void addImage(Size imageSize, final Point topLeft, final String url) {
@@ -93,4 +91,8 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		}
 	}
 
+	@Override
+	public Widget asWidget() {
+		return container;
+	}
 }
