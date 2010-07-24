@@ -1,5 +1,6 @@
 package teropa.globetrotter.client.wms;
 
+import teropa.globetrotter.client.HiddenUntilLoadedImage;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
@@ -17,7 +18,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 
 	private static final int IMAGE_BUFFER_SIZE = 3;
 	
-	private static final class BufferedImage extends Image {
+	private static final class BufferedImage extends HiddenUntilLoadedImage {
 		public Point desiredPosition;
 	}
 	

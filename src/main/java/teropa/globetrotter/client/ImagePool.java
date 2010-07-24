@@ -12,7 +12,7 @@ public class ImagePool {
 	public static Image get() {
 		int size = pool.size();
 		if (size == 0) {
-			return new Image();
+			return new HiddenUntilLoadedImage();
 		} else {
 			return pool.remove(size - 1);
 		}
