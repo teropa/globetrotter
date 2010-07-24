@@ -14,6 +14,7 @@ import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Zoomer;
+import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
@@ -72,7 +73,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public void setResolutionIndex(int index) {
 		this.resolutionIndex = index;
 		resizeView();
-		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), 1));
+		notifyLayers(new MapViewChangedEvent(false, false, true));
 	}
 	
 	public Size getTileSize() {
@@ -112,6 +113,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		return center;
 	}
 
+	public Point getViewCenterPoint() {
+		return Calc.getPoint(getCenter(), getMaxExtent(), getViewSize());
+	}
+	
 	public Grid getGrid() {
 		if (grids[resolutionIndex] == null) {
 			grids[resolutionIndex] = new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution());
@@ -120,53 +125,50 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void zoomIn() {
-		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), 1));
+		if (newResolutionInBounds(1)) {
+			resolutionIndex++;
+			resizeView();
+		}
+		notifyLayers(new MapViewChangedEvent(false, false, true));
 	}
 	
 	public void zoomOut() {
-		onViewZoomed(new ViewZoomedEvent(viewport.getViewCenterPoint(), -1));
+		if (newResolutionInBounds(-1)) {
+			resolutionIndex--;
+			resizeView();
+		}
+		notifyLayers(new MapViewChangedEvent(false, false, true));
 	}
 
-	private void draw() {
-		ViewPannedEvent evt = new ViewPannedEvent(viewport.getViewCenterPoint());
-		drawn = true;
-		notifyLayersMapPanned(evt);
-	}
-
-	private void notifyLayersMapPanned(ViewPannedEvent evt) {
+	private void notifyLayers(MapViewChangedEvent evt) {
 		for (Layer eachLayer : layers) {
-			eachLayer.onMapPanned(evt);
+			eachLayer.onMapViewChanged(evt);
 		}
 	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
-		for (Layer eachLayer : layers) {
-			eachLayer.onMapPanEnded(event);
-		}	
+		notifyLayers(new MapViewChangedEvent(false, true, false));
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
-		notifyLayersMapPanned(event);
+		notifyLayers(new MapViewChangedEvent(true, false, false));
 	}
 	
 	public void onViewZoomed(ViewZoomedEvent event) {
 		LonLat pointedAt = getLonLat(event.point, maxExtent, view.getSize());
-		if (newResolutionInBounds(event)) {
+		if (newResolutionInBounds(event.levels)) {
 			resolutionIndex += event.levels;
 			resizeView(pointedAt);
 		}
-		for (Layer eachLayer : layers) {
-			eachLayer.onMapZoomed(event);
-		}
-		draw();
+		notifyLayers(new MapViewChangedEvent(true, true, true));
 	}
 
-	private boolean newResolutionInBounds(ViewZoomedEvent event) {
-		if (event.levels > 0) {
-			return resolutionIndex + event.levels < resolutions.length;
+	private boolean newResolutionInBounds(int delta) {
+		if (delta > 0) {
+			return resolutionIndex + delta < resolutions.length;
 		} else {
-			return resolutionIndex + event.levels >= 0;
+			return resolutionIndex + delta >= 0;
 		}
 	}
 	
@@ -200,7 +202,8 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		super.onLoad();
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
-				draw();
+				drawn = true;
+				notifyLayers(new MapViewChangedEvent(true, true, true));
 			}
 		});
 	}

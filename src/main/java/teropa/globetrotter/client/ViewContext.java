@@ -29,4 +29,6 @@ public interface ViewContext {
 
 	Size getViewSize();
 
+	Point getViewCenterPoint();
+
 }

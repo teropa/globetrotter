@@ -1,8 +1,6 @@
 package teropa.globetrotter.client;
 
-import teropa.globetrotter.client.event.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.ViewPannedEvent;
-import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.user.client.ui.Widget;
 
@@ -38,7 +36,5 @@ public abstract class Layer {
 	
 	public abstract Widget asWidget();
 	
-	public abstract void onMapPanned(ViewPannedEvent evt);
-	public abstract void onMapPanEnded(ViewPanEndedEvent evt);
-	public abstract void onMapZoomed(ViewZoomedEvent evt);
+	public abstract void onMapViewChanged(MapViewChangedEvent evt);
 }

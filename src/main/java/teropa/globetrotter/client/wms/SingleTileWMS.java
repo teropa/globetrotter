@@ -2,6 +2,7 @@ package teropa.globetrotter.client.wms;
 
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
@@ -37,17 +38,13 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		}
 	}
 	
-	public void onMapPanned(ViewPannedEvent evt) {
+	@Override
+	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.panEnded || evt.zoomed) {
+			draw();
+		}
 	}
 	
-	public void onMapPanEnded(ViewPanEndedEvent evt) {		
-		draw();
-	}
-
-	public void onMapZoomed(ViewZoomedEvent event) {
-		draw();
-	}
-
 	private void draw() {
 		final String url = constructUrl(context.getExtent(), context.getViewportSize());
 		addImage(context.getViewportSize(), context.getViewportLocation(), url);

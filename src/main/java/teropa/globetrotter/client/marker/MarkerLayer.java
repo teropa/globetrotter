@@ -7,9 +7,7 @@ import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
-import teropa.globetrotter.client.event.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.ViewPannedEvent;
-import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,15 +34,15 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		markers.add(marker);
 	}
 
-	public void onMapPanned(ViewPannedEvent evt) {
-		if (!positioned) {
+	@Override
+	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.zoomed) {
+			positioned = false;
+		}
+		if ((evt.zoomed || evt.panned) && !positioned) {
 			positionMarkers();
 			positioned = true;
 		}
-	}
-
-	public void onMapZoomed(ViewZoomedEvent event) {
-		positioned = false;
 	}
 
 	private void positionMarkers() {
@@ -58,8 +56,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		DOM.setInnerHTML(container.getElement(), markup.toString());
 	}
 
-	public void onMapPanEnded(ViewPanEndedEvent evt) { }
-	
 	public void onClick(ClickEvent event) {
 		Integer idx = getMarkerIdx(event);
 		if (idx != null) {

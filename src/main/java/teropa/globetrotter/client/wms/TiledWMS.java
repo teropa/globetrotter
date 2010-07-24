@@ -8,9 +8,7 @@ import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
-import teropa.globetrotter.client.event.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.ViewPannedEvent;
-import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -49,29 +47,32 @@ public class TiledWMS extends WMSBase {
 		}
 	}
 	
-	public void onMapZoomed(ViewZoomedEvent evt) {
-		removeTiles(true);
-		imageGrid = null;
-		lastDrawnAtPoint = null;
-	}
-	
-	public void onMapPanned(ViewPannedEvent evt) {
-		if (!visible) return;
-		
-		maybeInitGrid();
-		if (shouldDraw(evt)) {
-			addNewTiles();
+	@Override
+	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.zoomed) {
+			removeTiles(true);
+			imageGrid = null;
+			lastDrawnAtPoint = null;
+		}
+		if ((evt.zoomed || evt.panned) && visible) {
+			maybeInitGrid();
+			if (shouldDraw()) {
+				addNewTiles();
+			}			
+		}
+		if (evt.panEnded) {
+			removeTiles(false);
 		}
 	}
-
+	
 	private void maybeInitGrid() {
 		if (imageGrid == null) {
 			imageGrid = new TileAndImage[context.getGrid().getNumCols()][context.getGrid().getNumRows()];
 		}
 	}
 
-	private boolean shouldDraw(ViewPannedEvent evt) {
-		Point newCenter = evt.newCenterPoint;
+	private boolean shouldDraw() {
+		Point newCenter = context.getViewCenterPoint();
 		if (lastDrawnAtPoint == null || distanceExceedsBuffer(newCenter, lastDrawnAtPoint)) {
 			lastDrawnAtPoint = newCenter;
 			return true;
@@ -85,10 +86,6 @@ public class TiledWMS extends WMSBase {
 		int yDist = Math.abs(lhs.getY() - rhs.getY());
 		if (yDist > ignoreEventsBuffer * context.getTileSize().getHeight()) return true;
 		return false;
-	}
-
-	public void onMapPanEnded(ViewPanEndedEvent evt) {
-		removeTiles(false);
 	}
 
 	private void removeTiles(boolean removeAll) {
