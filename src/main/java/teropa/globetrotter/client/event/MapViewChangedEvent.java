@@ -22,11 +22,13 @@ public class MapViewChangedEvent extends GwtEvent<MapViewChangedEvent.Handler> {
 	public final boolean panned;
 	public final boolean panEnded;
 	public final boolean zoomed;
+	public final boolean effectiveExtentChanged;
 	
-	public MapViewChangedEvent(boolean panned, boolean panEnded, boolean zoomed) {
+	public MapViewChangedEvent(boolean panned, boolean panEnded, boolean zoomed, boolean effectiveExtentChanged) {
 		this.panned = panned;
 		this.panEnded = panEnded;
 		this.zoomed = zoomed;
+		this.effectiveExtentChanged = effectiveExtentChanged;
 	}
 	
 	public Type<Handler> getAssociatedType() {

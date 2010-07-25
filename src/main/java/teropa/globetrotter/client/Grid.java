@@ -11,9 +11,10 @@ import teropa.globetrotter.client.common.Size;
 
 public class Grid {
 
-	private final Size viewSize;
+	private final ViewContext viewContext;
 	private final Size tileSize;
 	private final Bounds maxExtent;
+	private Bounds effectiveExtent;
 	private final double resolution;
 	private final double tileCoordWidth;
 	private final double tileCoordHeight;
@@ -22,10 +23,11 @@ public class Grid {
 	private final double[] tileYs;
 	private final Tile[][] tileCache;
 	
-	public Grid(Size viewSize, Size tileSize, Bounds maxExtent, double resolution) {
-		this.viewSize = viewSize;
+	public Grid(ViewContext ctx, Size tileSize, Bounds maxExtent, Bounds effectiveExtent, double resolution) {
+		this.viewContext = ctx;
 		this.tileSize = tileSize;
 		this.maxExtent = maxExtent;
+		this.effectiveExtent = effectiveExtent;
 		this.resolution = resolution;
 		this.tileCoordWidth = Calc.getCoordinateWidth(tileSize, resolution);
 		this.tileCoordHeight = Calc.getCoordinateHeight(tileSize, resolution);
@@ -41,6 +43,10 @@ public class Grid {
 
 	public int getNumRows() {
 		return tileYs.length;
+	}
+	
+	public void setEffectiveExtent(Bounds effectiveExtent) {
+		this.effectiveExtent = effectiveExtent;
 	}
 
 	private double[] initTileXs(Bounds maxExtent) {
@@ -65,12 +71,12 @@ public class Grid {
 		final List<Tile> result = new ArrayList<Tile>();
 		
 		int xIdx = 0;
-		while (tileXs[xIdx] < extent.getLowerLeftX())
+		while (xIdx < tileXs.length && tileXs[xIdx] < extent.getLowerLeftX())
 			xIdx++;
 		if (xIdx > 0) xIdx--;
 
 		int yIdx = 0;
-		while (tileYs[yIdx] < extent.getLowerLeftY())
+		while (yIdx < tileYs.length && tileYs[yIdx] < extent.getLowerLeftY())
 			yIdx++;
 		if (yIdx > 0) yIdx--;
 		
@@ -86,12 +92,7 @@ public class Grid {
 					double upperRightX = Math.min(lowerLeftX + tileCoordWidth, maxExtent.getUpperRightX());
 					double upperRightY = Math.min(lowerLeftY + tileCoordHeight, maxExtent.getUpperRightY());
 					Bounds tileBounds = new Bounds(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
-					Size tileSize = this.tileSize;
-					if (upperRightX >= maxExtent.getUpperRightX() || upperRightY >= maxExtent.getUpperRightY()) {
-						tileSize =  Calc.getPixelSize(tileBounds, resolution);
-					}
-					Point topLeft = Calc.getPoint(new LonLat(lowerLeftX, upperRightY), maxExtent, viewSize);
-					Tile tile = new Tile(tileBounds, tileSize, topLeft, xIdx, innerYIdx);
+					Tile tile = new Tile(tileBounds, xIdx, innerYIdx);
 					result.add(tile);
 					tileCache[xIdx][innerYIdx] = tile;
 				}
@@ -102,18 +103,14 @@ public class Grid {
 		return result;
 	}
 
-	public static class Tile {
+	public class Tile {
 		
 		private final Bounds extent;
-		private final Size size;
-		private final Point topLeft;
 		private final int col;
 		private final int row;
 		
-		public Tile(Bounds extent, Size size, Point topLeft, int col, int row) {
+		public Tile(Bounds extent, int col, int row) {
 			this.extent = extent;
-			this.size = size;
-			this.topLeft = topLeft;
 			this.col = col;
 			this.row = row;
 		}
@@ -123,11 +120,11 @@ public class Grid {
 		}
 		
 		public Size getSize() {
-			return size;
+			return Calc.getPixelSize(extent, resolution);
 		}
 		
 		public Point getTopLeft() {
-			return topLeft;
+			return Calc.getPoint(new LonLat(extent.getLowerLeftX(), extent.getUpperRightY()), effectiveExtent, viewContext.getViewSize());
 		}
 
 		public int getCol() {

@@ -1,5 +1,7 @@
 package teropa.globetrotter.client.common;
 
+import com.google.gwt.core.client.GWT;
+
 
 
 public class Calc {
@@ -93,9 +95,23 @@ public class Calc {
 			lhs.getUpperRightX() > rhs.getLowerLeftX() &&
 			lhs.getLowerLeftY() < rhs.getUpperRightY() &&
 			lhs.getUpperRightY() > rhs.getLowerLeftY();
-			
-			
 	}
 	
-	// getLonLat(getPoint(center, maxExtent, view.getSize()), maxExtent, view.getSize())
+	public static Bounds getEffectiveExtent(Bounds maxExtent, double resolution, LonLat center) {
+		Size vSize = getPixelSize(maxExtent, resolution);
+		if (vSize.getWidth() <= 10000 && vSize.getHeight() <= 10000) {
+			return maxExtent;
+		}
+		Size effectiveSize = new Size(Math.min(vSize.getWidth(), 10000), Math.min(vSize.getHeight(), 10000));
+		double halfWidth = getCoordinateWidth(effectiveSize, resolution) / 2.0;
+		double halfHeight = getCoordinateHeight(effectiveSize, resolution) / 2.0;
+
+		double lowerX = Math.max(center.getLon() - halfWidth, maxExtent.getLowerLeftX());
+		double lowerY = Math.max(center.getLat() - halfHeight, maxExtent.getLowerLeftY());
+		double upperX = Math.min(center.getLon() + halfWidth, maxExtent.getUpperRightX());
+		double upperY = Math.min(center.getLat() + halfHeight, maxExtent.getUpperRightY());
+		return new Bounds(lowerX, lowerY, upperX, upperY);
+
+	}
+
 }

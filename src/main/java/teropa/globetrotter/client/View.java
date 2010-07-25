@@ -3,9 +3,9 @@ package teropa.globetrotter.client;
 import teropa.globetrotter.client.common.Size;
 
 public class View extends AbsoluteFocusPanel {
-
+	
 	private Size size;
-
+	
 	public View() {
 	}
 

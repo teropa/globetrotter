@@ -30,6 +30,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	private final List<Layer> layers = new ArrayList<Layer>();
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
+	private Bounds effectiveExtent = maxExtent;
 	private LonLat center = new LonLat(0, 0);
 	private double[] resolutions = new double[] { 1.0, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005 };
 	private int resolutionIndex = 4;
@@ -46,10 +47,15 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setHeight(height);
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
-				resizeView();				
+				init();
 			}
 		});
 		grids = new Grid[resolutions.length];
+	}
+	
+	private void init() {
+		setEffectiveExtent(false);
+		adjustViewAndViewportSize();
 	}
 	
 	public void addLayer(Layer layer) {
@@ -64,6 +70,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 
 	public void setResolutions(double[] resolutions) {
 		this.resolutions = resolutions;
+		this.grids = new Grid[resolutions.length];
 	}
 	
 	public double[] getResolutions() {
@@ -71,9 +78,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void setResolutionIndex(int index) {
-		this.resolutionIndex = index;
-		resizeView();
-		notifyLayers(new MapViewChangedEvent(false, false, true));
+		resizeView(index - this.resolutionIndex);
 	}
 	
 	public Size getTileSize() {
@@ -90,10 +95,15 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	
 	public void setMaxExtent(Bounds maxExtent) {
 		this.maxExtent = maxExtent;
+		this.effectiveExtent = maxExtent;
+	}
+	
+	public Bounds getEffectiveExtent() {
+		return effectiveExtent;
 	}
 
-	public Bounds getExtent() {
-		return narrow(Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize()), maxExtent);
+	public Bounds getVisibleExtent() {
+		return narrow(Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize()), effectiveExtent);
 	}
 
 	public double getResolution() {
@@ -114,30 +124,22 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public Point getViewCenterPoint() {
-		return Calc.getPoint(getCenter(), getMaxExtent(), getViewSize());
+		return Calc.getPoint(getCenter(), getEffectiveExtent(), getViewSize());
 	}
 	
 	public Grid getGrid() {
 		if (grids[resolutionIndex] == null) {
-			grids[resolutionIndex] = new Grid(getViewSize(), getTileSize(), getMaxExtent(), getResolution());
+			grids[resolutionIndex] = new Grid(this, getTileSize(), getMaxExtent(), getEffectiveExtent(), getResolution());
 		}
 		return grids[resolutionIndex];
 	}
 	
 	public void zoomIn() {
-		if (newResolutionInBounds(1)) {
-			resolutionIndex++;
-			resizeView();
-		}
-		notifyLayers(new MapViewChangedEvent(false, false, true));
+		resizeView(1);
 	}
 	
 	public void zoomOut() {
-		if (newResolutionInBounds(-1)) {
-			resolutionIndex--;
-			resizeView();
-		}
-		notifyLayers(new MapViewChangedEvent(false, false, true));
+		resizeView(-1);
 	}
 
 	private void notifyLayers(MapViewChangedEvent evt) {
@@ -147,21 +149,22 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
-		notifyLayers(new MapViewChangedEvent(false, true, false));
+		if (effectiveExtent.getArea() < maxExtent.getArea()) {
+			setEffectiveExtent(true);
+			notifyLayers(new MapViewChangedEvent(false, true, false, true));
+		} else {
+			notifyLayers(new MapViewChangedEvent(false, true, false, false));
+		}
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
-		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize()));
-		notifyLayers(new MapViewChangedEvent(true, false, false));
+		setCenter(getLonLat(event.newCenterPoint, effectiveExtent, view.getSize()));
+		notifyLayers(new MapViewChangedEvent(true, false, false, false));
 	}
 	
 	public void onViewZoomed(ViewZoomedEvent event) {
-		LonLat pointedAt = getLonLat(event.point, maxExtent, view.getSize());
-		if (newResolutionInBounds(event.levels)) {
-			resolutionIndex += event.levels;
-			resizeView(pointedAt);
-		}
-		notifyLayers(new MapViewChangedEvent(true, true, true));
+		LonLat pointedAt = getLonLat(event.point, effectiveExtent, view.getSize());
+		resizeView(event.levels, pointedAt);
 	}
 
 	private boolean newResolutionInBounds(int delta) {
@@ -172,17 +175,38 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		}
 	}
 	
-	private void resizeView() {
-		view.setSize(getPixelSize(maxExtent, resolutions[resolutionIndex]));
-		viewport.positionView(getPoint(center, maxExtent, view.getSize()));
-		setCenter(getLonLat(getPoint(center, maxExtent, view.getSize()), maxExtent, view.getSize()));
-	
+	private void resizeView(int delta) {
+		if (newResolutionInBounds(delta)) {
+			resolutionIndex += delta;
+		}
+		setEffectiveExtent(false);
+		adjustViewAndViewportSize();
+		notifyLayers(new MapViewChangedEvent(false, false, true, false));
 	}
 	
-	private void resizeView(LonLat newCenter) {
-		view.setSize(getPixelSize(maxExtent, resolutions[resolutionIndex]));
+	private void resizeView(int delta, LonLat newCenter) {
+		if (newResolutionInBounds(delta)) {
+			resolutionIndex += delta;
+		}
 		setCenter(newCenter);
-		viewport.positionView(getPoint(center, maxExtent, view.getSize()));
+		setEffectiveExtent(false);
+		adjustViewAndViewportSize();
+		notifyLayers(new MapViewChangedEvent(true, true, true, false));
+	}
+
+	private void setEffectiveExtent(boolean position) {
+		this.effectiveExtent = Calc.getEffectiveExtent(maxExtent, getResolution(), getCenter());
+		if (grids[resolutionIndex] != null) {
+			grids[resolutionIndex].setEffectiveExtent(effectiveExtent);
+		}
+		if (position) {
+			adjustViewAndViewportSize();
+		}
+	}
+
+	private void adjustViewAndViewportSize() {
+		view.setSize(getPixelSize(effectiveExtent, resolutions[resolutionIndex]));
+		viewport.positionView(getPoint(center, effectiveExtent, view.getSize()));
 	}
 
 	public String getSRS() {
@@ -203,7 +227,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				drawn = true;
-				notifyLayers(new MapViewChangedEvent(true, true, true));
+				notifyLayers(new MapViewChangedEvent(true, true, true, false));
 			}
 		});
 	}

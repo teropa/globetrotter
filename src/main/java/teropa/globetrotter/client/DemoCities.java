@@ -21,7 +21,7 @@ public class DemoCities {
 	}
 	
 	public static City[] CITIES = new City[] {
-
+		// Europe
 		new City("Albania",	"Tirana",	41.3317, +19.8172),
 		new City("Andorra",	"Andorra la Vella", 42.5075, 1.5218),
 		new City("Austria",	"Vienna", 48.2092, 16.3728),
@@ -71,58 +71,57 @@ public class DemoCities {
 		new City("Isle of Man (UK)", "Douglas", 54.1670, -4.4821),
 		new City("Jersey (UK)", "Saint Helier", 49.1919, -2.1071),
 		new City("Kosovo", "Prishtine", 42.6740, +21.1788),
-		new City("Svalbard (NO)", "Longyearbyen", 78.2186, 15.6488)
+		new City("Svalbard (NO)", "Longyearbyen", 78.2186, 15.6488),
 		
-//
-//		Asian States (47+1)	Asian Capitals	Coordinates (φ / λ)	Alt. / m
-//		Afghanistan	Kabol / Kabul	+34.5155 / +69.1952	1807
-//		Armenia	Yerevan	+40.1596 / +44.5090	1032
-//		Azerbaijan	Baki / Baku	+40.3834 / +49.8932	1
-//		Bahrain	Al Manamah / Manama	+26.1921 / +50.5354	6
-//		Bangladesh	Dhaka	+23.7106 / +90.3978	3
-//		Bhutan	Thimphu	+27.4405 / +89.6730	2736
-//		Brunei	Bandar Seri Begawan	+4.9431 / +114.9425	0
-//		Cambodia	Phnum Penh / Phnom Penh	+11.5434 / +104.8984	15
-//		China	Beijing / Peking	+39.9056 / +116.3958	63
-//		Cyprus	Nicosia	+35.1676 / +33.3736	134
-//		Georgia	T'bilisi / Tiflis	+41.7010 / +44.7930	451
-//		India	New Delhi	+28.6353 / +77.2250	210
-//		Indonesia	Jakarta (on Java)	-6.1862 / +106.8063	3
-//		Iran	Tehran / Teheran	+35.7061 / +51.4358	1138
-//		Iraq	Baghdad	+33.3157 / +44.3922	40
-//		Israel	Yerushalayim / Jerusalem	+31.7857 / +35.2007	580
-//		Japan	Tokyo	+35.6785 / +139.6823	17
-//		Jordan	Amman	+31.9394 / +35.9349	759
-//		Kazakhstan	Astana	+51.1796 / +71.4475	338
-//		Kuwait	Al Kuwayt / Kuwait	+29.3721 / +47.9824	5
-//		Kyrgyzstan	Bishkek	+42.8679 / +74.5984	771
-//		Laos	Viangchan / Vientiane	+17.9689 / +102.6137	148
-//		Lebanon	Beyrouth / Beirut	+33.8872 / +35.5134	55
-//		Malaysia	Kuala Lumpur	+3.1502 / +101.7077	60
-//		Maldives	Maale / Male (on Male)	+4.1742 / +73.5109	0
-//		Mongolia	Ulaanbaatar / Ulan Bator	+47.9138 / +106.9220	1284
-//		Myanmar / Burma	Pyinmana	+19.7378 / +96.2083	77
-//		Nepal	Kathmandu	+27.7058 / +85.3157	1298
-//		North Korea	P'yongyang	+39.0187 / +125.7468	6
-//		Oman	Masqat / Muscat	+23.6086 / +58.5922	68
-//		Pakistan	Islamabad	+33.6751 / +73.0946	507
-//		Philippines	Manila	+14.5790 / +120.9726	7
-//		Qatar	Ad Dawhah / Doha	+25.2948 / +51.5082	13
-//		Saudi Arabia	Ar Riyad / Riyadh	+24.6748 / +46.6977	624
-//		Singapore	Singapore	+1.2894 / +103.8500	0
-//		South Korea	Seoul	+37.5139 / +126.9828	33
-//		Sri Lanka	Colombo	+6.9155 / +79.8572	4
-//		Syria	Dimashq / Damascus	+33.5158 / +36.2939	691
-//		Tajikistan	Dushanbe	+38.5737 / +68.7738	789
-//		Thailand	Krung Thep / Bangkok	+13.7573 / +100.5020	1
-//		Timor-Leste / East Timor	Dili	-8.5662 / +125.5880	11
-//		Turkey	Ankara	+39.9439 / +32.8560	938
-//		Turkmenistan	Asgabat / Ashgabat	+37.9509 / +58.3794	215
-//		United Arab Emirates	Abu Zaby / Abu Dhabi	+24.4764 / +54.3705	13
-//		Uzbekistan	Toshkent / Tashkent	+41.3193 / +69.2481	459
-//		Vietnam	Ha Noi / Hanoi	+21.0341 / +105.8372	25
-//		Yemen	San'a' / Sanaa	+15.3556 / +44.2081	2253
-//		Taiwan (CN)	T'ai-pei / Taipei	+25.0338 / +121.5645	5
+		// Asia
+		new City("Afghanistan", "Kabul", 34.5155, 69.1952),
+		new City("Armenia", "Yerevan", 40.1596, 44.5090),
+		new City("Azerbaijan", "Baku", 40.3834, 49.8932),
+		new City("Bahrain", "Manama", 26.1921, 50.5354),
+		new City("Bangladesh", "Dhaka", 23.7106, 90.3978),
+		new City("Bhutan", "Thimphu", 27.4405, 89.6730),
+		new City("Brunei", "Bandar Seri Begawan", 4.9431, 114.9425),
+		new City("Cambodia", "Phnom Penh", 11.5434, 104.8984),
+		new City("China", "Beijing", 39.9056, 116.3958),
+		new City("Cyprus", "Nicosia", 35.1676, 33.3736),
+		new City("Georgia", "T'bilisi", 41.7010, 44.7930),
+		new City("India", "New Delhi", 28.6353, 77.2250),
+		new City("Indonesia", "Jakarta", -6.1862, +106.8063),
+		new City("Iran", "Teheran", 35.7061, 51.4358),
+		new City("Iraq", "Baghdad", 33.3157, 44.3922),
+		new City("Israel", "Jerusalem", 31.7857, 35.2007),
+		new City("Japan", "Tokyo", 35.6785, +139.6823),
+		new City("Jordan", "Amman", 31.9394, 35.9349),
+		new City("Kazakhstan", "Astana", 51.1796, +71.4475),
+		new City("Kuwait", "Kuwait", 29.3721, 47.9824),
+		new City("Kyrgyzstan", "Bishkek", 42.8679, 74.5984),
+		new City("Laos", "Vientiane", 17.9689, 102.6137),
+		new City("Lebanon", "Beirut", 33.8872, 35.5134),
+		new City("Malaysia", "Kuala Lumpur", 3.1502, 101.7077),
+		new City("Maldives", "Male", 4.1742, 73.5109),
+		new City("Mongolia", "Ulan Bator", 47.9138, 106.9220),
+		new City("Myanmar", "Pyinmana", 19.7378, 96.2083),
+		new City("Nepal", "Kathmandu", 27.7058, 85.3157),
+		new City("North Korea", "P'yongyang", 39.0187, 125.7468),
+		new City("Oman", "Muscat", 23.6086, 58.5922),
+		new City("Pakistan", "Islamabad", 33.6751, 73.0946),
+		new City("Philippines", "Manila", 14.5790, 120.9726),
+		new City("Qatar", "Doha", 25.2948, 51.5082),
+		new City("Saudi Arabia", "Riyadh", 24.6748, 46.6977),
+		new City("Singapore", "Singapore", 1.2894, 103.8500),
+		new City("South Korea", "Seoul", 37.5139, 126.9828),
+		new City("Sri Lanka", "Colombo", 6.9155, 79.8572),
+		new City("Syria", "Damascus", 33.5158, 36.2939),
+		new City("Tajikistan", "Dushanbe", 38.5737, 68.7738),
+		new City("Thailand", "Bangkok", 13.7573, 100.5020),
+		new City("East Timor", "Dili", -8.5662, 125.5880),
+		new City("Turkey", "Ankara", 39.9439, 32.8560),
+		new City("Turkmenistan", "Ashgabat", 37.9509, 58.3794),
+		new City("United Arab Emirates", "Abu Dhabi", 24.4764, 54.3705),
+		new City("Uzbekistan", "Tashkent", 41.3193, 69.2481),
+		new City("Vietnam", "Hanoi", 21.0341, 105.8372),
+		new City("Yemen", "Sanaa", 15.3556, 44.2081),
+		new City("Taiwan (CN)", "Taipei", 25.0338, 121.5645)
 //
 //		American States (35+16)	American Capitals	Coordinates (φ / λ)	Alt. / m
 //		Antigua and Barbuda	Saint John's (on Antigua)	+17.1175 / -61.8456	0

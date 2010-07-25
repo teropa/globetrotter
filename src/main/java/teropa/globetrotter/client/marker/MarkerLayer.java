@@ -50,7 +50,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize());
+			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
 			each.appendMarkup(markup, String.valueOf(i), loc);
 		}
 		DOM.setInnerHTML(container.getElement(), markup.toString());

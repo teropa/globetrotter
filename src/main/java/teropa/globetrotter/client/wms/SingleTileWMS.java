@@ -4,14 +4,10 @@ import teropa.globetrotter.client.HiddenUntilLoadedImage;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
-import teropa.globetrotter.client.event.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.ViewPannedEvent;
-import teropa.globetrotter.client.event.ViewZoomedEvent;
 
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SingleTileWMS extends WMSBase implements LoadHandler {
@@ -47,7 +43,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	}
 	
 	private void draw() {
-		final String url = constructUrl(context.getExtent(), context.getViewportSize());
+		final String url = constructUrl(context.getVisibleExtent(), context.getViewportSize());
 		addImage(context.getViewportSize(), context.getViewportLocation(), url);
 	}
 	

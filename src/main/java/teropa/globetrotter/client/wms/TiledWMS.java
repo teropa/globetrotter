@@ -49,6 +49,9 @@ public class TiledWMS extends WMSBase {
 	
 	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.effectiveExtentChanged) {
+			repositionTiles();
+		}
 		if (evt.zoomed) {
 			removeTiles(true);
 			imageGrid = null;
@@ -91,7 +94,7 @@ public class TiledWMS extends WMSBase {
 	private void removeTiles(boolean removeAll) {
 		if (imageGrid == null) return;
 		
-		Bounds bufferedExtent = widenToBuffer(context.getExtent());
+		Bounds bufferedExtent = widenToBuffer(context.getVisibleExtent());
 		for (int i=0 ; i<imageGrid.length ; i++) {
 			for (int j=0 ; j<imageGrid[i].length ; j++) {
 				TileAndImage entry = imageGrid[i][j];
@@ -107,7 +110,7 @@ public class TiledWMS extends WMSBase {
 
 	private void addNewTiles() {
 		Grid grid = context.getGrid();
-		Bounds extent = widenToBuffer(context.getExtent());
+		Bounds extent = widenToBuffer(context.getVisibleExtent());
 		List<Grid.Tile> tiles = grid.getTiles(extent);
 		int length = tiles.size();
 		for (int i=0 ; i<length ; i++) {
@@ -118,7 +121,8 @@ public class TiledWMS extends WMSBase {
 				image.setUrl(constructUrl(eachTile.getExtent(), eachTile.getSize()));
 				col[eachTile.getRow()] = new TileAndImage(eachTile, image);
 				container.add(image);
-				fastSetElementPosition(image.getElement(), eachTile.getTopLeft().getX(), eachTile.getTopLeft().getY());				
+				Point topLeft = eachTile.getTopLeft();
+				fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());				
 			}
 		}
 	}
@@ -128,9 +132,23 @@ public class TiledWMS extends WMSBase {
 			Size viewportSize = context.getViewportSize();
 			Size widenedSize = new Size(viewportSize.getWidth() + 2 * buffer * context.getTileSize().getWidth(), viewportSize.getHeight() + 2 * buffer * context.getTileSize().getHeight());
 			Bounds widenedExtent = Calc.getExtent(context.getCenter(), context.getResolution(), widenedSize);
-			return Calc.narrow(widenedExtent, context.getMaxExtent());
+			return Calc.narrow(widenedExtent, context.getEffectiveExtent());
 		} else {
 			return extent;
+		}
+	}
+
+	private void repositionTiles() {
+		if (imageGrid == null) return;
+		
+		for (int i=0 ; i<imageGrid.length ; i++) {
+			for (int j=0 ; j<imageGrid[i].length ; j++) {
+				TileAndImage entry = imageGrid[i][j];
+				if (entry != null) {
+					Point topLeft = entry.tile.getTopLeft();
+					fastSetElementPosition(entry.image.getElement(), topLeft.getX(), topLeft.getY());
+				}
+			}
 		}
 	}
 

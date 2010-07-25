@@ -15,7 +15,11 @@ public interface ViewContext {
 
 	Size getTileSize();
 
-	Bounds getExtent();
+//	Bounds getMaxExtent();
+
+	Bounds getEffectiveExtent();
+	
+	Bounds getVisibleExtent();
 
 	Size getViewportSize();
 
@@ -23,7 +27,6 @@ public interface ViewContext {
 
 	double getResolution();
 
-	Bounds getMaxExtent();
 
 	Point getViewportLocation();
 

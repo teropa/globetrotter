@@ -40,6 +40,11 @@ public class Bounds {
 	public double getHeight() {
 		return Math.abs(upperRightY - lowerLeftY);
 	}
+
+
+	public double getArea() {
+		return getWidth() * getHeight();
+	}
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -68,4 +73,5 @@ public class Bounds {
 	public String toString() {
 		return "[" + getLowerLeftX() + "," + getLowerLeftY() + "," + getUpperRightX() + "," + getUpperRightY() + "]";
 	}
+
 }
