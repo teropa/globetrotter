@@ -1,6 +1,8 @@
 package teropa.globetrotter.client.wms;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
@@ -18,20 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TiledWMS extends WMSBase {
 
-	private static class TileAndImage {
-
-		public TileAndImage(Grid.Tile tile, Image image) {
-			this.tile = tile;
-			this.image = image;
-		}
-
-		public final Grid.Tile tile;
-		public final Image image;
-		
-	}
-
 	private final AbsolutePanel container = new AbsolutePanel();
-	private TileAndImage[][] imageGrid;	
+	private final HashMap<Grid.Tile,Image> imageTiles = new HashMap<Grid.Tile, Image>();
 	private int buffer = 2;
 	private double ignoreEventsBuffer = buffer / 4.0;
 	private Point lastDrawnAtPoint = null;
@@ -42,7 +32,6 @@ public class TiledWMS extends WMSBase {
 
 	protected void onVisibilityChanged() {
 		if (visible && initialized && context.isDrawn()) {
-			maybeInitGrid();
 			addNewTiles();
 		}
 	}
@@ -54,11 +43,9 @@ public class TiledWMS extends WMSBase {
 		}
 		if (evt.zoomed) {
 			removeTiles(true);
-			imageGrid = null;
 			lastDrawnAtPoint = null;
 		}
 		if ((evt.zoomed || evt.panned) && visible) {
-			maybeInitGrid();
 			if (shouldDraw()) {
 				addNewTiles();
 			}			
@@ -68,12 +55,6 @@ public class TiledWMS extends WMSBase {
 		}
 	}
 	
-	private void maybeInitGrid() {
-		if (imageGrid == null) {
-			imageGrid = new TileAndImage[context.getGrid().getNumCols()][context.getGrid().getNumRows()];
-		}
-	}
-
 	private boolean shouldDraw() {
 		Point newCenter = context.getViewCenterPoint();
 		if (lastDrawnAtPoint == null || distanceExceedsBuffer(newCenter, lastDrawnAtPoint)) {
@@ -92,18 +73,16 @@ public class TiledWMS extends WMSBase {
 	}
 
 	private void removeTiles(boolean removeAll) {
-		if (imageGrid == null) return;
+		if (imageTiles.isEmpty()) return;
 		
 		Bounds bufferedExtent = widenToBuffer(context.getVisibleExtent());
-		for (int i=0 ; i<imageGrid.length ; i++) {
-			for (int j=0 ; j<imageGrid[i].length ; j++) {
-				TileAndImage entry = imageGrid[i][j];
-				if (entry == null) continue;
-				if (removeAll || !Calc.intersect(bufferedExtent, entry.tile.getExtent())) {
-					container.remove(entry.image);
-					ImagePool.release(entry.image);
-					imageGrid[i][j] = null;
-				}
+		java.util.Iterator<Map.Entry<Grid.Tile, Image>> it = imageTiles.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Grid.Tile, Image> entry = it.next();
+			if (removeAll || !Calc.intersect(bufferedExtent, entry.getKey().getExtent())) {
+				container.remove(entry.getValue());
+				ImagePool.release(entry.getValue());
+				it.remove();
 			}
 		}
 	}
@@ -115,11 +94,10 @@ public class TiledWMS extends WMSBase {
 		int length = tiles.size();
 		for (int i=0 ; i<length ; i++) {
 			Grid.Tile eachTile = tiles.get(i);
-			TileAndImage[] col = imageGrid[eachTile.getCol()];
-			if (col[eachTile.getRow()] == null) {
+			if (!imageTiles.containsKey(eachTile)) { 
 				Image image = ImagePool.get();
 				image.setUrl(constructUrl(eachTile.getExtent(), eachTile.getSize()));
-				col[eachTile.getRow()] = new TileAndImage(eachTile, image);
+				imageTiles.put(eachTile, image);
 				container.add(image);
 				Point topLeft = eachTile.getTopLeft();
 				fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());				
@@ -139,16 +117,9 @@ public class TiledWMS extends WMSBase {
 	}
 
 	private void repositionTiles() {
-		if (imageGrid == null) return;
-		
-		for (int i=0 ; i<imageGrid.length ; i++) {
-			for (int j=0 ; j<imageGrid[i].length ; j++) {
-				TileAndImage entry = imageGrid[i][j];
-				if (entry != null) {
-					Point topLeft = entry.tile.getTopLeft();
-					fastSetElementPosition(entry.image.getElement(), topLeft.getX(), topLeft.getY());
-				}
-			}
+		for (Map.Entry<Grid.Tile, Image> each : imageTiles.entrySet()) {
+			Point topLeft = each.getKey().getTopLeft();
+			fastSetElementPosition(each.getValue().getElement(), topLeft.getX(), topLeft.getY());
 		}
 	}
 
