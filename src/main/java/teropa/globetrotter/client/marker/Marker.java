@@ -6,13 +6,12 @@ import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Image;
 
-public class Marker implements ClickHandler {
+public class Marker {
 
 	private static Images DEFAULT_IMAGES = GWT.create(Images.class);
 	
@@ -27,7 +26,8 @@ public class Marker implements ClickHandler {
 	private final Size size;
 	private final PinPosition pinPosition;
 
-	private Image image;
+	private String domId;
+	private Element element;
 	
 	public Marker(LonLat loc) {
 		this(loc, DEFAULT_IMAGES.markerRed(), new Size(32, 32), PinPosition.BOTTOM_LEFT);
@@ -43,21 +43,13 @@ public class Marker implements ClickHandler {
 	public LonLat getLoc() {
 		return loc;
 	}
-	
-	public Image getImage() {
-		if (image == null) {
-			GWT.log(imageProto.getHTML(), null);
-			image = imageProto.createImage();
-			image.addStyleName("pointerCursor");
-			image.addClickHandler(this);
-		}
-		return image;
-	}
-	
-	public void appendMarkup(StringBuilder builder, String id, Point location) {
+		
+	public void appendMarkup(StringBuilder builder, String domId, Point location) {
+		this.domId = domId;
+		this.element = null;
 		Point loc = translate(location);
 		builder.append("<div class=\"pointerCursor\" id=\"");
-		builder.append(id);
+		builder.append(domId);
 		builder.append("\" style=\"position: absolute; left: ");
 		builder.append(loc.getX());
 		builder.append("px; top: ");
@@ -97,11 +89,16 @@ public class Marker implements ClickHandler {
 	private int toCenter(Point point) {
 		return point.getX() - size.getWidth() / 2;
 	}
-	
-	@Override
-	public void onClick(ClickEvent event) {
-		Window.alert("Click!");
+
+	public void repositionTo(Point point) {
+		if (this.element == null) {
+			this.element = Document.get().getElementById(this.domId);
+		}
+		Point pos = translate(point);
+		Style style = this.element.getStyle();
+		style.setPropertyPx("left", pos.getX());
+		style.setPropertyPx("top", pos.getY());
 	}
-	
+
 	
 }

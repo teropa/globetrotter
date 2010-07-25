@@ -36,16 +36,19 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 
 	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.effectiveExtentChanged && positioned) {
+			repositionMarkers();
+		}
 		if (evt.zoomed) {
 			positioned = false;
 		}
 		if ((evt.zoomed || evt.panned) && !positioned) {
-			positionMarkers();
+			replaceMarkers();
 			positioned = true;
 		}
 	}
 
-	private void positionMarkers() {
+	private void replaceMarkers() {
 		StringBuilder markup = new StringBuilder();
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
@@ -56,6 +59,14 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		DOM.setInnerHTML(container.getElement(), markup.toString());
 	}
 
+	private void repositionMarkers() {
+		int size = markers.size();
+		for (int i=0 ; i<size ; i++) {
+			Marker each = markers.get(i);
+			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
+			each.repositionTo(loc);
+		}
+	}
 	public void onClick(ClickEvent event) {
 		Integer idx = getMarkerIdx(event);
 		if (idx != null) {
