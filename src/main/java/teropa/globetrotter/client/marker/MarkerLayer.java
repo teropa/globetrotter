@@ -11,12 +11,13 @@ import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
@@ -24,7 +25,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler {
+public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler, MouseDownHandler {
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
 	private final List<Marker> markers = new ArrayList<Marker>();
@@ -46,6 +47,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		super(name);
 		container.addClickHandler(this);
 		container.addDoubleClickHandler(this);
+		container.addMouseDownHandler(this);
 	}
 	
 	public void addMarker(Marker marker) {
@@ -147,6 +149,13 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			event.stopPropagation();
 			handlers.fireEvent(new MarkerDoubleClickEvent(markers.get(idx), this));
 		}		
+	}
+	
+	public void onMouseDown(MouseDownEvent event) {
+		Integer idx = getMarkerIdx(event);
+		if (idx != null) {
+			event.stopPropagation();
+		}
 	}
 	
 	private Integer getMarkerIdx(DomEvent<?> event) {
