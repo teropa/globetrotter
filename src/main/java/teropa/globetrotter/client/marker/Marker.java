@@ -15,29 +15,26 @@ public class Marker {
 
 	private static Images DEFAULT_IMAGES = GWT.create(Images.class);
 	
-	public static enum PinPosition {
-		TOP_LEFT, TOP_CENTER, TOP_RIGHT,
-		MIDDLE_LEFT, MIDDLE_CENTER, MIDDLE_RIGHT,
-		BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
-	};
-	
 	private final LonLat loc;
 	private final AbstractImagePrototype imageProto;
 	private final Size size;
-	private final PinPosition pinPosition;
-
+	private final Position pinPosition;
+	private final PopupProvider popupProvider;
+	private Popup popup;
+	
 	private String domId;
 	private Element element;
 	
 	public Marker(LonLat loc) {
-		this(loc, DEFAULT_IMAGES.markerRed(), new Size(32, 32), PinPosition.BOTTOM_LEFT);
+		this(loc, DEFAULT_IMAGES.markerRed(), new Size(32, 32), Position.BOTTOM_LEFT, null);
 	}
 	
-	public Marker(LonLat loc, AbstractImagePrototype image, Size size, PinPosition pinPosition) {
+	public Marker(LonLat loc, AbstractImagePrototype image, Size size, Position pinPosition, PopupProvider popupProvider) {
 		this.loc = loc;
 		this.imageProto = image;
 		this.size = size;
 		this.pinPosition = pinPosition;
+		this.popupProvider = popupProvider;
 	}
 
 	public LonLat getLoc() {
@@ -91,14 +88,29 @@ public class Marker {
 	}
 
 	public void repositionTo(Point point) {
-		if (this.element == null) {
-			this.element = Document.get().getElementById(this.domId);
-		}
+		maybeGetElement();
 		Point pos = translate(point);
 		Style style = this.element.getStyle();
 		style.setPropertyPx("left", pos.getX());
 		style.setPropertyPx("top", pos.getY());
 	}
 
+	public void remove() {
+		maybeGetElement();
+		this.element.getParentElement().removeChild(this.element);
+	}
+	
+	public Popup getPopup() {
+		if (this.popup == null && this.popupProvider != null) {
+			this.popup = popupProvider.get(this);
+		}
+		return this.popup;
+	}
+
+	private void maybeGetElement() {
+		if (this.element == null) {
+			this.element = Document.get().getElementById(this.domId);
+		}
+	}
 	
 }

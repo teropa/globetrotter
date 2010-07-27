@@ -22,8 +22,16 @@ import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.impl.FocusImpl;
 
+/**
+ * An {@link AbsolutePanel} with the additional functionalities of
+ * {@link FocusPanel}.
+ * 
+ * @author teroparv
+ *
+ */
 public class AbsoluteFocusPanel extends AbsolutePanel implements HasAllMouseHandlers, HasClickHandlers, HasDoubleClickHandlers {
 
 	static final FocusImpl impl = FocusImpl.getFocusImplForPanel();

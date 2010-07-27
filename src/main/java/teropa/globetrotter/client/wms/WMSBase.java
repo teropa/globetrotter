@@ -60,8 +60,11 @@ public abstract class WMSBase extends Layer {
 		if (!this.url.contains("?")) {
 			res.append("?");
 		}
+		if (!this.url.contains("SERVICE=")) {
+			res.append("&SERVICE=WMS");
+		}
 		if (!this.url.contains("VERSION=")) {
-			res.append("&VERSION=1.1.0");
+			res.append("&VERSION=1.1.1");
 		}
 		res.append("&REQUEST=GetMap&LAYERS=");
 		res.append(layers);

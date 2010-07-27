@@ -1,21 +1,26 @@
 package teropa.globetrotter.client.wms;
 
 import teropa.globetrotter.client.HiddenUntilLoadedImage;
+import teropa.globetrotter.client.common.Calc;
+import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SingleTileWMS extends WMSBase implements LoadHandler {
 
-	private static final int IMAGE_BUFFER_SIZE = 3;
+	private static final int IMAGE_BUFFER_SIZE = 50;
 	
 	private static final class BufferedImage extends HiddenUntilLoadedImage {
-		public Point desiredPosition;
+		public LonLat desiredPosition;
+		public boolean attached;
 	}
 	
 	private final AbsolutePanel container = new AbsolutePanel();
@@ -37,18 +42,26 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	
 	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (evt.effectiveExtentChanged) {
+			repositionImages();
+		}
 		if (evt.panEnded || evt.zoomed) {
 			draw();
 		}
 	}
 	
 	private void draw() {
-		final String url = constructUrl(context.getVisibleExtent(), context.getViewportSize());
-		addImage(context.getViewportSize(), context.getViewportLocation(), url);
+		DeferredCommand.addCommand(new Command() {
+			public void execute() {
+				final String url = constructUrl(context.getVisibleExtent(), context.getViewportSize());
+				addImage(context.getViewportSize(), Calc.getLonLat(context.getViewportLocation(), context.getEffectiveExtent(), context.getViewSize()), url);			
+			}
+		});
 	}
 	
-	private void addImage(Size imageSize, final Point topLeft, final String url) {
+	private void addImage(Size imageSize, final LonLat topLeft, final String url) {
 		final BufferedImage image = imageBuffer[imageBufferIdx];
+		image.attached = false;
 		image.desiredPosition = topLeft;
 		image.setUrl(url);
 		image.setWidth(imageSize.getWidth() + "px");
@@ -58,15 +71,28 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		incImageBufferIdx();
 	}
 
+	private void repositionImages() {
+		for (int i=0 ; i<IMAGE_BUFFER_SIZE ; i++) {
+			BufferedImage img = imageBuffer[i];
+			if (img.attached) {
+				Point pos = Calc.getPoint(img.desiredPosition, context.getEffectiveExtent(), context.getViewSize());
+				container.setWidgetPosition(img, pos.getX(), pos.getY());
+			}
+		}
+	}
+
 	public void onLoad(LoadEvent event) {
 		BufferedImage requested = imageBuffer[requestedIdx];
 		if (event.getSource() == requested) {
 			for (int i=0 ; i<IMAGE_BUFFER_SIZE ; i++) {
 				if (i != requestedIdx) {
 					container.remove(imageBuffer[i]);
+					imageBuffer[i].attached = false;
 				}
 			}
-			container.setWidgetPosition(requested, requested.desiredPosition.getX(), requested.desiredPosition.getY());
+			Point pos = Calc.getPoint(requested.desiredPosition, context.getEffectiveExtent(), context.getViewSize());
+			container.setWidgetPosition(requested, pos.getX(), pos.getY());
+			requested.attached = true;
 		}
 	}
 	
