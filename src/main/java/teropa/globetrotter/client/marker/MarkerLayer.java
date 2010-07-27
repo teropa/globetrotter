@@ -104,7 +104,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 				onMarkerPopupRemove(each);
 			}
 			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
-			each.appendMarkup(markup, String.valueOf(i), loc);
+			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc);
 		}
 		DOM.setInnerHTML(container.getElement(), markup.toString());
 		for (int i=0 ; i<size ; i++) {
@@ -170,7 +170,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		if (isBlank(itemId)) {
 			return null;
 		} else {
-			return Integer.valueOf(itemId);
+			return Integer.valueOf(itemId.substring(getMarkerIdPrefix().length()));
 		}
 	}
 
@@ -183,5 +183,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		return container;
 	}
 
-	
+	private String getMarkerIdPrefix() {
+		return id + "_marker_";
+	}
 }
