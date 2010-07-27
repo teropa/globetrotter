@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Widget;
 
 public class Marker {
 
@@ -19,32 +20,78 @@ public class Marker {
 	private final AbstractImagePrototype imageProto;
 	private final Size size;
 	private final Position pinPosition;
-	private final PopupProvider popupProvider;
-	private Popup popup;
+	private MarkerLayer layer;
+	private Widget popup;
+	private Position popupPosition;
 	
 	private String domId;
 	private Element element;
 	
 	public Marker(LonLat loc) {
-		this(loc, DEFAULT_IMAGES.markerRed(), new Size(32, 32), Position.BOTTOM_LEFT, null);
+		this(loc, DEFAULT_IMAGES.markerRed(), new Size(32, 32), Position.BOTTOM_LEFT);
 	}
 	
-	public Marker(LonLat loc, AbstractImagePrototype image, Size size, Position pinPosition, PopupProvider popupProvider) {
+	public Marker(LonLat loc, AbstractImagePrototype image, Size size, Position pinPosition) {
 		this.loc = loc;
 		this.imageProto = image;
 		this.size = size;
 		this.pinPosition = pinPosition;
-		this.popupProvider = popupProvider;
 	}
 
 	public LonLat getLoc() {
 		return loc;
 	}
-		
+
+	public Position getPinPosition() {
+		return pinPosition;
+	}
+	
+	public Position getPopupPosition() {
+		return popupPosition;
+	}
+
+	public Size getSize() {
+		return size;
+	}
+
+	public void setLayer(MarkerLayer layer) {
+		this.layer = layer;
+	}
+	
+	public void setPopup(Widget popup) {
+		setPopup(popup, Position.TOP_RIGHT);
+	}
+	
+	public void setPopup(Widget popup, Position pos) {
+		if (this.popup != null) {
+			removePopup();
+		}
+		this.popup = popup;
+		this.popupPosition = pos;
+		if (layer != null) {
+			layer.onMarkerPopupAdded(this);
+		}
+	}
+	
+	public Widget getPopup() {
+		return popup;
+	}
+	
+	public boolean hasPopup() {
+		return popup != null;
+	}
+	
+	public void removePopup() {
+		if (layer != null) {
+			layer.onMarkerPopupRemove(this);
+		}
+		this.popup = null;
+	}
+	
 	public void appendMarkup(StringBuilder builder, String domId, Point location) {
 		this.domId = domId;
 		this.element = null;
-		Point loc = translate(location);
+		Point loc = pinPosition.translateAroundPoint(location, size);
 		builder.append("<div class=\"pointerCursor\" id=\"");
 		builder.append(domId);
 		builder.append("\" style=\"position: absolute; left: ");
@@ -55,56 +102,24 @@ public class Marker {
 		builder.append(imageProto.getHTML());
 		builder.append("</div>");
 	}
-	
-	private Point translate(Point point) {
-		switch (pinPosition) {
-		case TOP_LEFT: return point;
-		case TOP_CENTER: return new Point(toCenter(point), point.getY());
-		case TOP_RIGHT: return new Point(toRight(point), point.getY());
-		case MIDDLE_LEFT: return new Point(point.getX(), toMiddle(point));
-		case MIDDLE_CENTER: return new Point(toCenter(point), toMiddle(point));
-		case MIDDLE_RIGHT: return new Point(toRight(point), toMiddle(point));
-		case BOTTOM_LEFT: return new Point(point.getX(), toBottom(point));
-		case BOTTOM_CENTER: return new Point(toCenter(point), toBottom(point));
-		case BOTTOM_RIGHT: return new Point(toRight(point), toBottom(point));
-		default: return point;
-		}
-	}
-
-	private int toBottom(Point point) {
-		return point.getY() - size.getHeight();
-	}
-
-	private int toMiddle(Point point) {
-		return point.getY() - size.getHeight() / 2;
-	}
-
-	private int toRight(Point point) {
-		return point.getX() - size.getWidth();
-	}
-
-	private int toCenter(Point point) {
-		return point.getX() - size.getWidth() / 2;
-	}
 
 	public void repositionTo(Point point) {
 		maybeGetElement();
-		Point pos = translate(point);
+		Point pos = pinPosition.translateAroundPoint(point, size);
 		Style style = this.element.getStyle();
 		style.setPropertyPx("left", pos.getX());
 		style.setPropertyPx("top", pos.getY());
+		if (hasPopup()) {
+			Point popupPos = popupPosition.translateAroundSize(pos, size);
+			Style popupStyle = getPopup().getElement().getStyle();
+			popupStyle.setPropertyPx("left", popupPos.getX());
+			popupStyle.setPropertyPx("top", popupPos.getY());
+		}
 	}
 
 	public void remove() {
 		maybeGetElement();
 		this.element.getParentElement().removeChild(this.element);
-	}
-	
-	public Popup getPopup() {
-		if (this.popup == null && this.popupProvider != null) {
-			this.popup = popupProvider.get(this);
-		}
-		return this.popup;
 	}
 
 	private void maybeGetElement() {

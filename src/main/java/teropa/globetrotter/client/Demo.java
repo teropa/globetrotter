@@ -3,6 +3,7 @@ package teropa.globetrotter.client;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import teropa.globetrotter.client.controls.Zoomer;
@@ -17,7 +18,9 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class Demo implements EntryPoint {
@@ -44,15 +47,25 @@ public class Demo implements EntryPoint {
 		radar.setLayers("RADNL_OPER_R___25PCPRR_L3_COLOR");
 		radar.setTransparent(true);
 		radar.setTime(getRadarTimes().get(0));
+		radar.setIsVisible(false);
 		map.addLayer(radar);
 		
 		final MarkerLayer markers = new MarkerLayer("Capitals");
+		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
 		for (DemoCities.City city : DemoCities.CITIES) {
-			markers.addMarker(new Marker(city.getLonLat()));
+			Marker marker = new Marker(city.getLonLat());
+			markers.addMarker(marker);
+			citiesByMarker.put(marker, city);
 		}
 		markers.addMarkerClickHandler(new MarkerClickEvent.Handler() {
 			public void onMarkerClick(MarkerClickEvent evt) {
-//				markers.addPopup(new Popup(new Label("Hello"), Position.TOP_CENTER));
+				if (evt.marker.hasPopup()) {
+					evt.marker.removePopup(); 
+				} else {
+					Label label = new Label(citiesByMarker.get(evt.marker).getName());
+					label.setStyleName("CityPopup");
+					evt.marker.setPopup(label);
+				}
 			}
 		});
 		map.addLayer(markers);
@@ -73,16 +86,6 @@ public class Demo implements EntryPoint {
 				map.zoomOut();
 			}
 		}));
-//		final List<String> imgs = getRadarTimes();
-//		RootPanel.get().add(new Button("inc radar", new ClickHandler() {
-//			public void onClick(ClickEvent event) {
-//				radarIdx++;
-//				if (radarIdx > imgs.size() - 1) {
-//					radarIdx = 0;
-//				}
-//				radar.setTime(imgs.get(radarIdx));
-//			}
-//		}));
 		final List<String> imgs = getRadarTimes();
 		final Timer t = new Timer() {
 			public void run() {
@@ -95,6 +98,7 @@ public class Demo implements EntryPoint {
 		};
 		RootPanel.get().add(new Button("toggle radar", new ClickHandler() {
 			public void onClick(ClickEvent event) {
+				radar.setIsVisible(true);
 				t.cancel();
 				t.scheduleRepeating(100);
 			}
@@ -140,6 +144,42 @@ public class Demo implements EntryPoint {
 		result.add("2010-07-27 11:50:00");
 		result.add("2010-07-27 11:55:00");
 		result.add("2010-07-27 12:00:00");
+		result.add("2010-07-27 12:05:00");
+		result.add("2010-07-27 12:10:00");
+		result.add("2010-07-27 12:15:00");
+		result.add("2010-07-27 12:20:00");
+		result.add("2010-07-27 12:25:00");
+		result.add("2010-07-27 12:30:00");
+		result.add("2010-07-27 12:35:00");
+		result.add("2010-07-27 12:40:00");
+		result.add("2010-07-27 12:45:00");
+		result.add("2010-07-27 12:50:00");
+		result.add("2010-07-27 12:55:00");
+		result.add("2010-07-27 13:00:00");		
+		result.add("2010-07-27 13:05:00");
+		result.add("2010-07-27 13:10:00");
+		result.add("2010-07-27 13:15:00");
+		result.add("2010-07-27 13:20:00");
+		result.add("2010-07-27 13:25:00");
+		result.add("2010-07-27 13:30:00");
+		result.add("2010-07-27 13:35:00");
+		result.add("2010-07-27 13:40:00");
+		result.add("2010-07-27 13:45:00");
+		result.add("2010-07-27 13:50:00");
+		result.add("2010-07-27 13:55:00");
+		result.add("2010-07-27 14:00:00");
+		result.add("2010-07-27 14:05:00");
+		result.add("2010-07-27 14:10:00");
+		result.add("2010-07-27 14:15:00");
+		result.add("2010-07-27 14:20:00");
+		result.add("2010-07-27 14:25:00");
+		result.add("2010-07-27 14:30:00");
+		result.add("2010-07-27 14:35:00");
+		result.add("2010-07-27 14:40:00");
+		result.add("2010-07-27 14:45:00");
+		result.add("2010-07-27 14:50:00");
+		result.add("2010-07-27 14:55:00");
+		result.add("2010-07-27 15:00:00");		
 		return result;
 	}
 }

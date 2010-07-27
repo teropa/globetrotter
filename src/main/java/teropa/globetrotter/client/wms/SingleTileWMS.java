@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SingleTileWMS extends WMSBase implements LoadHandler {
 
-	private static final int IMAGE_BUFFER_SIZE = 50;
+	private static final int IMAGE_BUFFER_SIZE = 100;
 	
 	private static final class BufferedImage extends HiddenUntilLoadedImage {
 		public LonLat desiredPosition;

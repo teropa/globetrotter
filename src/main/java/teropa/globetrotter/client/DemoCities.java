@@ -18,6 +18,10 @@ public class DemoCities {
 		public LonLat getLonLat() {
 			return lonLat;
 		}
+
+		public String getName() {
+			return city + ", " + country;
+		}
 	}
 	
 	public static City[] CITIES = new City[] {

@@ -1,6 +1,7 @@
 package teropa.globetrotter.client.marker;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import teropa.globetrotter.client.AbsoluteFocusPanel;
@@ -10,6 +11,7 @@ import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
@@ -26,7 +28,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
 	private final List<Marker> markers = new ArrayList<Marker>();
-	private final List<Popup> popups = new ArrayList<Popup>();
 	private final HandlerManager handlers = new HandlerManager(this);
 	
 	private boolean positioned = false;
@@ -49,6 +50,15 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	
 	public void addMarker(Marker marker) {
 		markers.add(marker);
+		marker.setLayer(this);
+		shouldReplace = true;
+		DeferredCommand.addCommand(replaceCommand);
+	}
+	
+	public void addMarkers(Collection<? extends Marker> newMarkers) {
+		for (Marker each : markers) {
+			markers.add(each);
+		}
 		shouldReplace = true;
 		DeferredCommand.addCommand(replaceCommand);
 	}
@@ -58,15 +68,15 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			marker.remove();
 		}
 		markers.remove(marker);
-	}
-
-	private void drawPopup(Popup popup) {
-//		Point loc = Calc.getPoint(popup.getForMarker().getLoc(), context.getEffectiveExtent(), context.getViewSize());
-//		container.add(popup.getContent(), loc.getX(), loc.getY());
+		marker.setLayer(null);
 	}
 		
 	public HandlerRegistration addMarkerClickHandler(MarkerClickEvent.Handler handler) {
 		return handlers.addHandler(MarkerClickEvent.TYPE, handler);
+	}
+	
+	public HandlerRegistration addMarkerDoubleClickHandler(MarkerDoubleClickEvent.Handler handler) {
+		return handlers.addHandler(MarkerDoubleClickEvent.TYPE, handler);
 	}
 	
 	@Override
@@ -88,13 +98,30 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
+			if (each.hasPopup()) {
+				onMarkerPopupRemove(each);
+			}
 			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
 			each.appendMarkup(markup, String.valueOf(i), loc);
 		}
 		DOM.setInnerHTML(container.getElement(), markup.toString());
-		for (Popup eachPopup : popups) {
-			drawPopup(eachPopup);
+		for (int i=0 ; i<size ; i++) {
+			Marker each = markers.get(i);
+			if (each.hasPopup()) {
+				onMarkerPopupAdded(each);
+			}
 		}
+	}
+
+	public void onMarkerPopupAdded(Marker marker) {
+		Point point = Calc.getPoint(marker.getLoc(), context.getEffectiveExtent(), context.getViewSize());
+		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
+		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
+		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());		
+	}
+
+	public void onMarkerPopupRemove(Marker marker) {
+		container.remove(marker.getPopup());		
 	}
 
 	private void repositionMarkers() {
@@ -104,32 +131,13 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
 			each.repositionTo(loc);
 		}
-		for (Popup eachPopup : popups) {
-//			Point loc = Calc.getPoint(eachPopup.getForMarker().getLoc(), context.getEffectiveExtent(), context.getViewSize());
-//			container.setWidgetPosition(eachPopup.getContent(), loc.getX(), loc.getY());
-		}
 	}
 	
 	public void onClick(ClickEvent event) {
 		Integer idx = getMarkerIdx(event);
 		if (idx != null) {
 			event.stopPropagation();
-			togglePopup(idx);
 			handlers.fireEvent(new MarkerClickEvent(markers.get(idx), this));
-		}
-	}
-
-	private void togglePopup(Integer idx) {
-		Marker marker = markers.get(idx);
-		Popup popup = marker.getPopup();
-		if (popup != null) {
-			if (popups.remove(popup)) {
-				container.remove(popup.getContent());
-			} else {
-				popups.add(popup);
-				Point loc = Calc.getPoint(marker.getLoc(), context.getEffectiveExtent(), context.getViewSize());
-				container.add(popup.getContent(), loc.getX(), loc.getY());
-			}
 		}
 	}
 
@@ -137,6 +145,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		Integer idx = getMarkerIdx(event);
 		if (idx != null) {
 			event.stopPropagation();
+			handlers.fireEvent(new MarkerDoubleClickEvent(markers.get(idx), this));
 		}		
 	}
 	
@@ -164,5 +173,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	public Widget asWidget() {
 		return container;
 	}
+
 	
 }
