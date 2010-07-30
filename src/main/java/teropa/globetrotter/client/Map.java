@@ -15,10 +15,12 @@ import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
+import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,6 +30,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	private final View view = new View();
 	private final Viewport viewport = new Viewport(this, view);
 	private final List<Layer> layers = new ArrayList<Layer>();
+	private final HandlerManager mapEvents = new HandlerManager(this);
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
 	private Bounds effectiveExtent = maxExtent;
@@ -98,7 +101,11 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public void setResolutionIndex(int index) {
 		resizeView(index - this.resolutionIndex);
 	}
-	
+
+	public int getResolutionIndex() {
+		return this.resolutionIndex;
+	}
+
 	public Size getTileSize() {
 		return tileSize;
 	}
@@ -199,6 +206,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
 		notifyLayers(new MapViewChangedEvent(false, false, true, false));
+		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 	
 	private void resizeView(int delta, LonLat newCenter) {
@@ -209,6 +217,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
 		notifyLayers(new MapViewChangedEvent(true, true, true, false));
+		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 
 	private void setEffectiveExtent(boolean position) {
@@ -235,9 +244,14 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public void addControl(Zoomer zoomer) {
+		zoomer.init(this);
 		viewport.addControl(zoomer);
 	}
 
+	public void addMapZoomHandler(MapZoomedEvent.Handler handler) {
+		mapEvents.addHandler(MapZoomedEvent.TYPE, handler);
+	}
+	
 	@Override
 	protected void onLoad() {
 		super.onLoad();
@@ -248,6 +262,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 			}
 		});
 	}
+
 
 
 }

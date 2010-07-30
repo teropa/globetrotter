@@ -179,7 +179,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 
 	@Override
 	public void onMouseOver(MouseOverEvent event) {
-		GWT.log("ovr");
 	}
 	
 	@Override

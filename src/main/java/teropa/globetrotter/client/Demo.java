@@ -70,7 +70,7 @@ public class Demo implements EntryPoint {
 		});
 		map.addLayer(markers);
 		
-		map.addControl(new Zoomer(map));
+		map.addControl(new Zoomer());
 		
 		addControls(map, radar);
 	}
