@@ -1,5 +1,7 @@
 package teropa.globetrotter.client;
 
+import com.google.gwt.user.client.ui.Widget;
+
 import teropa.globetrotter.client.common.Size;
 
 public class View extends AbsoluteFocusPanel {
@@ -23,8 +25,14 @@ public class View extends AbsoluteFocusPanel {
 		return size;
 	}
 
-	public void addLayer(Layer layer) {
-		add(layer.asWidget(), 0, 0);
+	public void addLayer(Layer layer, int zIndex) {
+		Widget layerWidget = layer.asWidget();
+		add(layerWidget, 0, 0);
+		layerWidget.getElement().getStyle().setProperty("zIndex", ""+zIndex);
+	}
+
+	public void removeLayer(Layer theLayer) {
+		remove(theLayer.asWidget());
 	}
 
 }

@@ -159,6 +159,7 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	}
 
 	public void addControl(Zoomer zoomer) {
+		zoomer.getElement().getStyle().setProperty("zIndex", "10000");
 		container.add(zoomer, 10, 10);
 	}
 

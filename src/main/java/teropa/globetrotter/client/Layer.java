@@ -13,6 +13,7 @@ public abstract class Layer {
 	protected final String id;
 	protected String name;
 	protected ViewContext context;
+	protected int zIndex;
 	protected boolean visible = true;
 
 	protected boolean initialized = false;
@@ -22,11 +23,16 @@ public abstract class Layer {
 		this.id = ID_PREFIX + idCounter++;
 	}
 	
-	public void init(ViewContext ctx) {
+	public void init(ViewContext ctx, int zIndex) {
 		this.context = ctx;
+		this.zIndex = zIndex;
 		this.initialized = true;
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
 	public boolean isVisible() {
 		return visible;
 	}
@@ -43,4 +49,5 @@ public abstract class Layer {
 	public abstract Widget asWidget();
 	
 	public abstract void onMapViewChanged(MapViewChangedEvent evt);
+
 }

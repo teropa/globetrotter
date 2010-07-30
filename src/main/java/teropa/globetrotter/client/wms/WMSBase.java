@@ -25,8 +25,8 @@ public abstract class WMSBase extends Layer {
 	}
 	
 	@Override
-	public void init(ViewContext ctx) {
-		super.init(ctx);
+	public void init(ViewContext ctx, int zIndex) {
+		super.init(ctx, zIndex);
 		this.urlBase = constructUrlBase();
 	}
 

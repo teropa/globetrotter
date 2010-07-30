@@ -15,8 +15,6 @@ public interface ViewContext {
 
 	Size getTileSize();
 
-//	Bounds getMaxExtent();
-
 	Bounds getEffectiveExtent();
 	
 	Bounds getVisibleExtent();

@@ -10,22 +10,28 @@ import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler, MouseDownHandler {
+public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler, MouseDownHandler, MouseOverHandler, EventListener {
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
 	private final List<Marker> markers = new ArrayList<Marker>();
@@ -48,6 +54,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		container.addClickHandler(this);
 		container.addDoubleClickHandler(this);
 		container.addMouseDownHandler(this);
+		container.addMouseOverHandler(this);
 	}
 	
 	public void addMarker(Marker marker) {
@@ -58,8 +65,9 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 	
 	public void addMarkers(Collection<? extends Marker> newMarkers) {
-		for (Marker each : markers) {
+		for (Marker each : newMarkers) {
 			markers.add(each);
+			each.setLayer(this);
 		}
 		shouldReplace = true;
 		DeferredCommand.addCommand(replaceCommand);
@@ -104,8 +112,19 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 				onMarkerPopupRemove(each);
 			}
 			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
-			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc);
+			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc, zIndex + 1);
 		}
+//		final MarkerLayer self = this;
+//		DeferredCommand.addCommand(new Command() {
+//			public void execute() {
+//				int size = markers.size();
+//				for (int i=0 ; i<size ; i++) {
+//					Element markerElement = Document.get().getElementById(getMarkerIdPrefix() + i);
+//					Event.sinkEvents(markerElement, Event.ONMOUSEOVER | Event.ONMOUSEOUT);
+//					Event.setEventListener(markerElement, self);
+//				}
+//			}
+//		});
 		DOM.setInnerHTML(container.getElement(), markup.toString());
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
@@ -119,7 +138,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		Point point = Calc.getPoint(marker.getLoc(), context.getEffectiveExtent(), context.getViewSize());
 		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
 		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
-		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());		
+		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());
 	}
 
 	public void onMarkerPopupRemove(Marker marker) {
@@ -136,7 +155,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 	
 	public void onClick(ClickEvent event) {
-		Integer idx = getMarkerIdx(event);
+		Integer idx = getMarkerIdx(event.getNativeEvent());
 		if (idx != null) {
 			event.stopPropagation();
 			handlers.fireEvent(new MarkerClickEvent(markers.get(idx), this));
@@ -144,7 +163,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 
 	public void onDoubleClick(DoubleClickEvent event) {
-		Integer idx = getMarkerIdx(event);
+		Integer idx = getMarkerIdx(event.getNativeEvent());
 		if (idx != null) {
 			event.stopPropagation();
 			handlers.fireEvent(new MarkerDoubleClickEvent(markers.get(idx), this));
@@ -152,21 +171,49 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 	
 	public void onMouseDown(MouseDownEvent event) {
-		Integer idx = getMarkerIdx(event);
+		Integer idx = getMarkerIdx(event.getNativeEvent());
 		if (idx != null) {
 			event.stopPropagation();
 		}
 	}
+
+	@Override
+	public void onMouseOver(MouseOverEvent event) {
+		GWT.log("ovr");
+	}
 	
-	private Integer getMarkerIdx(DomEvent<?> event) {
-		Element target = Element.as(event.getNativeEvent().getEventTarget());
+	@Override
+	public void onBrowserEvent(Event event) {
+		if (event.getTypeInt() == Event.ONMOUSEOVER) {
+			Integer idx = getMarkerIdx(event);
+			if (idx != null) {
+				onMarkerMouseOver(markers.get(idx));
+			}
+		} else if (event.getTypeInt() == Event.ONMOUSEOUT) {
+			Integer idx = getMarkerIdx(event);
+			if (idx != null) {
+				onMarkerMouseOut(markers.get(idx));
+			}
+		}
+	}
+	
+	public void onMarkerMouseOver(Marker marker) {
+		marker.setZIndex(zIndex + 2);
+	}
+	
+	public void onMarkerMouseOut(Marker marker) {
+		marker.setZIndex(zIndex + 1);
+	}
+	
+	private Integer getMarkerIdx(NativeEvent event) {
+		Element target = Element.as(event.getEventTarget());
 		String itemId = null;
 		while (isBlank(itemId) && target != container.getElement()) {
 			itemId = target.getId();
 			if (isBlank(itemId)) {
 				target = target.getParentElement();
 			}
-		} 
+		}
 		if (isBlank(itemId)) {
 			return null;
 		} else {

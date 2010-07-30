@@ -88,7 +88,7 @@ public class Marker {
 		this.popup = null;
 	}
 	
-	public void appendMarkup(StringBuilder builder, String domId, Point location) {
+	public void appendMarkup(StringBuilder builder, String domId, Point location, int zIndex) {
 		this.domId = domId;
 		this.element = null;
 		Point loc = pinPosition.translateAroundPoint(location, size);
@@ -98,33 +98,49 @@ public class Marker {
 		builder.append(loc.getX());
 		builder.append("px; top: ");
 		builder.append(loc.getY());
-		builder.append("px;\">");
+		builder.append("px; z-index: ");
+		builder.append(zIndex);
+		builder.append("\">");
 		builder.append(imageProto.getHTML());
 		builder.append("</div>");
 	}
 
 	public void repositionTo(Point point) {
 		maybeGetElement();
-		Point pos = pinPosition.translateAroundPoint(point, size);
-		Style style = this.element.getStyle();
-		style.setPropertyPx("left", pos.getX());
-		style.setPropertyPx("top", pos.getY());
-		if (hasPopup()) {
-			Point popupPos = popupPosition.translateAroundSize(pos, size);
-			Style popupStyle = getPopup().getElement().getStyle();
-			popupStyle.setPropertyPx("left", popupPos.getX());
-			popupStyle.setPropertyPx("top", popupPos.getY());
+		if (this.element != null) {
+			Point pos = pinPosition.translateAroundPoint(point, size);
+			Style style = this.element.getStyle();
+			style.setPropertyPx("left", pos.getX());
+			style.setPropertyPx("top", pos.getY());
+			if (hasPopup()) {
+				Point popupPos = popupPosition.translateAroundSize(pos, size);
+				Style popupStyle = getPopup().getElement().getStyle();
+				popupStyle.setPropertyPx("left", popupPos.getX());
+				popupStyle.setPropertyPx("top", popupPos.getY());
+			}
 		}
 	}
 
 	public void remove() {
 		maybeGetElement();
-		this.element.getParentElement().removeChild(this.element);
+		if (this.element != null) {
+			this.element.getParentElement().removeChild(this.element);
+		}
 	}
 
 	private void maybeGetElement() {
 		if (this.element == null) {
 			this.element = Document.get().getElementById(this.domId);
+		}
+	}
+
+	public void setZIndex(int zIndex) {
+		maybeGetElement();
+		if (this.element != null) {
+			this.element.getStyle().setProperty("zIndex", "" + zIndex);
+		}
+		if (this.popup != null) {
+			this.popup.getElement().getStyle().setProperty("zIndex", "" + zIndex);
 		}
 	}
 	

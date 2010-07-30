@@ -59,9 +59,27 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void addLayer(Layer layer) {
-		layer.init(this);
+		int zIndex = layers.size() * 100;
+		layer.init(this, zIndex);
 		layers.add(layer);
-		view.addLayer(layer);
+		view.addLayer(layer, zIndex);
+	}
+	
+	public Layer getLayerByName(String name) {
+		for (Layer each : layers) {
+			if (name.equals(each.getName())) {
+				return each;
+			}
+		}
+		return null;
+	}
+	
+	public void removeLayer(String name) {
+		Layer theLayer = getLayerByName(name);
+		if (theLayer != null) {
+			layers.remove(theLayer);
+			view.removeLayer(theLayer);
+		}
 	}
 	
 	public void setCenter(LonLat center) {
@@ -109,7 +127,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public double getResolution() {
 		return resolutions[resolutionIndex];
 	}
-	
 
 	public Size getViewportSize() {
 		return viewport.getSize();
