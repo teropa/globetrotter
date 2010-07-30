@@ -28,8 +28,8 @@ import com.google.gwt.user.client.ui.Image;
 public class Zoomer extends Composite implements ClickHandler, MouseDownHandler, MouseUpHandler, MouseMoveHandler, MouseOverHandler, MouseOutHandler, NativePreviewHandler, MapZoomedEvent.Handler {
 	
 	private static final int WIDTH = 30;
-	private static final int BUTTON_HEIGHT = 37;
-	private static final int NOTCH_HEIGHT = 24;
+	private static final int BUTTON_HEIGHT = 38;
+	private static final int NOTCH_HEIGHT = 21;
 
 	private final ZoomerImages images = GWT.create(ZoomerImages.class);
 	
