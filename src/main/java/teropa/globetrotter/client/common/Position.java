@@ -1,7 +1,5 @@
-package teropa.globetrotter.client.marker;
+package teropa.globetrotter.client.common;
 
-import teropa.globetrotter.client.common.Point;
-import teropa.globetrotter.client.common.Size;
 
 public enum Position {
 	TOP_LEFT,

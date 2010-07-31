@@ -3,6 +3,7 @@ package teropa.globetrotter.client.marker;
 import teropa.globetrotter.client.Images;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.common.Size;
 
 import com.google.gwt.core.client.GWT;

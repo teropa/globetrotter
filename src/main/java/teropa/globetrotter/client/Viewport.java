@@ -1,8 +1,9 @@
 package teropa.globetrotter.client;
 
 import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.common.Size;
-import teropa.globetrotter.client.controls.Zoomer;
+import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
@@ -20,7 +21,9 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -32,7 +35,6 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final Map map;
 	private final View view;
-	private Size size = null;
 	
 	private boolean dragging = false;
 	private boolean hasMoved = false;
@@ -158,9 +160,70 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 				-(newCenterPoint.getY() - getSize().getHeight() / 2));
 	}
 
-	public void addControl(Zoomer zoomer) {
-		zoomer.getElement().getStyle().setProperty("zIndex", "10000");
-		container.add(zoomer, 10, 10);
+	public void addControl(final Control control, final Position at) {
+		control.asWidget().getElement().getStyle().setProperty("zIndex", "10000");
+		container.add(control.asWidget(), -100, -1000);
+		DeferredCommand.addCommand(new Command() {
+			public void execute() {
+				positionControl(control, at);
+			}
+		});
+	}
+	
+	private void positionControl(Control control, Position at) {
+		switch (at) {
+		case TOP_LEFT:
+			setControlPosition(control, "top", "10px");
+			setControlPosition(control, "left", "10px");
+			break;			
+		case MIDDLE_LEFT:
+			setControlPosition(control, "top", getMiddleY(control) + "px");
+			setControlPosition(control, "left", "10px");
+			break;
+		case BOTTOM_LEFT:
+			setControlPosition(control, "bottom", "10px");
+			setControlPosition(control, "left", "10px");
+			break;
+		case TOP_CENTER:
+			setControlPosition(control, "top", "10px");
+			setControlPosition(control, "left", getCenterX(control) + "px");
+		case MIDDLE_CENTER:
+			setControlPosition(control, "top", getMiddleY(control) + "px");
+			setControlPosition(control, "left", getCenterX(control) + "px");
+			break;
+		case BOTTOM_CENTER:
+			setControlPosition(control, "bottom", "10px");			
+			setControlPosition(control, "left", getCenterX(control) + "px");
+			break;
+		case TOP_RIGHT:
+			setControlPosition(control, "top", "10px");
+			setControlPosition(control, "right", "10px");
+			break;			
+		case MIDDLE_RIGHT:
+			setControlPosition(control, "top", getMiddleY(control) + "px");
+			setControlPosition(control, "right", "10px");
+			break;
+		case BOTTOM_RIGHT:
+			setControlPosition(control, "bottom", "10px");
+			setControlPosition(control, "right", "10px");
+			break;
+		}
+	}
+
+	private int getCenterX(Control control) {
+		int portWidth = getOffsetWidth();
+		int controlWidth = control.asWidget().getOffsetWidth();
+		return portWidth / 2 - controlWidth / 2;
+	}
+
+	private int getMiddleY(Control control) {
+		int portHeight = getOffsetHeight();
+		int controlHeight = control.asWidget().getOffsetHeight();
+		return portHeight / 2 - controlHeight / 2;
+	}
+	
+	private void setControlPosition(Control control, String posDeclaration, String value) {
+		control.asWidget().getElement().getStyle().setProperty(posDeclaration, value);
 	}
 
 }

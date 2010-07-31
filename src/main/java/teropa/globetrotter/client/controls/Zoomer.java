@@ -3,20 +3,15 @@ package teropa.globetrotter.client.controls;
 import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.event.MapZoomedEvent;
+import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -24,10 +19,12 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Widget;
 
-public class Zoomer extends Composite implements ClickHandler, MouseDownHandler, MouseUpHandler, MouseMoveHandler, MouseOverHandler, MouseOutHandler, NativePreviewHandler, MapZoomedEvent.Handler {
+public class Zoomer extends Composite implements Control, MouseHandler, NativePreviewHandler, MapZoomedEvent.Handler {
 	
-	private static final int WIDTH = 30;
+	private static final int WIDTH = 45;
+	private static final int LEFT_MARGIN = 15;
 	private static final int BUTTON_HEIGHT = 38;
 	private static final int NOTCH_HEIGHT = 21;
 
@@ -39,7 +36,9 @@ public class Zoomer extends Composite implements ClickHandler, MouseDownHandler,
 	private final Image zoomOut = images.zoomerOut().createImage();
 	
 	private Map map;
-
+	private int numLevels;
+	private int trackHeight;
+	
 	private boolean dragging = false;
 	private int yOffset;
 	private HandlerRegistration preventDefaultMouseEventsRegistration = null;
@@ -47,11 +46,29 @@ public class Zoomer extends Composite implements ClickHandler, MouseDownHandler,
 	public Zoomer() {
 		initWidget(container);
 		setStyleName("Zoomer");
-		setWidth(WIDTH+"px");
+		setWidth(WIDTH + "px");
 	}
 	
 	public void init(final Map map) {
 		this.map = map;
+		this.numLevels = map.getResolutions().length;
+		this.trackHeight = numLevels * NOTCH_HEIGHT;
+		
+		registerHandlers();
+		initZoomIn();
+		initTrack();
+		initKnob();
+		initZoomOut();
+		
+		setHeight((2 * BUTTON_HEIGHT + trackHeight) + "px");
+	}
+
+	private void initZoomIn() {
+		zoomIn.setHeight(BUTTON_HEIGHT + "px");
+		container.add(zoomIn, LEFT_MARGIN, 0);
+	}
+
+	private void registerHandlers() {
 		container.addMouseDownHandler(this);
 		container.addMouseUpHandler(this);
 		container.addMouseMoveHandler(this);
@@ -60,32 +77,25 @@ public class Zoomer extends Composite implements ClickHandler, MouseDownHandler,
 		knob.addMouseDownHandler(this);
 		zoomIn.addClickHandler(this);
 		zoomOut.addClickHandler(this);
-		map.addMapZoomHandler(this);
-		
-		zoomIn.setWidth("100%");
-		zoomIn.setHeight(BUTTON_HEIGHT+"px");
-		container.add(zoomIn, 0, 0);
-		
-		double[] res = map.getResolutions();
-		int trackHeight = res.length * NOTCH_HEIGHT;
-		for (int i=0 ; i < res.length ; i++) {
+		map.addMapZoomedHandler(this);
+	}
+
+	private void initTrack() {
+		for (int i=0 ; i < numLevels ; i++) {
 			int y = BUTTON_HEIGHT + i * NOTCH_HEIGHT;
-			container.add(images.zoomerTrack().createImage(), 0, y);
+			container.add(images.zoomerTrack().createImage(), LEFT_MARGIN, y);
 		}
-		knob.setWidth("100%");
+	}
+
+	private void initKnob() {
 		knob.setHeight(NOTCH_HEIGHT + "px");
 		container.add(knob);
 		positionKnob();
-		zoomOut.setWidth("100%");
-		zoomOut.setHeight(BUTTON_HEIGHT+"px");
-		container.add(zoomOut, 0, BUTTON_HEIGHT + trackHeight);
-		
-		setHeight((2 * BUTTON_HEIGHT + trackHeight)+"px");
 	}
 
-	private void positionKnob() {
-		int yInTrack = (map.getResolutions().length - map.getResolutionIndex() - 1) * NOTCH_HEIGHT;
-		container.setWidgetPosition(knob, 0, BUTTON_HEIGHT + yInTrack);
+	private void initZoomOut() {
+		zoomOut.setHeight(BUTTON_HEIGHT+"px");
+		container.add(zoomOut, LEFT_MARGIN, BUTTON_HEIGHT + trackHeight);
 	}
 	
 	public void onClick(ClickEvent event) {
@@ -98,70 +108,24 @@ public class Zoomer extends Composite implements ClickHandler, MouseDownHandler,
 	
 	public void onMouseDown(MouseDownEvent event) {
 		if (event.getSource() == knob) {
-			yOffset = event.getY();
-			dragging = true;
-			DOM.setCapture(container.getElement());
-			event.stopPropagation();
+			startDrag(event);
 		} else if (event.getSource() == container) {
-			int minY = container.getAbsoluteTop() + BUTTON_HEIGHT;
-			int maxY = container.getAbsoluteTop() + BUTTON_HEIGHT + (map.getResolutions().length + 1)* NOTCH_HEIGHT;
-			int evtY = event.getNativeEvent().getClientY();
-			if (evtY >= minY && evtY <= maxY) {
-				int relY = evtY - minY;
-				int idx = map.getResolutions().length - 1 - relY / NOTCH_HEIGHT;
-				if (idx < map.getResolutions().length && idx >= 0) {
-					map.setResolutionIndex(idx);
-				}
-			}
+			zoomToSpecificLevel(event);
+		}
+	}
+	
+	public void onMouseMove(MouseMoveEvent event) {
+		if (dragging) {
+			moveKnob(event);
 		}
 	}
 
 	public void onMouseUp(MouseUpEvent event) {
 		if (dragging) {
-			int movedToY = event.getY() - yOffset;
-			int minY = BUTTON_HEIGHT;
-			int maxY = container.getOffsetHeight() - BUTTON_HEIGHT - NOTCH_HEIGHT;
-			if (movedToY < minY) {
-				movedToY = minY;
-			} else if (movedToY > maxY) {
-				movedToY = maxY;
-			}
-			double pos = ((double)movedToY - BUTTON_HEIGHT) / NOTCH_HEIGHT;
-			
-			int idx = (int)Math.round(map.getResolutions().length - 1 - pos);
-			if (idx < map.getResolutions().length && idx >= 0) {
-				map.setResolutionIndex(idx);
-			}
-			
-			DOM.releaseCapture(container.getElement());
-			dragging = false;
+			endDrag(event);
 		}
 	}
-	
-	@Override
-	public void onMouseMove(MouseMoveEvent event) {
-		if (dragging) {
-			int movedToY = event.getY() - yOffset;
-			int minY = BUTTON_HEIGHT;
-			int maxY = container.getOffsetHeight() - BUTTON_HEIGHT - NOTCH_HEIGHT;
-			if (movedToY >= minY && movedToY <= maxY) {
-				container.setWidgetPosition(knob, 0, movedToY);
-			} else if (movedToY < minY) {
-				container.setWidgetPosition(knob, 0, minY);
-			} else if (movedToY > maxY) {
-				container.setWidgetPosition(knob, 0, maxY);
-			}
-		}
-	}
-	
-	public void onPreviewNativeEvent(NativePreviewEvent event) {
-		switch (event.getTypeInt()) {
-		case Event.ONMOUSEDOWN:
-		case Event.ONMOUSEMOVE:
-			event.getNativeEvent().preventDefault();
-		}			
-	}
-	
+
 	public void onMouseOver(MouseOverEvent event) {
 		preventDefaultMouseEventsRegistration = Event.addNativePreviewHandler(this);
 	}
@@ -173,8 +137,74 @@ public class Zoomer extends Composite implements ClickHandler, MouseDownHandler,
 		}
 	}
 
+	public void onPreviewNativeEvent(NativePreviewEvent event) {
+		switch (event.getTypeInt()) {
+		case Event.ONMOUSEDOWN:
+		case Event.ONMOUSEMOVE:
+			event.getNativeEvent().preventDefault();
+		}			
+	}
+	
 	public void onMapZoomed(MapZoomedEvent event) {
 		positionKnob();
 	}
+
+	private void positionKnob() {
+		int yInTrack = (numLevels - map.getResolutionIndex() - 1) * NOTCH_HEIGHT;
+		container.setWidgetPosition(knob, LEFT_MARGIN, BUTTON_HEIGHT + yInTrack);
+	}
+
+	private void startDrag(MouseDownEvent event) {
+		yOffset = event.getY();
+		dragging = true;
+		DOM.setCapture(container.getElement());
+		event.stopPropagation();
+	}
+
+	private void moveKnob(MouseMoveEvent event) {
+		int movedToY = event.getY() - yOffset;
+		int minY = BUTTON_HEIGHT;
+		int maxY = container.getOffsetHeight() - BUTTON_HEIGHT - NOTCH_HEIGHT;
+		if (movedToY < minY) movedToY = minY;
+		if (movedToY > maxY) movedToY = maxY;
+		container.setWidgetPosition(knob, LEFT_MARGIN, movedToY);
+	}
+
+	private void endDrag(MouseUpEvent event) {
+		int movedToY = event.getY() - yOffset;
+		int minY = BUTTON_HEIGHT;
+		int maxY = container.getOffsetHeight() - BUTTON_HEIGHT - NOTCH_HEIGHT;
+		if (movedToY < minY) movedToY = minY;
+		if (movedToY > maxY) movedToY = maxY;
+		
+		int zoomLevel = getZoomLevelByY(movedToY);		
+		if (zoomLevel >= 0 && zoomLevel < numLevels) {
+			map.setResolutionIndex(zoomLevel);
+		}
+		
+		DOM.releaseCapture(container.getElement());
+		dragging = false;
+	}
+
+	private void zoomToSpecificLevel(MouseDownEvent event) {
+		int minY = container.getAbsoluteTop() + BUTTON_HEIGHT;
+		int maxY = container.getAbsoluteTop() + BUTTON_HEIGHT + (numLevels + 1) * NOTCH_HEIGHT;
+		int evtY = event.getNativeEvent().getClientY();
+		if (evtY >= minY && evtY <= maxY) {
+			int relativeY = evtY - container.getAbsoluteTop();
+			int zoomLevel = getZoomLevelByY(relativeY);
+			if (zoomLevel < numLevels && zoomLevel >= 0) {
+				map.setResolutionIndex(zoomLevel);
+			}
+		}
+	}
 	
+	private int getZoomLevelByY(int y) {
+		double yInTrack = (double)(y - BUTTON_HEIGHT);
+		return (int)Math.round(numLevels - 1 - yInTrack / NOTCH_HEIGHT);
+	}
+			
+	public Widget asWidget() {
+		return this;
+	}
 }

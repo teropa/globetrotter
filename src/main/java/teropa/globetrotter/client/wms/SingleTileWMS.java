@@ -42,6 +42,8 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	
 	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
+		if (!visible) return;
+		
 		if (evt.effectiveExtentChanged) {
 			repositionImages();
 		}

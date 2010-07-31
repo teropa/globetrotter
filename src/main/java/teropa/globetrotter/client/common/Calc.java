@@ -1,8 +1,11 @@
 package teropa.globetrotter.client.common;
 
-import com.google.gwt.core.client.GWT;
-
-
+import static java.lang.Math.atan2;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
+import static java.lang.Math.sqrt;
 
 public class Calc {
 
@@ -11,11 +14,11 @@ public class Calc {
 	}
 	
 	public static int getPixelWidth(Bounds bounds, double resolution) {
-		return (int)Math.round(bounds.getWidth() / resolution);		
+		return (int)round(bounds.getWidth() / resolution);		
 	}
 	
 	public static int getPixelHeight(Bounds bounds, double resolution) {
-		return (int)Math.round(bounds.getHeight() / resolution);
+		return (int)round(bounds.getHeight() / resolution);
 	}
 	
 	public static double getCoordinateWidth(Size size, double resolution) {
@@ -77,8 +80,8 @@ public class Calc {
 		double ratioFromLeft = fromLeft / extent.getWidth();
 		double ratioFromTop = fromTop / extent.getHeight();
 		
-		int x = (int)Math.round(ratioFromLeft * area.getWidth());
-		int y = (int)Math.round(ratioFromTop * area.getHeight());
+		int x = (int)round(ratioFromLeft * area.getWidth());
+		int y = (int)round(ratioFromTop * area.getHeight());
 		
 		return new Point(x, y);
 	}
@@ -102,16 +105,57 @@ public class Calc {
 		if (vSize.getWidth() <= 10000 && vSize.getHeight() <= 10000) {
 			return maxExtent;
 		}
-		Size effectiveSize = new Size(Math.min(vSize.getWidth(), 10000), Math.min(vSize.getHeight(), 10000));
+		Size effectiveSize = new Size(min(vSize.getWidth(), 10000), min(vSize.getHeight(), 10000));
 		double halfWidth = getCoordinateWidth(effectiveSize, resolution) / 2.0;
 		double halfHeight = getCoordinateHeight(effectiveSize, resolution) / 2.0;
 
-		double lowerX = Math.max(center.getLon() - halfWidth, maxExtent.getLowerLeftX());
-		double lowerY = Math.max(center.getLat() - halfHeight, maxExtent.getLowerLeftY());
-		double upperX = Math.min(center.getLon() + halfWidth, maxExtent.getUpperRightX());
-		double upperY = Math.min(center.getLat() + halfHeight, maxExtent.getUpperRightY());
+		double lowerX = max(center.getLon() - halfWidth, maxExtent.getLowerLeftX());
+		double lowerY = max(center.getLat() - halfHeight, maxExtent.getLowerLeftY());
+		double upperX = min(center.getLon() + halfWidth, maxExtent.getUpperRightX());
+		double upperY = min(center.getLat() + halfHeight, maxExtent.getUpperRightY());
 		return new Bounds(lowerX, lowerY, upperX, upperY);
 
 	}
 
+	public static int distance(Point lhs, Point rhs) {
+		int distX = rhs.getX() - lhs.getX();
+		int distY = rhs.getY() - lhs.getY();
+		return (int)round(sqrt(pow(distX, 2) + pow(distY, 2)));
+	}
+	
+	public static double angle(Point p) {
+		return atan2(p.getY(), p.getX());
+	}
+
+	public static Point addToPoint(Point centerPoint, int amountPx, Direction dir) {
+		switch (dir) {
+		case UP: 	return new Point(centerPoint.getX(), centerPoint.getY() - amountPx);
+		case RIGHT: return new Point(centerPoint.getX() + amountPx, centerPoint.getY());
+		case DOWN: 	return new Point(centerPoint.getX(), centerPoint.getY() + amountPx);
+		case LEFT: 	return new Point(centerPoint.getX() - amountPx, centerPoint.getY());
+		default: 	return centerPoint;
+		}
+	}
+
+	public static Bounds keepInBounds(Bounds newExtent, Bounds maxExtent) {
+		double lowX = newExtent.getLowerLeftX() - maxExtent.getLowerLeftX();
+		double lowY = newExtent.getLowerLeftY() - maxExtent.getLowerLeftY();
+		double highX = newExtent.getUpperRightX() - maxExtent.getUpperRightX();
+		double highY = newExtent.getUpperRightY() - maxExtent.getUpperRightY();
+		
+		double xOffset = 0;
+		if (lowX < 0) xOffset = -lowX;
+		else if (highX > 0) xOffset = -highX;
+		
+		double yOffset = 0;
+		if (lowY < 0) yOffset = -lowY;
+		if (highY > 0) yOffset = -highY;
+		
+		return new Bounds(
+				newExtent.getLowerLeftX() + xOffset,
+				newExtent.getLowerLeftY() + yOffset,
+				newExtent.getUpperRightX() + xOffset,
+				newExtent.getUpperRightY() + yOffset);
+	}
+	
 }

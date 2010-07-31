@@ -46,7 +46,7 @@ public class TiledWMS extends WMSBase {
 			lastDrawnAtPoint = null;
 		}
 		if ((evt.zoomed || evt.panned) && visible) {
-			if (shouldDraw()) {
+			if (evt.panEnded || shouldDraw()) {
 				addNewTiles();
 			}			
 		}
@@ -58,7 +58,6 @@ public class TiledWMS extends WMSBase {
 	private boolean shouldDraw() {
 		Point newCenter = context.getViewCenterPoint();
 		if (lastDrawnAtPoint == null || distanceExceedsBuffer(newCenter, lastDrawnAtPoint)) {
-			lastDrawnAtPoint = newCenter;
 			return true;
 		}
 		return false;
@@ -88,6 +87,7 @@ public class TiledWMS extends WMSBase {
 	}
 
 	private void addNewTiles() {
+		lastDrawnAtPoint = context.getViewCenterPoint();
 		Grid grid = context.getGrid();
 		Bounds extent = widenToBuffer(context.getVisibleExtent());
 		List<Grid.Tile> tiles = grid.getTiles(extent);

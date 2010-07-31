@@ -41,11 +41,16 @@ public class Bounds {
 		return Math.abs(upperRightY - lowerLeftY);
 	}
 
-
 	public double getArea() {
 		return getWidth() * getHeight();
 	}
-	
+
+	public LonLat getCenter() {
+		double x = getLowerLeftX() + getWidth() / 2;
+		double y = getLowerLeftY() + getHeight() / 2;
+		return new LonLat(x, y);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		Bounds o = (Bounds)obj;

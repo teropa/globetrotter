@@ -1,5 +1,7 @@
 package teropa.globetrotter.client.marker;
 
+import teropa.globetrotter.client.common.Position;
+
 import com.google.gwt.user.client.ui.Widget;
 
 public class Popup {
