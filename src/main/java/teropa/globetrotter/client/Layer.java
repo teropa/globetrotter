@@ -5,7 +5,7 @@ import teropa.globetrotter.client.event.MapViewChangedEvent;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.ui.Widget;
 
-public abstract class Layer {
+public abstract class Layer implements MapViewChangedEvent.Handler {
 
 	private static final String ID_PREFIX = "globetrotter_layer_" + Random.nextInt(10000) + "_";
 	private static int idCounter = 0;
@@ -26,6 +26,7 @@ public abstract class Layer {
 	public void init(ViewContext ctx, int zIndex) {
 		this.context = ctx;
 		this.zIndex = zIndex;
+		ctx.addMapViewChangedHandler(this);
 		this.initialized = true;
 	}
 
@@ -48,6 +49,5 @@ public abstract class Layer {
 	
 	public abstract Widget asWidget();
 	
-	public abstract void onMapViewChanged(MapViewChangedEvent evt);
 
 }

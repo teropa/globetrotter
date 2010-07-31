@@ -8,6 +8,7 @@ import java.util.List;
 
 import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.controls.Panner;
+import teropa.globetrotter.client.controls.ScaleIndicator;
 import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.marker.Marker;
 import teropa.globetrotter.client.marker.MarkerClickEvent;
@@ -74,7 +75,7 @@ public class Demo implements EntryPoint {
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
-		
+		map.addControl(new ScaleIndicator(), Position.BOTTOM_LEFT);
 		addControls(map, radar);
 	}
 

@@ -8,6 +8,7 @@ import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -223,7 +224,17 @@ public class Viewport extends Composite implements MouseOverHandler, MouseOutHan
 	}
 	
 	private void setControlPosition(Control control, String posDeclaration, String value) {
-		control.asWidget().getElement().getStyle().setProperty(posDeclaration, value);
+		Style style = control.asWidget().getElement().getStyle();
+		if ("top".equals(posDeclaration)) {
+			style.clearProperty("bottom");
+		} else if ("bottom".equals(posDeclaration)) {
+			style.clearProperty("top");
+		} else if ("left".equals(posDeclaration)) {
+			style.clearProperty("right");
+		} else if ("right".equals(posDeclaration)) {
+			style.clearProperty("left");
+		}
+		style.setProperty(posDeclaration, value);
 	}
 
 }

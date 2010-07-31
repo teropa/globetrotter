@@ -1,11 +1,13 @@
 package teropa.globetrotter.client.common;
 
 import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
+import static java.lang.Math.toRadians;
 
 public class Calc {
 
@@ -41,12 +43,12 @@ public class Calc {
 	}
 	
 	public static Bounds narrow(Bounds bounds, Bounds to) {
-		final double fromWidth = bounds.getWidth();
-		final double fromHeight = bounds.getHeight();
-		final double toWidth = to.getWidth();
-		final double toHeight = to.getHeight();
-		final boolean narrowWidth = fromWidth > toWidth;
-		final boolean narrowHeight = fromHeight > toHeight;
+		double fromWidth = bounds.getWidth();
+		double fromHeight = bounds.getHeight();
+		double toWidth = to.getWidth();
+		double toHeight = to.getHeight();
+		boolean narrowWidth = fromWidth > toWidth;
+		boolean narrowHeight = fromHeight > toHeight;
 		
 		if (narrowWidth || narrowHeight) {
 			double widthDiff = narrowWidth ? (fromWidth - toWidth) / 2 : 0;
@@ -117,13 +119,13 @@ public class Calc {
 
 	}
 
-	public static int distance(Point lhs, Point rhs) {
+	public static int getDistance(Point lhs, Point rhs) {
 		int distX = rhs.getX() - lhs.getX();
 		int distY = rhs.getY() - lhs.getY();
 		return (int)round(sqrt(pow(distX, 2) + pow(distY, 2)));
 	}
 	
-	public static double angle(Point p) {
+	public static double getAngle(Point p) {
 		return atan2(p.getY(), p.getX());
 	}
 
@@ -137,11 +139,11 @@ public class Calc {
 		}
 	}
 
-	public static Bounds keepInBounds(Bounds newExtent, Bounds maxExtent) {
-		double lowX = newExtent.getLowerLeftX() - maxExtent.getLowerLeftX();
-		double lowY = newExtent.getLowerLeftY() - maxExtent.getLowerLeftY();
-		double highX = newExtent.getUpperRightX() - maxExtent.getUpperRightX();
-		double highY = newExtent.getUpperRightY() - maxExtent.getUpperRightY();
+	public static Bounds keepInBounds(Bounds extent, Bounds maxExtent) {
+		double lowX = extent.getLowerLeftX() - maxExtent.getLowerLeftX();
+		double lowY = extent.getLowerLeftY() - maxExtent.getLowerLeftY();
+		double highX = extent.getUpperRightX() - maxExtent.getUpperRightX();
+		double highY = extent.getUpperRightY() - maxExtent.getUpperRightY();
 		
 		double xOffset = 0;
 		if (lowX < 0) xOffset = -lowX;
@@ -152,10 +154,14 @@ public class Calc {
 		if (highY > 0) yOffset = -highY;
 		
 		return new Bounds(
-				newExtent.getLowerLeftX() + xOffset,
-				newExtent.getLowerLeftY() + yOffset,
-				newExtent.getUpperRightX() + xOffset,
-				newExtent.getUpperRightY() + yOffset);
+				extent.getLowerLeftX() + xOffset,
+				extent.getLowerLeftY() + yOffset,
+				extent.getUpperRightX() + xOffset,
+				extent.getUpperRightY() + yOffset);
+	}
+	
+	public static double getLonDegreeLengthMeters(LonLat at) {
+		return cos(toRadians(at.getLat())) * 111325;
 	}
 	
 }

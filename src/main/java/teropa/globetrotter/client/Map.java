@@ -171,24 +171,19 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		resizeView(-1);
 	}
 
-	private void notifyLayers(MapViewChangedEvent evt) {
-		for (Layer eachLayer : layers) {
-			eachLayer.onMapViewChanged(evt);
-		}
-	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
 		if (effectiveExtent.getArea() < maxExtent.getArea()) {
 			setEffectiveExtent(true);
-			notifyLayers(new MapViewChangedEvent(false, true, false, true));
+			mapEvents.fireEvent(new MapViewChangedEvent(false, true, false, true));
 		} else {
-			notifyLayers(new MapViewChangedEvent(false, true, false, false));
+			mapEvents.fireEvent(new MapViewChangedEvent(false, true, false, false));
 		}
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, effectiveExtent, view.getSize()));
-		notifyLayers(new MapViewChangedEvent(true, false, false, false));
+		mapEvents.fireEvent(new MapViewChangedEvent(true, false, false, false));
 	}
 
 	public void move(Direction dir, int amountPx) {
@@ -201,10 +196,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		if (effectiveExtent.getArea() < maxExtent.getArea()) {
 			setEffectiveExtent(true);
 			viewport.positionView(newCenterPoint);
-			notifyLayers(new MapViewChangedEvent(true, true, false, true));
+			mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, true));
 		} else {
 			viewport.positionView(newCenterPoint);
-			notifyLayers(new MapViewChangedEvent(true, true, false, false));
+			mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, false));
 		}
 	}
 
@@ -227,7 +222,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		}
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
-		notifyLayers(new MapViewChangedEvent(false, false, true, false));
+		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 	
@@ -238,7 +233,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setCenter(newCenter);
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
-		notifyLayers(new MapViewChangedEvent(true, true, true, false));
+		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 
@@ -269,6 +264,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		control.init(this);
 		viewport.addControl(control, at);
 	}
+	
+	public HandlerRegistration addMapViewChangedHandler(MapViewChangedEvent.Handler handler) {
+		return mapEvents.addHandler(MapViewChangedEvent.TYPE, handler);
+	}
 
 	public HandlerRegistration addMapZoomedHandler(MapZoomedEvent.Handler handler) {
 		return mapEvents.addHandler(MapZoomedEvent.TYPE, handler);
@@ -284,12 +283,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				drawn = true;
-				notifyLayers(new MapViewChangedEvent(true, true, true, false));
+				mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 			}
 		});
 	}
-
-
 
 
 }

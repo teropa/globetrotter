@@ -3,6 +3,7 @@ ToDo
 
 - Cancel tiles still loading which aren't needed anymore?
 - Restricted extent
+- Check scale indicator on very small resolutions and near the poles
 
 
 
