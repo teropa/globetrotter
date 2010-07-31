@@ -179,7 +179,7 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		
 		int zoomLevel = getZoomLevelByY(movedToY);		
 		if (zoomLevel >= 0 && zoomLevel < numLevels) {
-			map.setResolutionIndex(zoomLevel);
+			map.zoomTo(zoomLevel);
 		}
 		
 		DOM.releaseCapture(container.getElement());
@@ -194,7 +194,7 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 			int relativeY = evtY - container.getAbsoluteTop();
 			int zoomLevel = getZoomLevelByY(relativeY);
 			if (zoomLevel < numLevels && zoomLevel >= 0) {
-				map.setResolutionIndex(zoomLevel);
+				map.zoomTo(zoomLevel);
 			}
 		}
 	}

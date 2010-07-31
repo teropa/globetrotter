@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import teropa.globetrotter.client.common.Position;
+import teropa.globetrotter.client.controls.LocationSwitch;
 import teropa.globetrotter.client.controls.Panner;
 import teropa.globetrotter.client.controls.ScaleIndicator;
 import teropa.globetrotter.client.controls.Zoomer;
@@ -76,6 +77,7 @@ public class Demo implements EntryPoint {
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
 		map.addControl(new ScaleIndicator(), Position.BOTTOM_LEFT);
+		map.addControl(new LocationSwitch(), Position.TOP_RIGHT);
 		addControls(map, radar);
 	}
 

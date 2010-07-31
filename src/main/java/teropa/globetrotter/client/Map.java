@@ -103,8 +103,12 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		return resolutions;
 	}
 	
-	public void setResolutionIndex(int index) {
-		resizeView(index - this.resolutionIndex);
+	public void zoomTo(int resolutionIndex) {
+		resizeView(resolutionIndex - this.resolutionIndex);
+	}
+	
+	public void zoomTo(int resolutionIndex, LonLat point) {
+		resizeView(resolutionIndex - this.resolutionIndex, point);
 	}
 
 	public int getResolutionIndex() {
@@ -171,7 +175,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		resizeView(-1);
 	}
 
-
 	public void onViewPanEnded(ViewPanEndedEvent event) {
 		if (effectiveExtent.getArea() < maxExtent.getArea()) {
 			setEffectiveExtent(true);
@@ -207,6 +210,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		LonLat pointedAt = getLonLat(event.point, effectiveExtent, view.getSize());
 		resizeView(event.levels, pointedAt);
 	}
+	
 
 	private boolean newResolutionInBounds(int delta) {
 		if (delta > 0) {
