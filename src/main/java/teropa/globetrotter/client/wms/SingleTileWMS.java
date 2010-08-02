@@ -29,8 +29,8 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 	private int imageBufferIdx = 0;
 	private int requestedIdx = 0;
 	
-	public SingleTileWMS(String name, String url) {
-		super(name, url);
+	public SingleTileWMS(String name, String url, boolean base) {
+		super(name, url, base);
 		initImageBuffer();
 	}
 	
@@ -40,7 +40,6 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		}
 	}
 	
-	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
 		if (!visible) return;
 		
@@ -56,7 +55,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				final String url = constructUrl(context.getVisibleExtent(), context.getViewportSize());
-				addImage(context.getViewportSize(), Calc.getLonLat(context.getViewportLocation(), context.getEffectiveExtent(), context.getViewSize()), url);			
+				addImage(context.getViewportSize(), Calc.getLonLat(context.getViewportLocation(), context.getEffectiveExtent(), context.getViewSize(), getProjection()), url);			
 			}
 		});
 	}
@@ -77,7 +76,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		for (int i=0 ; i<IMAGE_BUFFER_SIZE ; i++) {
 			BufferedImage img = imageBuffer[i];
 			if (img.attached) {
-				Point pos = Calc.getPoint(img.desiredPosition, context.getEffectiveExtent(), context.getViewSize());
+				Point pos = Calc.getPoint(img.desiredPosition, context.getEffectiveExtent(), context.getViewSize(), context.getProjection());
 				container.setWidgetPosition(img, pos.getX(), pos.getY());
 			}
 		}
@@ -92,7 +91,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 					imageBuffer[i].attached = false;
 				}
 			}
-			Point pos = Calc.getPoint(requested.desiredPosition, context.getEffectiveExtent(), context.getViewSize());
+			Point pos = Calc.getPoint(requested.desiredPosition, context.getEffectiveExtent(), context.getViewSize(), context.getProjection());
 			container.setWidgetPosition(requested, pos.getX(), pos.getY());
 			requested.attached = true;
 		}

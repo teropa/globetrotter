@@ -1,4 +1,4 @@
-package teropa.globetrotter.client.wms;
+package teropa.globetrotter.client.osm;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,12 +6,13 @@ import java.util.Map;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
+import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
-import teropa.globetrotter.client.proj.Projection;
+import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -20,22 +21,44 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TiledWMS extends WMSBase {
+public class OpenStreetMapLayer extends Layer {
 
+	// based on the zoom levels at http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+	public static final double[] SUPPORTED_RESOLUTIONS = {
+		156543.03392804097,
+		78271.51696402048,
+		39135.75848201024,
+		19567.87924100512,
+		9783.93962050256,
+		4891.96981025128,
+		2445.98490512564,
+		1222.99245256282,
+		611.49622628141,
+		305.748113140705,
+		152.8740565703525,
+		76.43702828517625,
+		38.21851414258813,
+		19.109257071294063,
+		9.554628535647032,
+		4.777314267823516,
+		2.388657133911758,
+		1.194328566955879,
+		0.5971642834779395};
+	
 	private final AbsolutePanel container = new AbsolutePanel();
+	
 	private final HashMap<Grid.Tile,Image> imageTiles = new HashMap<Grid.Tile, Image>();
 	private int buffer = 2;
 	private double ignoreEventsBuffer = buffer / 4.0;
 	private Point lastDrawnAtPoint = null;
+
+	private final String baseUrl;
 	
-	public TiledWMS(String name, String url, boolean base) {
-		super(name, url, base);
+	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
+		super(name, base, new GoogleMercator());
+		this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 	}
-
-	public TiledWMS(String name, String url, boolean base, Projection projection) {
-		super(name, url, base, projection);
-	}
-
+	
 	protected void onVisibilityChanged() {
 		if (visible && initialized && context.isDrawn()) {
 			addNewTiles();
@@ -103,12 +126,11 @@ public class TiledWMS extends WMSBase {
 			Grid.Tile eachTile = tiles.get(i);
 			if (!imageTiles.containsKey(eachTile)) { 
 				Image image = ImagePool.get();
-				image.setUrl(constructUrl(eachTile.getExtent(), eachTile.getSize()));
+				image.setUrl(getUrl(context.getResolutionIndex(), eachTile.getCol(), grid.getNumRows() - eachTile.getRow() - 1));
 				imageTiles.put(eachTile, image);
 				container.add(image);
 				Point topLeft = eachTile.getTopLeft();
 				fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());
-				GWT.log("put to "+topLeft.getX()+","+topLeft.getY());
 			}
 		}
 	}
@@ -138,8 +160,13 @@ public class TiledWMS extends WMSBase {
 		style.setPropertyPx("top", top);
 	}
 
+	private String getUrl(int zoom, int x, int y) {
+		return baseUrl + zoom + "/" + x + "/" + y + ".png";
+	}
+	
 	@Override
 	public Widget asWidget() {
 		return container;
 	}
+
 }

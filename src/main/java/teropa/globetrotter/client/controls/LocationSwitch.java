@@ -22,13 +22,11 @@ public class LocationSwitch extends Composite implements Control, ClickHandler {
 		initWidget(theSwitch);
 	}
 	
-	@Override
 	public void init(Map map) {
 		this.map = map;
 		theSwitch.addClickHandler(this);
 	}
 	
-	@Override
 	public void onClick(ClickEvent event) {
 		getLocation(TIMEOUT);
 	}

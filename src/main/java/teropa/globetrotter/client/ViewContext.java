@@ -7,10 +7,11 @@ import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
+import teropa.globetrotter.client.proj.Projection;
 
 public interface ViewContext {
 
-	String getSRS();
+	Projection getProjection();
 
 	boolean isDrawn();
 
@@ -28,6 +29,8 @@ public interface ViewContext {
 
 	double getResolution();
 
+	int getResolutionIndex();
+	
 	Point getViewportLocation();
 
 	Size getViewSize();

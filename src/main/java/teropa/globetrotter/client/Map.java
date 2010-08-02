@@ -22,6 +22,7 @@ import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.ViewPanEndedEvent;
 import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -33,7 +34,8 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 
 	private final View view = new View();
 	private final Viewport viewport = new Viewport(this, view);
-	private final List<Layer> layers = new ArrayList<Layer>();
+	private final List<Layer> overlays = new ArrayList<Layer>();
+	private Layer baseLayer;
 	private final HandlerManager mapEvents = new HandlerManager(this);
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
@@ -66,15 +68,18 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void addLayer(Layer layer) {
-		int zIndex = layers.size() * 100;
+		int zIndex = overlays.size() * 100;
 		layer.init(this, zIndex);
-		layers.add(layer);
+		overlays.add(layer);
 		view.addLayer(layer, zIndex);
+		if (layer.isBase()) {
+			baseLayer = layer;
+		}
 		mapEvents.fireEvent(new MapLayerAddedEvent(this, layer));
 	}
 	
 	public Layer getLayerByName(String name) {
-		for (Layer each : layers) {
+		for (Layer each : overlays) {
 			if (name.equals(each.getName())) {
 				return each;
 			}
@@ -85,13 +90,21 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public void removeLayer(String name) {
 		Layer theLayer = getLayerByName(name);
 		if (theLayer != null) {
-			layers.remove(theLayer);
+			overlays.remove(theLayer);
 			view.removeLayer(theLayer);
 		}
 	}
 	
 	public void setCenter(LonLat center) {
 		this.center = center;
+	}
+	
+	public Projection getProjection() {
+		if (baseLayer != null) {
+			return baseLayer.getProjection();
+		} else {
+			return Projection.WGS_84;
+		}
 	}
 
 	public void setResolutions(double[] resolutions) {
@@ -137,7 +150,8 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public Bounds getVisibleExtent() {
-		return narrow(Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize()), effectiveExtent);
+		Bounds extent = Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize(), getProjection());
+		return narrow(extent, effectiveExtent, getProjection());
 	}
 
 	public double getResolution() {
@@ -157,7 +171,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public Point getViewCenterPoint() {
-		return Calc.getPoint(getCenter(), getEffectiveExtent(), getViewSize());
+		return Calc.getPoint(getCenter(), getEffectiveExtent(), getViewSize(), getProjection());
 	}
 	
 	public Grid getGrid() {
@@ -185,16 +199,16 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
-		setCenter(getLonLat(event.newCenterPoint, effectiveExtent, view.getSize()));
+		setCenter(getLonLat(event.newCenterPoint, effectiveExtent, view.getSize(), getProjection()));
 		mapEvents.fireEvent(new MapViewChangedEvent(true, false, false, false));
 	}
 
 	public void move(Direction dir, int amountPx) {
-		Point centerPoint = Calc.getPoint(getCenter(), getEffectiveExtent(), getViewSize());
+		Point centerPoint = Calc.getPoint(getCenter(), getEffectiveExtent(), getViewSize(), getProjection());
 		Point newCenterPoint = Calc.addToPoint(centerPoint, amountPx, dir);
-		LonLat newCenter = Calc.getLonLat(newCenterPoint, getEffectiveExtent(), getViewSize());
-		Bounds newExtent = Calc.getExtent(newCenter, resolutions[resolutionIndex], getViewportSize());
-		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent).getCenter();
+		LonLat newCenter = Calc.getLonLat(newCenterPoint, getEffectiveExtent(), getViewSize(), getProjection());
+		Bounds newExtent = Calc.getExtent(newCenter, resolutions[resolutionIndex], getViewportSize(), getProjection());
+		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent, getProjection()).getCenter();
 		setCenter(ensuredCenter);
 		if (effectiveExtent.getArea() < maxExtent.getArea()) {
 			setEffectiveExtent(true);
@@ -207,7 +221,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public void onViewZoomed(ViewZoomedEvent event) {
-		LonLat pointedAt = getLonLat(event.point, effectiveExtent, view.getSize());
+		LonLat pointedAt = getLonLat(event.point, effectiveExtent, view.getSize(), getProjection());
 		resizeView(event.levels, pointedAt);
 	}
 	
@@ -242,7 +256,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	private void setEffectiveExtent(boolean position) {
-		this.effectiveExtent = Calc.getEffectiveExtent(maxExtent, getResolution(), getCenter());
+		this.effectiveExtent = Calc.getEffectiveExtent(maxExtent, getResolution(), getCenter(), getProjection());
 		if (grids[resolutionIndex] != null) {
 			grids[resolutionIndex].setEffectiveExtent(effectiveExtent);
 		}
@@ -253,13 +267,9 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 
 	private void adjustViewAndViewportSize() {
 		view.setSize(getPixelSize(effectiveExtent, resolutions[resolutionIndex]));
-		viewport.positionView(getPoint(center, effectiveExtent, view.getSize()));
+		viewport.positionView(getPoint(center, effectiveExtent, view.getSize(), getProjection()));
 	}
 
-	public String getSRS() {
-		return "EPSG:4326";
-	}
-	
 	public boolean isDrawn() {
 		return drawn;
 	}

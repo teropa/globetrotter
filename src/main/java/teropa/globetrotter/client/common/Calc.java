@@ -8,6 +8,8 @@ import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
+import teropa.globetrotter.client.proj.GoogleMercator;
+import teropa.globetrotter.client.proj.Projection;
 
 public class Calc {
 
@@ -23,64 +25,62 @@ public class Calc {
 		return (int)round(bounds.getHeight() / resolution);
 	}
 	
-	public static double getCoordinateWidth(Size size, double resolution) {
+	public static double getUnitWidth(Size size, double resolution) {
 		return size.getWidth() * resolution;
 	}
 	
-	public static double getCoordinateHeight(Size size, double resolution) {
+	public static double getUnitHeight(Size size, double resolution) {
 		return size.getHeight() * resolution;
 	}
 	
-	public static Bounds getExtent(LonLat center, double resolution, Size viewportSize) {
-		final double halfWidth = getCoordinateWidth(viewportSize, resolution) / 2.0;
-		final double halfHeight = getCoordinateHeight(viewportSize, resolution) / 2.0;
+	public static Bounds getExtent(LonLat center, double resolution, Size viewportSize, Projection proj) {
+		final double halfWidth = getUnitWidth(viewportSize, resolution) / 2.0;
+		final double halfHeight = getUnitHeight(viewportSize, resolution) / 2.0;
 		
 		return new Bounds(
-				center.getLon() - halfWidth,
-				center.getLat() - halfHeight,
-				center.getLon() + halfWidth,
-				center.getLat() + halfHeight);
+				center.getLon() - halfWidth * proj.leftToRight(),
+				center.getLat() + halfHeight * proj.topToBottom(),
+				center.getLon() + halfWidth * proj.leftToRight(),
+				center.getLat() - halfHeight * proj.topToBottom());
 	}
 	
-	public static Bounds narrow(Bounds bounds, Bounds to) {
-		double fromWidth = bounds.getWidth();
-		double fromHeight = bounds.getHeight();
-		double toWidth = to.getWidth();
-		double toHeight = to.getHeight();
-		boolean narrowWidth = fromWidth > toWidth;
-		boolean narrowHeight = fromHeight > toHeight;
-		
-		if (narrowWidth || narrowHeight) {
-			double widthDiff = narrowWidth ? (fromWidth - toWidth) / 2 : 0;
-			double heightDiff = narrowHeight ? (fromHeight - toHeight) / 2 : 0;
-			return new Bounds(
-					bounds.getLowerLeftX() + widthDiff,
-					bounds.getLowerLeftY() + heightDiff,
-					bounds.getUpperRightX() - widthDiff,
-					bounds.getUpperRightY() - heightDiff);
+	public static Bounds narrow(Bounds bounds, Bounds to, Projection proj) {
+		double lowX, lowY, highX, highY;
+		if (proj.leftToRight() < 0) {
+			lowX = Math.min(bounds.getLowerLeftX(), to.getLowerLeftX());
+			highX = Math.max(bounds.getUpperRightX(), to.getUpperRightX());
 		} else {
-			return bounds;
+			lowX = Math.max(bounds.getLowerLeftX(), to.getLowerLeftX());
+			highX = Math.min(bounds.getUpperRightX(), to.getUpperRightX());
 		}
+		if (proj.topToBottom() < 0) {
+			lowY = Math.max(bounds.getLowerLeftY(), to.getLowerLeftY());
+			highY = Math.min(bounds.getUpperRightY(), to.getUpperRightY());
+		} else {
+			lowY = Math.min(bounds.getLowerLeftY(), to.getLowerLeftY());
+			highY = Math.max(bounds.getUpperRightY(), to.getUpperRightY());
+		}
+		return new Bounds(lowX, lowY, highX, highY);
 	}
 	
-	public static LonLat getLonLat(Point point, Bounds extent, Size area) {
+	public static LonLat getLonLat(Point point, Bounds extent, Size area, Projection proj) {
 		double ratioFromLeft = ((double)point.getX()) / ((double)area.getWidth());
 		double fromBottom = area.getHeight() - point.getY();
 		double ratioFromBottom = fromBottom / ((double)area.getHeight());
 		
-		double lon = extent.getLowerLeftX() + ratioFromLeft * extent.getWidth();
-		double lat = extent.getLowerLeftY() + ratioFromBottom * extent.getHeight();
+		double lon = extent.getLowerLeftX() + ratioFromLeft * extent.getWidth() * proj.leftToRight();
+		double lat = extent.getLowerLeftY() - ratioFromBottom * extent.getHeight() * proj.topToBottom();
 		
 		return new LonLat(lon, lat);
 	}
 	
-	public static Point getPoint(LonLat lonLat, Bounds extent, Size area) {
+	public static Point getPoint(LonLat lonLat, Bounds extent, Size area, Projection proj) {
 		double fromLeft = lonLat.getLon() - extent.getLowerLeftX();
 		double fromBottom = lonLat.getLat() - extent.getLowerLeftY();
 		double fromTop = extent.getHeight() - fromBottom;
 		
-		double ratioFromLeft = fromLeft / extent.getWidth();
-		double ratioFromTop = fromTop / extent.getHeight();
+		double ratioFromLeft = fromLeft / extent.getWidth() * proj.leftToRight();
+		double ratioFromTop = fromTop / extent.getHeight() * proj.topToBottom() * -1;
 		
 		int x = (int)round(ratioFromLeft * area.getWidth());
 		int y = (int)round(ratioFromTop * area.getHeight());
@@ -94,27 +94,45 @@ public class Calc {
 				topLeft.getY() + areaSize.getHeight() / 2);
 	}
 
-	public static boolean intersect(Bounds lhs, Bounds rhs) {
-		return
-			lhs.getLowerLeftX() < rhs.getUpperRightX() &&
-			lhs.getUpperRightX() > rhs.getLowerLeftX() &&
-			lhs.getLowerLeftY() < rhs.getUpperRightY() &&
-			lhs.getUpperRightY() > rhs.getLowerLeftY();
+	public static boolean intersect(Bounds lhs, Bounds rhs, Projection proj) {
+		boolean xIntersect, yIntersect;
+		if (proj.leftToRight() > 0) {
+			xIntersect = lhs.getLowerLeftX() < rhs.getUpperRightX() && lhs.getUpperRightX() > rhs.getLowerLeftX();
+		} else {
+			xIntersect = lhs.getLowerLeftX() > rhs.getUpperRightX() && lhs.getUpperRightX() < rhs.getLowerLeftX();
+		}
+		if (proj.topToBottom() > 0) {
+			yIntersect = lhs.getLowerLeftY() > rhs.getUpperRightY() && lhs.getUpperRightY() < rhs.getLowerLeftY();
+		} else {
+			yIntersect = lhs.getLowerLeftY() < rhs.getUpperRightY() && lhs.getUpperRightY() > rhs.getLowerLeftY();
+		}
+		return xIntersect && yIntersect;
 	}
 	
-	public static Bounds getEffectiveExtent(Bounds maxExtent, double resolution, LonLat center) {
+	public static Bounds getEffectiveExtent(Bounds maxExtent, double resolution, LonLat center, Projection proj) {
 		Size vSize = getPixelSize(maxExtent, resolution);
 		if (vSize.getWidth() <= 10000 && vSize.getHeight() <= 10000) {
 			return maxExtent;
 		}
 		Size effectiveSize = new Size(min(vSize.getWidth(), 10000), min(vSize.getHeight(), 10000));
-		double halfWidth = getCoordinateWidth(effectiveSize, resolution) / 2.0;
-		double halfHeight = getCoordinateHeight(effectiveSize, resolution) / 2.0;
+		double halfWidth = getUnitWidth(effectiveSize, resolution) / 2.0;
+		double halfHeight = getUnitHeight(effectiveSize, resolution) / 2.0;
 
-		double lowerX = max(center.getLon() - halfWidth, maxExtent.getLowerLeftX());
-		double lowerY = max(center.getLat() - halfHeight, maxExtent.getLowerLeftY());
-		double upperX = min(center.getLon() + halfWidth, maxExtent.getUpperRightX());
-		double upperY = min(center.getLat() + halfHeight, maxExtent.getUpperRightY());
+		double lowerX, lowerY, upperX, upperY;
+		if (proj.leftToRight() > 0) {
+			lowerX = max(center.getLon() - halfWidth, maxExtent.getLowerLeftX());
+			upperX = min(center.getLon() + halfWidth, maxExtent.getUpperRightX());
+		} else {
+			lowerX = min(center.getLon() + halfWidth, maxExtent.getLowerLeftX());
+			upperX = max(center.getLon() - halfWidth, maxExtent.getUpperRightX());
+		}
+		if (proj.topToBottom() > 0) {
+			lowerY = min(center.getLat() + halfHeight, maxExtent.getLowerLeftY());
+			upperY = max(center.getLat() - halfHeight, maxExtent.getUpperRightY());			
+		} else {
+			lowerY = max(center.getLat() - halfHeight, maxExtent.getLowerLeftY());
+			upperY = min(center.getLat() + halfHeight, maxExtent.getUpperRightY());
+		}
 		return new Bounds(lowerX, lowerY, upperX, upperY);
 
 	}
@@ -139,19 +157,29 @@ public class Calc {
 		}
 	}
 
-	public static Bounds keepInBounds(Bounds extent, Bounds maxExtent) {
+	public static Bounds keepInBounds(Bounds extent, Bounds maxExtent, Projection p) {
 		double lowX = extent.getLowerLeftX() - maxExtent.getLowerLeftX();
 		double lowY = extent.getLowerLeftY() - maxExtent.getLowerLeftY();
 		double highX = extent.getUpperRightX() - maxExtent.getUpperRightX();
 		double highY = extent.getUpperRightY() - maxExtent.getUpperRightY();
 		
 		double xOffset = 0;
-		if (lowX < 0) xOffset = -lowX;
-		else if (highX > 0) xOffset = -highX;
+		if (p.leftToRight() > 0) {
+			if (lowX < 0) xOffset = -lowX;
+			else if (highX > 0) xOffset = -highX;
+		} else {
+			if (lowX > 0) xOffset = -lowX;
+			else if (highX < 0) xOffset = -highX;			
+		}
 		
 		double yOffset = 0;
-		if (lowY < 0) yOffset = -lowY;
-		if (highY > 0) yOffset = -highY;
+		if (p.topToBottom() > 0) {
+			if (lowY > 0) yOffset = -lowY;
+			if (highY < 0) yOffset = -highY;
+		} else {
+			if (lowY < 0) yOffset = -lowY;
+			if (highY > 0) yOffset = -highY;			
+		}
 		
 		return new Bounds(
 				extent.getLowerLeftX() + xOffset,

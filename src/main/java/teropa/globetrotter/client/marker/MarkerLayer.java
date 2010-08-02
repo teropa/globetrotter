@@ -50,7 +50,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	};
 	
 	public MarkerLayer(String name) {
-		super(name);
+		super(name, false);
 		container.addClickHandler(this);
 		container.addDoubleClickHandler(this);
 		container.addMouseDownHandler(this);
@@ -89,7 +89,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		return handlers.addHandler(MarkerDoubleClickEvent.TYPE, handler);
 	}
 	
-	@Override
 	public void onMapViewChanged(MapViewChangedEvent evt) {
 		if (evt.effectiveExtentChanged && positioned) {
 			repositionMarkers();
@@ -111,7 +110,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			if (each.hasPopup()) {
 				onMarkerPopupRemove(each);
 			}
-			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
+			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize(), context.getProjection());
 			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc, zIndex + 1);
 		}
 //		final MarkerLayer self = this;
@@ -135,7 +134,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 
 	public void onMarkerPopupAdded(Marker marker) {
-		Point point = Calc.getPoint(marker.getLoc(), context.getEffectiveExtent(), context.getViewSize());
+		Point point = Calc.getPoint(marker.getLoc(), context.getEffectiveExtent(), context.getViewSize(), context.getProjection());
 		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
 		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
 		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());
@@ -149,7 +148,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize());
+			Point loc = Calc.getPoint(each.getLoc(), context.getEffectiveExtent(), context.getViewSize(), context.getProjection());
 			each.repositionTo(loc);
 		}
 	}
@@ -177,11 +176,9 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		}
 	}
 
-	@Override
 	public void onMouseOver(MouseOverEvent event) {
 	}
 	
-	@Override
 	public void onBrowserEvent(Event event) {
 		if (event.getTypeInt() == Event.ONMOUSEOVER) {
 			Integer idx = getMarkerIdx(event);

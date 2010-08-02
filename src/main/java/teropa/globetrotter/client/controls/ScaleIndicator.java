@@ -38,8 +38,6 @@ public class ScaleIndicator extends Composite implements Control, MapViewChanged
 		container.add(imperialIndicator);
 	}
 
-	
-	@Override
 	public void onMapViewChanged(MapViewChangedEvent event) {
 		if (event.panEnded || event.zoomed) {
 			double viewWidthDeg = map.getVisibleExtent().getWidth();

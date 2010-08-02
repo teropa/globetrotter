@@ -4,6 +4,7 @@ import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.ViewContext;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.http.client.URL;
 
@@ -19,8 +20,13 @@ public abstract class WMSBase extends Layer {
 	
 	protected String time;
 
-	protected WMSBase(String name, String url) {
-		super(name);
+	protected WMSBase(String name, String url, boolean base) {
+		super(name, base);
+		this.url = url;
+	}
+	
+	protected WMSBase(String name, String url, boolean base, Projection projection) {
+		super(name, base, projection);
 		this.url = url;
 	}
 	
@@ -69,7 +75,7 @@ public abstract class WMSBase extends Layer {
 		res.append("&REQUEST=GetMap&LAYERS=");
 		res.append(layers);
 		res.append("&STYLES=&SRS=");
-		res.append(URL.encodeComponent(context.getSRS()));
+		res.append(URL.encodeComponent(context.getProjection().getSRS()));
 		res.append("&FORMAT=");
 		res.append(URL.encodeComponent(format));
 		res.append("&TRANSPARENT=");

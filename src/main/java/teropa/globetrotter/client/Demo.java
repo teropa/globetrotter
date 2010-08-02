@@ -14,6 +14,8 @@ import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.marker.Marker;
 import teropa.globetrotter.client.marker.MarkerClickEvent;
 import teropa.globetrotter.client.marker.MarkerLayer;
+import teropa.globetrotter.client.osm.OpenStreetMapLayer;
+import teropa.globetrotter.client.proj.GoogleMercator;
 import teropa.globetrotter.client.wms.SingleTileWMS;
 import teropa.globetrotter.client.wms.TiledWMS;
 import teropa.globetrotter.client.wms.WMSBase;
@@ -34,10 +36,19 @@ public class Demo implements EntryPoint {
 	public void onModuleLoad() {
 		final Map map = new Map("100%", "100%");
 		
-		WMSBase base = new TiledWMS("Metacarta", "http://labs.metacarta.com/wms/vmap0");
-		base.setLayers("basic");
-		base.setIsVisible(true);
+//		map.setResolutions(new double[] {78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564});
+//		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
+//
+//		GoogleMercator baseProj = new GoogleMercator();
+//		WMSBase base = new TiledWMS("Metacarta", "http://labs.metacarta.com/wms/vmap0", true, baseProj);
+//		base.setLayers("basic");
+//		base.setIsVisible(true);
+//		map.addLayer(base);
+		
+		OpenStreetMapLayer base = new OpenStreetMapLayer("http://tile.openstreetmap.org/", "Mapnik", true);
 		map.addLayer(base);
+		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS);
+		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
 		
 		RootPanel.get("container").add(map);
 //		
@@ -47,7 +58,7 @@ public class Demo implements EntryPoint {
 //		canada.setIsVisible(false);
 //		map.addLayer(canada);
 
-		WMSBase radar = new SingleTileWMS("Radar", "http://geoservices.knmi.nl/cgi-bin/RADNL_OPER_R___25PCPRR_L3.cgi?");
+		WMSBase radar = new SingleTileWMS("Radar", "http://geoservices.knmi.nl/cgi-bin/RADNL_OPER_R___25PCPRR_L3.cgi?", false);
 		radar.setLayers("RADNL_OPER_R___25PCPRR_L3_COLOR");
 		radar.setTransparent(true);
 		radar.setTime(getRadarTimes().get(0));

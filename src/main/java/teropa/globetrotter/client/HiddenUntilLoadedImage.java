@@ -24,7 +24,6 @@ public class HiddenUntilLoadedImage extends Image implements LoadHandler {
 		super.setUrl(url);
 	}
 
-	@Override
 	public void onLoad(LoadEvent event) {
 		setVisible(true);
 	}
