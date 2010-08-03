@@ -3,8 +3,6 @@ package teropa.globetrotter.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
-
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
@@ -22,7 +20,6 @@ public class Grid {
 	
 	private final double[] tileXs;
 	private final double[] tileYs;
-	private final Tile[][] tileCache;
 	
 	public Grid(ViewContext ctx, Size tileSize, Bounds maxExtent, Bounds effectiveExtent, double resolution) {
 		this.viewContext = ctx;
@@ -34,7 +31,6 @@ public class Grid {
 		
 		tileXs = initTileXs(maxExtent);
 		tileYs = initTileYs(maxExtent);
-		tileCache = new Tile[tileXs.length][tileYs.length];
 	}
 
 	public int getNumCols() {
@@ -51,7 +47,6 @@ public class Grid {
 
 	private double[] initTileXs(Bounds maxExtent) {
 		double[] res = new double[(int)Math.round(maxExtent.getWidth() / tileCoordWidth)];
-		GWT.log("initialized xs: "+res.length);
 		for (int i=0 ; i<res.length ; i++) {
 			res[i] = maxExtent.getLowerLeftX() + i * tileCoordWidth * viewContext.getProjection().leftToRight();
 		}
@@ -60,7 +55,6 @@ public class Grid {
 
 	private double[] initTileYs(Bounds maxExtent) {
 		double[] res =  new double[(int)Math.round(maxExtent.getHeight() / tileCoordHeight)];
-		GWT.log("initialized y	s: "+res.length);
 		for (int i=0 ; i<res.length ; i++) {
 			res[i] = maxExtent.getLowerLeftY() - i * tileCoordHeight * viewContext.getProjection().topToBottom();
 		}
@@ -100,29 +94,23 @@ public class Grid {
 		while (xIdx < tileXs.length && xLeftFrom(tileXs[xIdx], extent.getUpperRightX())) {
 			int innerYIdx = yIdx;
 			while (innerYIdx < tileYs.length && yBelow(tileYs[innerYIdx], extent.getUpperRightY())) {
-				Tile cached = tileCache[xIdx][innerYIdx];
-				if (cached != null) {
-					result.add(cached);
+				double lowerLeftX = tileXs[xIdx];
+				double lowerLeftY = tileYs[innerYIdx];
+				double upperRightX = lowerLeftX + (tileCoordWidth * viewContext.getProjection().leftToRight());
+				if (viewContext.getProjection().leftToRight() < 0) {
+					upperRightX = Math.max(upperRightX, maxExtent.getUpperRightX());
 				} else {
-					double lowerLeftX = tileXs[xIdx];
-					double lowerLeftY = tileYs[innerYIdx];
-					double upperRightX = lowerLeftX + (tileCoordWidth * viewContext.getProjection().leftToRight());
-					if (viewContext.getProjection().leftToRight() < 0) {
-						upperRightX = Math.max(upperRightX, maxExtent.getUpperRightX());
-					} else {
-						upperRightX = Math.min(upperRightX, maxExtent.getUpperRightX());
-					}
-					double upperRightY = lowerLeftY - (tileCoordHeight * viewContext.getProjection().topToBottom());
-					if (viewContext.getProjection().topToBottom() < 0) {
-						upperRightY = Math.min(upperRightY, maxExtent.getUpperRightY());
-					} else {
-						upperRightY = Math.max(upperRightY, maxExtent.getUpperRightY());
-					}
-					Bounds tileBounds = new Bounds(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
-					Tile tile = new Tile(tileBounds, xIdx, innerYIdx);
-					result.add(tile);
-					tileCache[xIdx][innerYIdx] = tile;
+					upperRightX = Math.min(upperRightX, maxExtent.getUpperRightX());
 				}
+				double upperRightY = lowerLeftY - (tileCoordHeight * viewContext.getProjection().topToBottom());
+				if (viewContext.getProjection().topToBottom() < 0) {
+					upperRightY = Math.min(upperRightY, maxExtent.getUpperRightY());
+				} else {
+					upperRightY = Math.max(upperRightY, maxExtent.getUpperRightY());
+				}
+				Bounds tileBounds = new Bounds(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
+				Tile tile = new Tile(tileBounds, xIdx, innerYIdx);
+					result.add(tile);
 				innerYIdx++;
 			}
 			xIdx++;

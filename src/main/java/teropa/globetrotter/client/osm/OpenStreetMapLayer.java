@@ -1,8 +1,6 @@
 package teropa.globetrotter.client.osm;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
@@ -14,7 +12,6 @@ import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -47,10 +44,7 @@ public class OpenStreetMapLayer extends Layer {
 	
 	private final AbsolutePanel container = new AbsolutePanel();
 	
-	private final HashMap<Grid.Tile,Image> imageTiles = new HashMap<Grid.Tile, Image>();
 	private int buffer = 2;
-	private double ignoreEventsBuffer = buffer / 4.0;
-	private Point lastDrawnAtPoint = null;
 
 	private final String baseUrl;
 	
@@ -66,72 +60,30 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	public void onMapViewChanged(MapViewChangedEvent evt) {
-		if (evt.effectiveExtentChanged) {
-			repositionTiles();
-		}
-		if (evt.zoomed) {
-			removeTiles(true);
-			lastDrawnAtPoint = null;
-		}
-		if ((evt.zoomed || evt.panned) && visible) {
-			if (evt.panEnded || shouldDraw()) {
-				addNewTiles();
-			}			
-		}
-		if (evt.panEnded) {
-			removeTiles(false);
-		}
-	}
-	
-	private boolean shouldDraw() {
-		Point newCenter = context.getViewCenterPoint();
-		if (lastDrawnAtPoint == null || distanceExceedsBuffer(newCenter, lastDrawnAtPoint)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean distanceExceedsBuffer(Point lhs, Point rhs) {
-		int xDist = Math.abs(lhs.getX() - rhs.getX());
-		if (xDist > ignoreEventsBuffer * context.getTileSize().getWidth()) return true;
-		int yDist = Math.abs(lhs.getY() - rhs.getY());
-		if (yDist > ignoreEventsBuffer * context.getTileSize().getHeight()) return true;
-		return false;
+		removeTiles(true);
+		addNewTiles();
 	}
 
 	private void removeTiles(boolean removeAll) {
-		if (imageTiles.isEmpty()) return;
-		
-		Bounds bufferedExtent = widenToBuffer(context.getVisibleExtent());
-		java.util.Iterator<Map.Entry<Grid.Tile, Image>> it = imageTiles.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Grid.Tile, Image> entry = it.next();
-			if (removeAll || !Calc.intersect(bufferedExtent, entry.getKey().getExtent(), context.getProjection())) {
-				container.remove(entry.getValue());
-				ImagePool.release(entry.getValue());
-				it.remove();
-			}
+		while (container.getWidgetCount() > 0) {
+			Image img = (Image)container.getWidget(0);
+			container.remove(img);
+			ImagePool.release(img);
 		}
 	}
 
 	private void addNewTiles() {
-		lastDrawnAtPoint = context.getViewCenterPoint();
 		Grid grid = context.getGrid();
 		Bounds extent = widenToBuffer(context.getVisibleExtent());
 		List<Grid.Tile> tiles = grid.getTiles(extent);
 		int length = tiles.size();
-		GWT.log("view: "+context.getViewSize());
-		GWT.log("port at "+context.getViewportLocation());
 		for (int i=0 ; i<length ; i++) {
 			Grid.Tile eachTile = tiles.get(i);
-			if (!imageTiles.containsKey(eachTile)) { 
-				Image image = ImagePool.get();
-				image.setUrl(getUrl(context.getResolutionIndex(), eachTile.getCol(), grid.getNumRows() - eachTile.getRow() - 1));
-				imageTiles.put(eachTile, image);
-				container.add(image);
-				Point topLeft = eachTile.getTopLeft();
-				fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());
-			}
+			Image image = ImagePool.get();
+			image.setUrl(getUrl(context.getResolutionIndex(), eachTile.getCol(), grid.getNumRows() - eachTile.getRow() - 1));
+			container.add(image);
+			Point topLeft = eachTile.getTopLeft();
+			fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());
 		}
 	}
 
@@ -143,13 +95,6 @@ public class OpenStreetMapLayer extends Layer {
 			return Calc.narrow(widenedExtent, context.getEffectiveExtent(), context.getProjection());
 		} else {
 			return extent;
-		}
-	}
-
-	private void repositionTiles() {
-		for (Map.Entry<Grid.Tile, Image> each : imageTiles.entrySet()) {
-			Point topLeft = each.getKey().getTopLeft();
-			fastSetElementPosition(each.getValue().getElement(), topLeft.getX(), topLeft.getY());
 		}
 	}
 

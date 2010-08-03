@@ -47,8 +47,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	
 	private Size tileSize = new Size(256, 256);
 	
-	// A different grid for each resolution
-	private Grid[] grids;
+	private Grid grid;
 	
 	public Map(String width, String height) {
 		initWidget(viewport);
@@ -59,7 +58,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 				init();
 			}
 		});
-		grids = new Grid[resolutions.length];
 	}
 	
 	private void init() {
@@ -109,7 +107,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 
 	public void setResolutions(double[] resolutions) {
 		this.resolutions = resolutions;
-		this.grids = new Grid[resolutions.length];
 	}
 	
 	public double[] getResolutions() {
@@ -175,10 +172,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public Grid getGrid() {
-		if (grids[resolutionIndex] == null) {
-			grids[resolutionIndex] = new Grid(this, getTileSize(), getMaxExtent(), getEffectiveExtent(), getResolution());
+		if (grid == null) {
+			grid = new Grid(this, getTileSize(), getMaxExtent(), getEffectiveExtent(), getResolution());
 		}
-		return grids[resolutionIndex];
+		return grid;
 	}
 	
 	public void zoomIn() {
@@ -240,6 +237,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		}
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
+		grid = null;
 		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
@@ -251,14 +249,15 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setCenter(newCenter);
 		setEffectiveExtent(false);
 		adjustViewAndViewportSize();
+		grid = null;
 		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 
 	private void setEffectiveExtent(boolean position) {
 		this.effectiveExtent = Calc.getEffectiveExtent(maxExtent, getResolution(), getCenter(), getProjection());
-		if (grids[resolutionIndex] != null) {
-			grids[resolutionIndex].setEffectiveExtent(effectiveExtent);
+		if (grid != null) {
+			grid.setEffectiveExtent(effectiveExtent);
 		}
 		if (position) {
 			adjustViewAndViewportSize();

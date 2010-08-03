@@ -58,38 +58,38 @@ public class Demo implements EntryPoint {
 //		canada.setIsVisible(false);
 //		map.addLayer(canada);
 
-		WMSBase radar = new SingleTileWMS("Radar", "http://geoservices.knmi.nl/cgi-bin/RADNL_OPER_R___25PCPRR_L3.cgi?", false);
-		radar.setLayers("RADNL_OPER_R___25PCPRR_L3_COLOR");
-		radar.setTransparent(true);
-		radar.setTime(getRadarTimes().get(0));
-		radar.setIsVisible(false);
-		map.addLayer(radar);
-		
-		final MarkerLayer markers = new MarkerLayer("Capitals");
-		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
-		for (DemoCities.City city : DemoCities.CITIES) {
-			Marker marker = new Marker(city.getLonLat());
-			markers.addMarker(marker);
-			citiesByMarker.put(marker, city);
-		}
-		markers.addMarkerClickHandler(new MarkerClickEvent.Handler() {
-			public void onMarkerClick(MarkerClickEvent evt) {
-				if (evt.marker.hasPopup()) {
-					evt.marker.removePopup(); 
-				} else {
-					Label label = new Label(citiesByMarker.get(evt.marker).getName());
-					label.setStyleName("CityPopup");
-					evt.marker.setPopup(label);
-				}
-			}
-		});
-		map.addLayer(markers);
+//		WMSBase radar = new SingleTileWMS("Radar", "http://geoservices.knmi.nl/cgi-bin/RADNL_OPER_R___25PCPRR_L3.cgi?", false);
+//		radar.setLayers("RADNL_OPER_R___25PCPRR_L3_COLOR");
+//		radar.setTransparent(true);
+//		radar.setTime(getRadarTimes().get(0));
+//		radar.setIsVisible(false);
+//		map.addLayer(radar);
+//		
+//		final MarkerLayer markers = new MarkerLayer("Capitals");
+//		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
+//		for (DemoCities.City city : DemoCities.CITIES) {
+//			Marker marker = new Marker(city.getLonLat());
+//			markers.addMarker(marker);
+//			citiesByMarker.put(marker, city);
+//		}
+//		markers.addMarkerClickHandler(new MarkerClickEvent.Handler() {
+//			public void onMarkerClick(MarkerClickEvent evt) {
+//				if (evt.marker.hasPopup()) {
+//					evt.marker.removePopup(); 
+//				} else {
+//					Label label = new Label(citiesByMarker.get(evt.marker).getName());
+//					label.setStyleName("CityPopup");
+//					evt.marker.setPopup(label);
+//				}
+//			}
+//		});
+//		map.addLayer(markers);
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
 		map.addControl(new ScaleIndicator(), Position.BOTTOM_LEFT);
 		map.addControl(new LocationSwitch(), Position.TOP_RIGHT);
-		addControls(map, radar);
+//		addControls(map, radar);
 	}
 
 	private void addControls(final Map map, final WMSBase radar) {
