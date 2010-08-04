@@ -8,6 +8,7 @@ import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.proj.GoogleMercator;
@@ -43,9 +44,6 @@ public class OpenStreetMapLayer extends Layer {
 		0.5971642834779395};
 	
 	private final AbsolutePanel container = new AbsolutePanel();
-	
-	private int buffer = 2;
-
 	private final String baseUrl;
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
@@ -74,27 +72,15 @@ public class OpenStreetMapLayer extends Layer {
 
 	private void addNewTiles() {
 		Grid grid = context.getGrid();
-		Bounds extent = widenToBuffer(context.getVisibleExtent());
-		List<Grid.Tile> tiles = grid.getTiles(extent);
+		Rectangle visibleRect = context.getVisibleRectangle();
+		List<Grid.Tile> tiles = grid.getTiles(visibleRect);
 		int length = tiles.size();
 		for (int i=0 ; i<length ; i++) {
 			Grid.Tile eachTile = tiles.get(i);
 			Image image = ImagePool.get();
-			image.setUrl(getUrl(context.getResolutionIndex(), eachTile.getCol(), grid.getNumRows() - eachTile.getRow() - 1));
+			image.setUrl(getUrl(context.getResolutionIndex(), eachTile.getCol(), eachTile.getRow()));
 			container.add(image);
-			Point topLeft = eachTile.getTopLeft();
-			fastSetElementPosition(image.getElement(), topLeft.getX(), topLeft.getY());
-		}
-	}
-
-	private Bounds widenToBuffer(Bounds extent) {
-		if (buffer > 0) {
-			Size viewportSize = context.getViewportSize();
-			Size widenedSize = new Size(viewportSize.getWidth() + 2 * buffer * context.getTileSize().getWidth(), viewportSize.getHeight() + 2 * buffer * context.getTileSize().getHeight());
-			Bounds widenedExtent = Calc.getExtent(context.getCenter(), context.getResolution(), widenedSize, context.getProjection());
-			return Calc.narrow(widenedExtent, context.getEffectiveExtent(), context.getProjection());
-		} else {
-			return extent;
+			fastSetElementPosition(image.getElement(), eachTile.getRect().x, eachTile.getRect().y);
 		}
 	}
 

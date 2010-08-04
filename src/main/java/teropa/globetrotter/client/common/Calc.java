@@ -33,9 +33,9 @@ public class Calc {
 		return size.getHeight() * resolution;
 	}
 	
-	public static Bounds getExtent(LonLat center, double resolution, Size viewportSize, Projection proj) {
-		final double halfWidth = getUnitWidth(viewportSize, resolution) / 2.0;
-		final double halfHeight = getUnitHeight(viewportSize, resolution) / 2.0;
+	public static Bounds getExtent(LonLat center, double resolution, Size size, Projection proj) {
+		final double halfWidth = getUnitWidth(size, resolution) / 2.0;
+		final double halfHeight = getUnitHeight(size, resolution) / 2.0;
 		
 		return new Bounds(
 				center.getLon() - halfWidth * proj.leftToRight(),
@@ -108,7 +108,12 @@ public class Calc {
 		}
 		return xIntersect && yIntersect;
 	}
-	
+
+	public static boolean intersect(Rectangle lhs, Rectangle rhs) {
+		return lhs.x < rhs.x + rhs.width && lhs.x + lhs.width > rhs.x &&
+			lhs.y < rhs.y + rhs.height && lhs.y + lhs.height > rhs.y;
+	}
+
 	public static Bounds getEffectiveExtent(Bounds maxExtent, double resolution, LonLat center, Projection proj) {
 		Size vSize = getPixelSize(maxExtent, resolution);
 		if (vSize.getWidth() <= 10000 && vSize.getHeight() <= 10000) {
