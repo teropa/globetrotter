@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Composite;
 
 public class Map extends Composite implements ViewContext, ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
+	private final Projector projector = new Projector(this);
 	private final View view = new View();
 	private final Viewport viewport = new Viewport(this, view);
 	private final List<Layer> overlays = new ArrayList<Layer>();
@@ -62,6 +63,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	
 	private void init() {
 		adjustViewAndViewportSize();
+	}
+	
+	public Projector getProjector() {
+		return projector;
 	}
 	
 	public void addLayer(Layer layer) {
@@ -96,7 +101,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		this.center = center;
 	}
 	
-	public Projection getProjection() {
+	Projection getProjection() {
 		if (baseLayer != null) {
 			return baseLayer.getProjection();
 		} else {

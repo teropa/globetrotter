@@ -76,7 +76,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 		for (int i=0 ; i<IMAGE_BUFFER_SIZE ; i++) {
 			BufferedImage img = imageBuffer[i];
 			if (img.attached) {
-				Point pos = Calc.getPoint(img.desiredPosition, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+				Point pos = Calc.getPoint(img.desiredPosition, context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
 				container.setWidgetPosition(img, pos.getX(), pos.getY());
 			}
 		}
@@ -91,7 +91,7 @@ public class SingleTileWMS extends WMSBase implements LoadHandler {
 					imageBuffer[i].attached = false;
 				}
 			}
-			Point pos = Calc.getPoint(requested.desiredPosition, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point pos = Calc.getPoint(requested.desiredPosition, context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
 			container.setWidgetPosition(requested, pos.getX(), pos.getY());
 			requested.attached = true;
 		}

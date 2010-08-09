@@ -79,9 +79,9 @@ public class TiledWMS extends WMSBase {
 						+ eachTile.getRect().height / 2);
 				LonLat center = Calc.getLonLat(centerPoint,
 						context.getMaxExtent(), context.getViewSize(),
-						context.getProjection());
+						context.getProjector().getProjection());
 				Bounds extent = Calc.getExtent(center, context.getResolution(),
-						tileSize, context.getProjection());
+						tileSize, context.getProjector().getProjection());
 				image.setUrl(constructUrl(extent, tileSize));
 				imageTiles.put(eachTile, image);
 				container.add(image);

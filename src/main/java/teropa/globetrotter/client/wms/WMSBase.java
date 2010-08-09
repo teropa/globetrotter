@@ -75,7 +75,7 @@ public abstract class WMSBase extends Layer {
 		res.append("&REQUEST=GetMap&LAYERS=");
 		res.append(layers);
 		res.append("&STYLES=&SRS=");
-		res.append(URL.encodeComponent(context.getProjection().getSRS()));
+		res.append(URL.encodeComponent(context.getProjector().getProjection().getSRS()));
 		res.append("&FORMAT=");
 		res.append(URL.encodeComponent(format));
 		res.append("&TRANSPARENT=");

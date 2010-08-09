@@ -110,7 +110,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			if (each.hasPopup()) {
 				onMarkerPopupRemove(each);
 			}
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
 			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc, zIndex + 1);
 		}
 //		final MarkerLayer self = this;
@@ -134,7 +134,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 
 	public void onMarkerPopupAdded(Marker marker) {
-		Point point = Calc.getPoint(marker.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
+		Point point = Calc.getPoint(marker.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
 		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
 		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
 		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());
@@ -148,7 +148,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
 			each.repositionTo(loc);
 		}
 	}

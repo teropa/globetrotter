@@ -12,7 +12,7 @@ import teropa.globetrotter.client.proj.Projection;
 
 public interface ViewContext {
 
-	Projection getProjection();
+	Projector getProjector();
 
 	boolean isDrawn();
 

@@ -45,7 +45,7 @@ public class Demo implements EntryPoint {
 //		base.setIsVisible(true);
 //		map.addLayer(base);
 		
-		OpenStreetMapLayer base = new OpenStreetMapLayer("http://tile.openstreetmap.org/", "Mapnik", true);
+		OpenStreetMapLayer base = new OpenStreetMapLayer("http://localhost/", "Mapnik", true);
 		map.addLayer(base);
 		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS);
 		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
