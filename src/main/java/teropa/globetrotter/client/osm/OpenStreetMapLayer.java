@@ -2,6 +2,7 @@ package teropa.globetrotter.client.osm;
 
 import java.util.List;
 
+import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.ImagePool;
 import teropa.globetrotter.client.Layer;
@@ -57,6 +58,18 @@ public class OpenStreetMapLayer extends Layer {
 		}
 	}
 	
+	@Override
+	public void drawOn(CanvasView canvasView) {
+		Grid grid = context.getGrid();
+		Rectangle visibleRect = context.getVisibleRectangle();
+		List<Grid.Tile> tiles = grid.getTiles(visibleRect);
+		int length = tiles.size();
+		for (int i=0 ; i<length ; i++) {
+			Grid.Tile eachTile = tiles.get(i);
+			canvasView.addImage(eachTile.getRect().x, eachTile.getRect().y, getUrl(context.getResolutionIndex(), eachTile.getCol(), eachTile.getRow()));
+		}		
+	}
+	
 	public void onMapViewChanged(MapViewChangedEvent evt) {
 		removeTiles(true);
 		addNewTiles();
@@ -95,9 +108,5 @@ public class OpenStreetMapLayer extends Layer {
 		return baseUrl + zoom + "/" + x + "/" + y + ".png";
 	}
 	
-	@Override
-	public Widget asWidget() {
-		return container;
-	}
 
 }

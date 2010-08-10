@@ -34,9 +34,8 @@ import com.google.gwt.user.client.ui.Composite;
 public class Map extends Composite implements ViewContext, ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
 	private final Projector projector = new Projector(this);
-	private final View view = new View();
-	private final Viewport viewport = new Viewport(this, view);
-	private final List<Layer> overlays = new ArrayList<Layer>();
+	private final CanvasView view = new CanvasView(this);
+	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
 	private final HandlerManager mapEvents = new HandlerManager(this);
 	
@@ -51,7 +50,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	private Grid grid;
 	
 	public Map(String width, String height) {
-		initWidget(viewport);
+		initWidget(view);
 		setWidth(width);
 		setHeight(height);
 		DeferredCommand.addCommand(new Command() {
@@ -63,6 +62,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	
 	private void init() {
 		adjustViewAndViewportSize();
+		view.draw();
 	}
 	
 	public Projector getProjector() {
@@ -70,10 +70,9 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public void addLayer(Layer layer) {
-		int zIndex = overlays.size() * 100;
+		int zIndex = layers.size() * 100;
 		layer.init(this, zIndex);
-		overlays.add(layer);
-		view.addLayer(layer, zIndex);
+		layers.add(layer);
 		if (layer.isBase()) {
 			baseLayer = layer;
 		}
@@ -81,7 +80,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 	
 	public Layer getLayerByName(String name) {
-		for (Layer each : overlays) {
+		for (Layer each : layers) {
 			if (name.equals(each.getName())) {
 				return each;
 			}
@@ -92,8 +91,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public void removeLayer(String name) {
 		Layer theLayer = getLayerByName(name);
 		if (theLayer != null) {
-			overlays.remove(theLayer);
-			view.removeLayer(theLayer);
+			layers.remove(theLayer);
 		}
 	}
 	
@@ -156,11 +154,11 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public Size getViewportSize() {
-		return viewport.getSize();
+		return view.getVisibleSize();
 	}
 
 	public Point getViewportLocation() {
-		return viewport.getViewTopLeftPoint();
+		return view.getVisibleAreaTopLeftPoint();
 	}
 	
 	public LonLat getCenter() {
@@ -212,7 +210,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		Bounds newExtent = Calc.getExtent(newCenter, resolutions[resolutionIndex], getViewportSize(), getProjection());
 		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent, getProjection()).getCenter();
 		setCenter(ensuredCenter);
-		viewport.positionView(newCenterPoint);
+		adjustViewAndViewportSize();
 		mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, false));
 	}
 
@@ -252,8 +250,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	private void adjustViewAndViewportSize() {
-		view.setSize(getPixelSize(maxExtent, resolutions[resolutionIndex]));
-		viewport.positionView(getPoint(center, maxExtent, view.getSize(), getProjection()));
+		Size fullSize = getPixelSize(maxExtent, resolutions[resolutionIndex]);
+		view.setSize(fullSize);
+		Point centerPoint = getPoint(center, maxExtent, fullSize, getProjection());
+		view.position(centerPoint);
 	}
 
 	public boolean isDrawn() {
@@ -262,7 +262,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 
 	public void addControl(Control control, Position at) {
 		control.init(this);
-		viewport.addControl(control, at);
+//		viewport.addControl(control, at);
 	}
 	
 	public HandlerRegistration addMapViewChangedHandler(MapViewChangedEvent.Handler handler) {
@@ -286,6 +286,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 				mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 			}
 		});
+	}
+
+	public List<Layer> getLayers() {
+		return layers;
 	}
 
 

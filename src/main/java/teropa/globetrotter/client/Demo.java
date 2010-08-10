@@ -16,9 +16,6 @@ import teropa.globetrotter.client.marker.MarkerClickEvent;
 import teropa.globetrotter.client.marker.MarkerLayer;
 import teropa.globetrotter.client.osm.OpenStreetMapLayer;
 import teropa.globetrotter.client.proj.GoogleMercator;
-import teropa.globetrotter.client.wms.SingleTileWMS;
-import teropa.globetrotter.client.wms.TiledWMS;
-import teropa.globetrotter.client.wms.WMSBase;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -45,7 +42,7 @@ public class Demo implements EntryPoint {
 //		base.setIsVisible(true);
 //		map.addLayer(base);
 		
-		OpenStreetMapLayer base = new OpenStreetMapLayer("http://localhost/", "Mapnik", true);
+		OpenStreetMapLayer base = new OpenStreetMapLayer("http://tile.openstreetmap.org/", "Mapnik", true);
 		map.addLayer(base);
 		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS);
 		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
@@ -87,40 +84,8 @@ public class Demo implements EntryPoint {
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
-		map.addControl(new ScaleIndicator(), Position.BOTTOM_LEFT);
-		map.addControl(new LocationSwitch(), Position.TOP_RIGHT);
-//		addControls(map, radar);
 	}
 
-	private void addControls(final Map map, final WMSBase radar) {
-		RootPanel.get().add(new Button("+", new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				map.zoomIn();
-			}
-		}));
-		RootPanel.get().add(new Button("-", new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				map.zoomOut();
-			}
-		}));
-		final List<String> imgs = getRadarTimes();
-		final Timer t = new Timer() {
-			public void run() {
-				radarIdx++;
-				if (radarIdx > imgs.size() - 1) {
-					radarIdx = 0;
-				}
-				radar.setTime(imgs.get(radarIdx));				
-			}
-		};
-		RootPanel.get().add(new Button("toggle radar", new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				radar.setIsVisible(true);
-				t.cancel();
-				t.scheduleRepeating(100);
-			}
-		}));
-	}
 	
 	private List<String> getRadarTimes() {
 		List<String> result = new ArrayList<String>();

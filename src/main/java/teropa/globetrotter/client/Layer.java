@@ -56,14 +56,13 @@ public abstract class Layer implements MapViewChangedEvent.Handler {
 	
 	public final void setIsVisible(boolean visible) {
 		this.visible = visible;
-		this.asWidget().setVisible(visible);
 		onVisibilityChanged();
 	}
 
 	protected void onVisibilityChanged() {
 	}
-	
-	public abstract Widget asWidget();
+
+	public abstract void drawOn(CanvasView canvasView);
 
 	
 

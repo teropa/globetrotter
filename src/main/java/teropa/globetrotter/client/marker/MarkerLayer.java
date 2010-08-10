@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import teropa.globetrotter.client.AbsoluteFocusPanel;
+import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
@@ -87,6 +88,12 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	
 	public HandlerRegistration addMarkerDoubleClickHandler(MarkerDoubleClickEvent.Handler handler) {
 		return handlers.addHandler(MarkerDoubleClickEvent.TYPE, handler);
+	}
+	
+	@Override
+	public void drawOn(CanvasView canvasView) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public void onMapViewChanged(MapViewChangedEvent evt) {
@@ -221,10 +228,6 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		return str == null || "".equals(str);
 	}
 
-	@Override
-	public Widget asWidget() {
-		return container;
-	}
 
 	private String getMarkerIdPrefix() {
 		return id + "_marker_";
