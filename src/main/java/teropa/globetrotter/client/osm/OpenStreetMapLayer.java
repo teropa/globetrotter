@@ -1,9 +1,11 @@
 package teropa.globetrotter.client.osm;
 
+import java.util.Collection;
 import java.util.List;
 
 import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
+import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.proj.GoogleMercator;
@@ -40,6 +42,14 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	@Override
+	public void addTiles(Collection<Tile> newTiles) {
+		for (Tile each : newTiles) {
+			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
+			context.getView().addImage(each.getLeftX(), each.getTopY(), url);
+		}
+	}
+	
+	@Override
 	public void drawOn(CanvasView canvasView) {
 		Grid grid = context.getGrid();
 		Rectangle visibleRect = context.getVisibleRectangle();
@@ -47,7 +57,7 @@ public class OpenStreetMapLayer extends Layer {
 		int length = tiles.size();
 		for (int i=0 ; i<length ; i++) {
 			Grid.Tile eachTile = tiles.get(i);
-			canvasView.addImage(eachTile.getRect().x, eachTile.getRect().y, getUrl(context.getResolutionIndex(), eachTile.getCol(), eachTile.getRow()));
+			canvasView.addImage(eachTile.getLeftX(), eachTile.getTopY(), getUrl(context.getResolutionIndex(), eachTile.getCol(), eachTile.getRow()));
 		}		
 	}
 	

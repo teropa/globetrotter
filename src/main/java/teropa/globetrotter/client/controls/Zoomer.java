@@ -30,9 +30,9 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	private final ZoomerImages images = GWT.create(ZoomerImages.class);
 	
 	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
-	private final Image knob = images.zoomerKnob().createImage();
-	private final Image zoomIn = images.zoomerIn().createImage();
-	private final Image zoomOut = images.zoomerOut().createImage();
+	private final Image knob = new Image(images.zoomerKnob());
+	private final Image zoomIn = new Image(images.zoomerIn());
+	private final Image zoomOut = new Image(images.zoomerOut());
 	
 	private Map map;
 	private int numLevels;
@@ -81,7 +81,7 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	private void initTrack() {
 		for (int i=0 ; i < numLevels ; i++) {
 			int y = BUTTON_HEIGHT + i * NOTCH_HEIGHT;
-			container.add(images.zoomerTrack().createImage(), LEFT_MARGIN, y);
+			container.add(new Image(images.zoomerTrack()), LEFT_MARGIN, y);
 		}
 	}
 

@@ -22,8 +22,6 @@ import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
@@ -33,7 +31,6 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	private final CanvasView view = new CanvasView(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
-	private final HandlerManager mapEvents = new HandlerManager(this);
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
 	private LonLat center = new LonLat(0, 0);
@@ -121,6 +118,10 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		return tileSize;
 	}
 
+	public CanvasView getView() {
+		return view;
+	}
+	
 	public Size getViewSize() {
 		return view.getSize();
 	}
@@ -148,7 +149,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	}
 
 	public Point getViewportLocation() {
-		return view.getVisibleAreaTopLeftPoint();
+		return view.getTopLeft();
 	}
 	
 	public LonLat getCenter() {
@@ -161,7 +162,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	
 	public Grid getGrid() {
 		if (grid == null) {
-			grid = new Grid(getTileSize(), getFullSize());
+			grid = new Grid(getTileSize(), getFullSize(), this);
 		}
 		return grid;
 	}

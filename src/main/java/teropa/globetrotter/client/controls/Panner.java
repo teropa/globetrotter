@@ -22,7 +22,7 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 
 	private final PannerImages images = GWT.create(PannerImages.class);
 	
-	private final Image img = images.panner().createImage();
+	private final Image img = new Image(images.panner());
 	private Map map;
 	
 	public Panner() {
@@ -63,13 +63,13 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 		if (dir == null) {
 			removeHighlight();
 		} else if (dir == Direction.UP) {
-			images.pannerUp().applyTo(img);
+			img.setResource(images.pannerUp());
 		} else if (dir == Direction.RIGHT) {
-			images.pannerRight().applyTo(img);
+			img.setResource(images.pannerRight());
 		} else if (dir == Direction.DOWN) {
-			images.pannerDown().applyTo(img);
+			img.setResource(images.pannerDown());
 		} else if (dir == Direction.LEFT) {
-			images.pannerLeft().applyTo(img);
+			img.setResource(images.pannerLeft());
 		}
 	}
 
@@ -100,7 +100,7 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 	}
 
 	private void removeHighlight() {
-		images.panner().applyTo(img);
+		img.setResource(images.panner());
 	}
 
 	public Widget asWidget() {

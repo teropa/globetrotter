@@ -9,7 +9,6 @@ import java.util.List;
 import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.controls.LocationSwitch;
 import teropa.globetrotter.client.controls.Panner;
-import teropa.globetrotter.client.controls.ScaleIndicator;
 import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.marker.Marker;
 import teropa.globetrotter.client.marker.MarkerClickEvent;

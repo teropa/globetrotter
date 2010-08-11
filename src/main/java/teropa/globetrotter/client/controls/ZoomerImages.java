@@ -1,17 +1,17 @@
 package teropa.globetrotter.client.controls;
 
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ImageBundle;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 
-public interface ZoomerImages extends ImageBundle {
+public interface ZoomerImages extends ClientBundle {
 
-	@Resource("zoomer_in.png")
-	public AbstractImagePrototype zoomerIn();
-	@Resource("zoomer_out.png")
-	public AbstractImagePrototype zoomerOut();
-	@Resource("zoomer_track.png")
-	public AbstractImagePrototype zoomerTrack();
-	@Resource("zoomer_knob.png")
-	public AbstractImagePrototype zoomerKnob();
+	@Source("zoomer_in.png")
+	public ImageResource zoomerIn();
+	@Source("zoomer_out.png")
+	public ImageResource zoomerOut();
+	@Source("zoomer_track.png")
+	public ImageResource zoomerTrack();
+	@Source("zoomer_knob.png")
+	public ImageResource zoomerKnob();
 	
 }

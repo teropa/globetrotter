@@ -6,7 +6,9 @@ import java.util.List;
 
 import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.CanvasView;
+import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Layer;
+import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 
@@ -91,6 +93,12 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	
 	@Override
 	public void drawOn(CanvasView canvasView) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void addTiles(Collection<Grid.Tile> newTiles) {
 		// TODO Auto-generated method stub
 		
 	}

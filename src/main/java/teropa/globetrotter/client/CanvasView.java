@@ -5,6 +5,10 @@ import java.util.List;
 
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
+import teropa.globetrotter.client.event.internal.ViewPanEvent;
+import teropa.globetrotter.client.event.internal.ViewPanHandler;
+import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.dom.client.ImageElement;
@@ -14,6 +18,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
@@ -62,23 +67,18 @@ public class CanvasView extends Composite implements MouseHandler {
 	
 	public void setSize(Size size) {
 		this.virtualSize = size;
-		canvas.setCoordWidth(getVisibleSize().getWidth());
-		canvas.setCoordHeight(getVisibleSize().getHeight());
 	}
 
 	public Size getVisibleSize() {
 		return new Size(getOffsetWidth(), getOffsetHeight());
 	}
 
-	public Point getVisibleAreaTopLeftPoint() {
+	public Point getTopLeft() {
 		return topLeft;
 	}
 
 	public void position(Point newCenterPoint) {
-		Size visibleSize = getVisibleSize();
-		Point newTopLeft = new Point(
-				newCenterPoint.getX() - visibleSize.getWidth() / 2,
-				newCenterPoint.getY() - visibleSize.getHeight() / 2);
+		Point newTopLeft = toTopLeft(newCenterPoint);
 		canvas.translate(topLeft.getX() - newTopLeft.getX(), topLeft.getY() - newTopLeft.getY());
 		topLeft = newTopLeft;
 	}
@@ -93,6 +93,13 @@ public class CanvasView extends Composite implements MouseHandler {
 			}
 		});
 	}
+
+	@Override
+	protected void onLoad() {
+		Size visibleSize = getVisibleSize();
+		canvas.setCoordWidth(visibleSize.getWidth());
+		canvas.setCoordHeight(visibleSize.getHeight());
+	}
 	
 	public void onMouseOver(MouseOverEvent event) {
 		
@@ -106,11 +113,12 @@ public class CanvasView extends Composite implements MouseHandler {
 		dragging = true;
 		xOffset = event.getX();
 		yOffset = event.getY();
+		fireEvent(new ViewPanStartEvent(toCenter(topLeft)));
 	}
 	
 	public void onMouseUp(MouseUpEvent event) {
 		dragging = false;
-		draw();
+		fireEvent(new ViewPanEndEvent(toCenter(topLeft)));
 	}
 	
 	public void onMouseMove(MouseMoveEvent event) {
@@ -121,6 +129,7 @@ public class CanvasView extends Composite implements MouseHandler {
 			canvas.translate(xDelta, yDelta);
 			xOffset = event.getX();
 			yOffset = event.getY();
+			fireEvent(new ViewPanEvent(toCenter(topLeft)));
 			redraw();
 		}
 	}
@@ -128,7 +137,34 @@ public class CanvasView extends Composite implements MouseHandler {
 	public void onClick(ClickEvent event) {
 		
 	}
+
+	public HandlerRegistration addViewPanHandler(ViewPanHandler handler) {
+		final HandlerRegistration startRegistration = addHandler(handler, ViewPanStartEvent.TYPE);
+		final HandlerRegistration panRegistration = addHandler(handler, ViewPanEvent.TYPE);
+		final HandlerRegistration endRegistration = addHandler(handler, ViewPanEndEvent.TYPE);
+		return new HandlerRegistration() {
+			public void removeHandler() {
+				startRegistration.removeHandler();
+				panRegistration.removeHandler();
+				endRegistration.removeHandler();
+			}
+		};
+	}
 	
+	private Point toTopLeft(Point center) {
+		Size visibleSize = getVisibleSize();
+		return new Point(
+				center.getX() - visibleSize.getWidth() / 2,
+				center.getY() - visibleSize.getHeight() / 2);
+	}
+
+	private Point toCenter(Point topLeft) {
+		Size visibleSize = getVisibleSize();
+		return new Point(
+				topLeft.getX() + visibleSize.getWidth() / 2,
+				topLeft.getY() + visibleSize.getHeight() / 2);
+	}
+
 	private static class ImageAndCoords {
 		ImageElement image;
 		double x;

@@ -1,6 +1,6 @@
 package teropa.globetrotter.client;
 
-import com.google.gwt.event.shared.HandlerRegistration;
+import java.util.List;
 
 import teropa.globetrotter.client.common.Bounds;
 import teropa.globetrotter.client.common.LonLat;
@@ -38,6 +38,10 @@ public interface ViewContext {
 	Point getViewCenterPoint();
 	
 	Bounds getMaxExtent();
+
+	CanvasView getView();
+
+	List<Layer> getLayers();
 
 
 }

@@ -1,5 +1,8 @@
 package teropa.globetrotter.client;
 
+import java.util.Collection;
+import java.util.List;
+
 import teropa.globetrotter.client.proj.Projection;
 
 public abstract class Layer {
@@ -44,6 +47,8 @@ public abstract class Layer {
 	}
 
 	public abstract void drawOn(CanvasView canvasView);
+
+	public abstract void addTiles(Collection<Grid.Tile> newTiles);
 
 	
 
