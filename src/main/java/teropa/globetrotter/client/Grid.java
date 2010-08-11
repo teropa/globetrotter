@@ -1,6 +1,9 @@
 package teropa.globetrotter.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import teropa.globetrotter.client.common.Rectangle;
@@ -78,29 +81,35 @@ public class Grid implements ViewPanHandler {
 	
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
-		final Set<Tile> newTiles = new HashSet<Tile>();		
-		for (int xIdx = coords[0] - 1 ; xIdx >= newCoords[0] ; xIdx--) {
-			for (int yIdx = newCoords[2] ; yIdx <= newCoords[3] ; yIdx++) {
-				newTiles.add(makeTile(xIdx, yIdx));
-			}
+		
+		if (Arrays.equals(newCoords, coords)) {
+			return;
 		}
-		for (int xIdx = coords[1] + 1 ; xIdx <= newCoords[1] ; xIdx++) {
-			for (int yIdx = newCoords[2] ; yIdx <= newCoords[3] ; yIdx++) {
-				newTiles.add(makeTile(xIdx, yIdx));
-			}
-		}
-		for (int yIdx = coords[2] - 1 ; yIdx >= newCoords[2] ; yIdx--) {
-			for (int xIdx = newCoords[0] ; xIdx <= newCoords[1] ; xIdx++) {
-				newTiles.add(makeTile(xIdx, yIdx));
-			}
-		}
-		for (int yIdx = coords[3] + 1 ; yIdx <= newCoords[3] ; yIdx++) {
-			for (int xIdx = newCoords[0] ; xIdx <= newCoords[1] ; xIdx++) {
-				newTiles.add(makeTile(xIdx, yIdx));
-			}
-		}
+		
+		final int oldXFrom = coords[0], oldXTo = coords[1], oldYFrom = coords[2], oldYTo = coords[3];
+		final int newXFrom = newCoords[0], newXTo = newCoords[1], newYFrom = newCoords[2], newYTo = newCoords[3];
+		
+		final Set<Tile> removedTiles = new HashSet<Grid.Tile>();
+		removedTiles.addAll(makeTiles(oldXFrom, newXFrom - 1, oldYFrom, oldYTo));
+		removedTiles.addAll(makeTiles(newXTo + 1, oldXTo, oldYFrom, oldYTo));
+		removedTiles.addAll(makeTiles(oldXFrom, oldXTo, oldYFrom, newYFrom - 1));
+		removedTiles.addAll(makeTiles(oldXFrom, oldXTo, newYTo + 1, oldYTo));
+		notifyRemovedTiles(removedTiles);
+		
+		final Set<Tile> newTiles = new HashSet<Tile>();
+		newTiles.addAll(makeTiles(newXFrom, oldXFrom - 1, newYFrom, newYTo));
+		newTiles.addAll(makeTiles(oldXTo + 1, newXTo, newYFrom, newYTo));
+		newTiles.addAll(makeTiles(newXFrom, newXTo, newYFrom, oldYFrom - 1));
+		newTiles.addAll(makeTiles(newXFrom, newXTo, oldYTo + 1, newYTo));
 		notifyNewTiles(newTiles);
+
 		coords = newCoords;
+	}
+
+	private void notifyRemovedTiles(final Set<Tile> removedTiles) {
+		for (Layer each : ctx.getLayers()) {
+			each.removeTiles(removedTiles);
+		}
 	}
 
 	private void notifyNewTiles(final Set<Tile> newTiles) {
@@ -110,6 +119,16 @@ public class Grid implements ViewPanHandler {
 	}
 
 	public void onViewPanEnded(ViewPanEndEvent event) {
+	}
+
+	private List<Tile> makeTiles(int fromX, int toX, int fromY, int toY) {
+		List<Tile> result = new ArrayList<Tile>();
+		for (int xIdx = fromX ; xIdx <= toX ; xIdx++) {
+			for (int yIdx = fromY ; yIdx <= toY ; yIdx++) {
+				result.add(makeTile(xIdx, yIdx));
+			}
+		}
+		return result;
 	}
 	
 	private Tile makeTile(int xIdx, int yIdx) {

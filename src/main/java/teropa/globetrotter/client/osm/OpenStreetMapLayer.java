@@ -61,6 +61,11 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	@Override
+	public void removeTiles(Collection<Tile> removedTiles) {
+		images.keySet().removeAll(removedTiles);
+	}
+	
+	@Override
 	public void drawOn(CanvasView canvasView) {
 		for (ImageAndCoords each : images.values()) {
 			canvasView.addImage(each);

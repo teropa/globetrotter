@@ -2,6 +2,7 @@ package teropa.globetrotter.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import teropa.globetrotter.client.proj.Projection;
 
@@ -49,6 +50,7 @@ public abstract class Layer {
 	public abstract void drawOn(CanvasView canvasView);
 
 	public abstract void addTiles(Collection<Grid.Tile> newTiles);
+	public abstract void removeTiles(Collection<Grid.Tile> removedTiles);
 
 	
 
