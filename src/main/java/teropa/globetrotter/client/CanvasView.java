@@ -5,30 +5,27 @@ import java.util.List;
 
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
-public class CanvasView extends Composite implements MouseOverHandler, MouseOutHandler, MouseDownHandler, MouseUpHandler, MouseMoveHandler {
+public class CanvasView extends Composite implements MouseHandler {
 
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
 	
 	private Size virtualSize;
 	private Point topLeft = new Point(0, 0);
-	private List<ImageAndCoords> currentImages = new ArrayList<CanvasView.ImageAndCoords>();
+	private List<ImageAndCoords> images = new ArrayList<CanvasView.ImageAndCoords>();
 	
 	private boolean dragging;
 	private int xOffset;
@@ -41,12 +38,13 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 		canvas.addMouseDownHandler(this);
 		canvas.addMouseUpHandler(this);
 		canvas.addMouseMoveHandler(this);
+		canvas.addClickHandler(this);
 		initWidget(canvas);
 	}
 	
 	public void draw() {
 		canvas.clear();
-		currentImages.clear();
+		images.clear();
 		for (Layer eachLayer : map.getLayers()) {
 			eachLayer.drawOn(this);
 		}
@@ -54,7 +52,7 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 
 	public void redraw() {
 		canvas.clear();
-		for (ImageAndCoords each : currentImages) {
+		for (ImageAndCoords each : images) {
 			canvas.drawImage(each.image, each.x, each.y);
 		}
 	}
@@ -91,7 +89,7 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 		ImageLoader.loadImages(new String[] { url }, new CallBack() {
 			public void onImagesLoaded(ImageElement[] imageElements) {
 				canvas.drawImage(imageElements[0], visibleX, visibleY);
-				currentImages.add(new ImageAndCoords(imageElements[0], visibleX, visibleY));
+				images.add(new ImageAndCoords(imageElements[0], visibleX, visibleY));
 			}
 		});
 	}
@@ -120,12 +118,15 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 			int xDelta = event.getX() - xOffset;
 			int yDelta = event.getY() - yOffset;
 			topLeft = new Point(topLeft.getX() - xDelta, topLeft.getY() - yDelta);
-//			GWT.log("Move "+xDelta+","+yDelta);
 			canvas.translate(xDelta, yDelta);
 			xOffset = event.getX();
 			yOffset = event.getY();
 			redraw();
 		}
+	}
+	
+	public void onClick(ClickEvent event) {
+		
 	}
 	
 	private static class ImageAndCoords {

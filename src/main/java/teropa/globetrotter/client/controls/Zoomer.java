@@ -2,7 +2,6 @@ package teropa.globetrotter.client.controls;
 
 import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.Map;
-import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.core.client.GWT;
@@ -21,7 +20,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Zoomer extends Composite implements Control, MouseHandler, NativePreviewHandler, MapZoomedEvent.Handler {
+public class Zoomer extends Composite implements Control, MouseHandler, NativePreviewHandler {
 	
 	private static final int WIDTH = 45;
 	private static final int LEFT_MARGIN = 15;
@@ -77,7 +76,6 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		knob.addMouseDownHandler(this);
 		zoomIn.addClickHandler(this);
 		zoomOut.addClickHandler(this);
-		map.addMapZoomedHandler(this);
 	}
 
 	private void initTrack() {
@@ -145,9 +143,9 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		}			
 	}
 	
-	public void onMapZoomed(MapZoomedEvent event) {
-		positionKnob();
-	}
+//	public void onMapZoomed(MapZoomedEvent event) {
+//		positionKnob();
+//	}
 
 	private void positionKnob() {
 		int yInTrack = (numLevels - map.getResolutionIndex() - 1) * NOTCH_HEIGHT;

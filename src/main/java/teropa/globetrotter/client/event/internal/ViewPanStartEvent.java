@@ -5,18 +5,18 @@ import teropa.globetrotter.client.common.Point;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class ViewPannedEvent extends GwtEvent<ViewPannedEvent.Handler> {
+public class ViewPanStartEvent extends GwtEvent<ViewPanStartEvent.Handler> {
 
 	public static Type<Handler> TYPE = new Type<Handler>();
 	
 	public static interface Handler extends EventHandler {
-		public void onViewPanned(ViewPannedEvent event);
+		public void onViewPanStarted(ViewPanStartEvent event);
 	}
 	
-	public final Point newCenterPoint;
+	public final Point centerPoint;
 	
-	public ViewPannedEvent(Point newCenterPoint) {
-		this.newCenterPoint = newCenterPoint;
+	public ViewPanStartEvent(Point newCenterPoint) {
+		this.centerPoint = newCenterPoint;
 	}
 	
 	public Type<Handler> getAssociatedType() {
@@ -24,7 +24,7 @@ public class ViewPannedEvent extends GwtEvent<ViewPannedEvent.Handler> {
 	}
 	
 	protected void dispatch(Handler handler) {
-		handler.onViewPanned(this);
+		handler.onViewPanStarted(this);
 	}
 	
 }

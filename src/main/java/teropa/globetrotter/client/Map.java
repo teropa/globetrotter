@@ -17,11 +17,9 @@ import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Control;
-import teropa.globetrotter.client.event.MapLayerAddedEvent;
-import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
-import teropa.globetrotter.client.event.internal.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.internal.ViewPannedEvent;
+import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
+import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -30,7 +28,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewContext, ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
+public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, ViewPanEndEvent.Handler, ViewZoomedEvent.Handler {
 
 	private final CanvasView view = new CanvasView(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
@@ -69,7 +67,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		if (layer.isBase()) {
 			baseLayer = layer;
 		}
-		mapEvents.fireEvent(new MapLayerAddedEvent(this, layer));
 	}
 	
 	public Layer getLayerByName(String name) {
@@ -187,10 +184,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		resizeView(-1);
 	}
 
-	public void onViewPanEnded(ViewPanEndedEvent event) {
+	public void onViewPanEnded(ViewPanEndEvent event) {
 	}
 	
-	public void onViewPanned(ViewPannedEvent event) {
+	public void onViewPanned(ViewPanEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize(), getProjection()));
 	}
 
@@ -226,7 +223,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		adjustViewAndViewportSize();
 		grid = null;
 //		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
-		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 	
 	private void resizeView(int delta, LonLat newCenter) {
@@ -237,7 +233,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		adjustViewAndViewportSize();
 		grid = null;
 //		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
-		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 
 	private void adjustViewAndViewportSize() {
@@ -254,14 +249,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	public void addControl(Control control, Position at) {
 		control.init(this);
 //		viewport.addControl(control, at);
-	}
-	
-	public HandlerRegistration addMapZoomedHandler(MapZoomedEvent.Handler handler) {
-		return mapEvents.addHandler(MapZoomedEvent.TYPE, handler);
-	}
-	
-	public HandlerRegistration addMapLayerAddedHandler(MapLayerAddedEvent.Handler handler) {
-		return mapEvents.addHandler(MapLayerAddedEvent.TYPE, handler);
 	}
 	
 	@Override
