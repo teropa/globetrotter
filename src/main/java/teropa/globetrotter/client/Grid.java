@@ -24,7 +24,7 @@ public class Grid implements ViewPanHandler {
 	private final int[] tileXs;
 	private final int[] tileYs;
 
-	private int[] panCoords;
+	private int[] coords;
 	
 	public Grid(Size tileSize, Size fullSize, ViewContext ctx) {
 		this.fullSize = fullSize;
@@ -64,55 +64,58 @@ public class Grid implements ViewPanHandler {
 		}
 		return res;
 	}
-	
+
+	public void init() {
+		coords = getVisibleCoords(ctx.getVisibleRectangle());
+		Set<Tile> tiles = new HashSet<Grid.Tile>();
+		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
+			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
+				tiles.add(makeTile(xIdx, yIdx));
+			}
+		}
+		notifyNewTiles(tiles);
+	}
+
 	public void onViewPanStarted(ViewPanStartEvent event) {
-		panCoords = getVisibleCoords(ctx.getVisibleRectangle());
+		coords = getVisibleCoords(ctx.getVisibleRectangle());
 	}
 	
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
 		final Set<Tile> newTiles = new HashSet<Tile>();		
-		for (int xIdx = panCoords[0] - 1 ; xIdx >= newCoords[0] ; xIdx--) {
+		for (int xIdx = coords[0] - 1 ; xIdx >= newCoords[0] ; xIdx--) {
 			for (int yIdx = newCoords[2] ; yIdx <= newCoords[3] ; yIdx++) {
 				newTiles.add(makeTile(xIdx, yIdx));
 			}
 		}
-		for (int xIdx = panCoords[1] + 1 ; xIdx <= newCoords[1] ; xIdx++) {
+		for (int xIdx = coords[1] + 1 ; xIdx <= newCoords[1] ; xIdx++) {
 			for (int yIdx = newCoords[2] ; yIdx <= newCoords[3] ; yIdx++) {
 				newTiles.add(makeTile(xIdx, yIdx));
 			}
 		}
-		for (int yIdx = panCoords[2] - 1 ; yIdx >= newCoords[2] ; yIdx--) {
+		for (int yIdx = coords[2] - 1 ; yIdx >= newCoords[2] ; yIdx--) {
 			for (int xIdx = newCoords[0] ; xIdx <= newCoords[1] ; xIdx++) {
 				newTiles.add(makeTile(xIdx, yIdx));
 			}
 		}
-		for (int yIdx = panCoords[3] + 1 ; yIdx <= newCoords[3] ; yIdx++) {
+		for (int yIdx = coords[3] + 1 ; yIdx <= newCoords[3] ; yIdx++) {
 			for (int xIdx = newCoords[0] ; xIdx <= newCoords[1] ; xIdx++) {
 				newTiles.add(makeTile(xIdx, yIdx));
 			}
 		}
+		notifyNewTiles(newTiles);
+		coords = newCoords;
+	}
+
+	private void notifyNewTiles(final Set<Tile> newTiles) {
 		for (Layer each : ctx.getLayers()) {
 			each.addTiles(newTiles);
 		}
-		panCoords = newCoords;
 	}
 
 	public void onViewPanEnded(ViewPanEndEvent event) {
 	}
 	
-	public List<Tile> getTiles(Rectangle area) {
-		final List<Tile> result = new ArrayList<Tile>();		
-		final int[] coords = getVisibleCoords(area);
-		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
-			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
-				Tile tile = makeTile(xIdx, yIdx);
-				result.add(tile);
-			}
-		}
-		return result;
-	}
-
 	private Tile makeTile(int xIdx, int yIdx) {
 		int x = tileXs[xIdx];
 		int y = tileYs[yIdx];
@@ -194,5 +197,6 @@ public class Grid implements ViewPanHandler {
 			return "Tile ["+col+","+row+"]";
 		}
 	}
+
 	
 }

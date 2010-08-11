@@ -55,7 +55,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	
 	private void init() {
 		adjustViewAndViewportSize();
-		view.draw();
+		getGrid().init();
 	}
 	
 	public void addLayer(Layer layer) {

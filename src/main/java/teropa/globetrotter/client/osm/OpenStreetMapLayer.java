@@ -1,14 +1,19 @@
 package teropa.globetrotter.client.osm;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
+import teropa.globetrotter.client.ImageAndCoords;
 import teropa.globetrotter.client.Layer;
-import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.proj.GoogleMercator;
+
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.widgetideas.graphics.client.ImageLoader;
+import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
 public class OpenStreetMapLayer extends Layer {
 
@@ -35,6 +40,7 @@ public class OpenStreetMapLayer extends Layer {
 		0.5971642834779395};
 
 	private final String baseUrl;
+	private final Map<Tile, ImageAndCoords> images = new HashMap<Grid.Tile, ImageAndCoords>();
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
 		super(name, base, new GoogleMercator());
@@ -43,22 +49,22 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void addTiles(Collection<Tile> newTiles) {
-		for (Tile each : newTiles) {
+		for (final Tile each : newTiles) {
 			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
-			context.getView().addImage(each.getLeftX(), each.getTopY(), url);
+			ImageLoader.loadImages(new String[] { url }, new CallBack() {
+				public void onImagesLoaded(ImageElement[] imageElements) {
+					images.put(each, new ImageAndCoords(imageElements[0], each.getLeftX(), each.getTopY()));
+					context.getView().draw();
+				}
+			});
 		}
 	}
 	
 	@Override
 	public void drawOn(CanvasView canvasView) {
-		Grid grid = context.getGrid();
-		Rectangle visibleRect = context.getVisibleRectangle();
-		List<Grid.Tile> tiles = grid.getTiles(visibleRect);
-		int length = tiles.size();
-		for (int i=0 ; i<length ; i++) {
-			Grid.Tile eachTile = tiles.get(i);
-			canvasView.addImage(eachTile.getLeftX(), eachTile.getTopY(), getUrl(context.getResolutionIndex(), eachTile.getCol(), eachTile.getRow()));
-		}		
+		for (ImageAndCoords each : images.values()) {
+			canvasView.addImage(each);
+		}
 	}
 	
 	private String getUrl(int zoom, int x, int y) {
