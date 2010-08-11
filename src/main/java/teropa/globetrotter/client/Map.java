@@ -24,10 +24,12 @@ import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
 public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, ViewPanEndEvent.Handler, ViewZoomedEvent.Handler {
 
+	private final AbsolutePanel container = new AbsolutePanel();
 	private final CanvasView view = new CanvasView(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
@@ -43,7 +45,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	private Grid grid;
 	
 	public Map(String width, String height) {
-		initWidget(view);
+		initWidget(container);
 		setWidth(width);
 		setHeight(height);
 		DeferredCommand.addCommand(new Command() {
@@ -54,6 +56,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	}
 	
 	private void init() {
+		container.add(view);
 		adjustViewAndViewportSize();
 		getGrid().init();
 	}

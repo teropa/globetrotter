@@ -38,6 +38,8 @@ public class CanvasView extends Composite implements MouseHandler {
 		canvas.addMouseMoveHandler(this);
 		canvas.addClickHandler(this);
 		initWidget(canvas);
+		setWidth("100%");
+		setHeight("100%");
 	}
 	
 	public void draw() {
