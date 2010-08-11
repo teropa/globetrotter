@@ -7,13 +7,11 @@ import java.util.List;
 import teropa.globetrotter.client.AbsoluteFocusPanel;
 import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
-import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.Grid.Tile;
+import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +29,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Widget;
 
 public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler, MouseDownHandler, MouseOverHandler, EventListener {
 	

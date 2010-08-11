@@ -1,8 +1,6 @@
 package teropa.globetrotter.client;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 import teropa.globetrotter.client.proj.Projection;
 

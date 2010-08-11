@@ -15,6 +15,10 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
 
 public class CanvasView extends Composite implements MouseHandler {
@@ -28,6 +32,16 @@ public class CanvasView extends Composite implements MouseHandler {
 	private boolean dragging;
 	private int xOffset;
 	private int yOffset;
+	
+	private NativePreviewHandler preventDefaults = new NativePreviewHandler() {
+		public void onPreviewNativeEvent(NativePreviewEvent event) {
+			int type = event.getTypeInt();
+			if (type == Event.ONMOUSEDOWN || type == Event.ONMOUSEMOVE) {
+				event.getNativeEvent().preventDefault();
+			}
+		}
+	};
+	private HandlerRegistration preventDefaultsRegistration;
 	
 	public CanvasView(Map map) {
 		this.map = map;
@@ -83,15 +97,19 @@ public class CanvasView extends Composite implements MouseHandler {
 	}
 	
 	public void onMouseOver(MouseOverEvent event) {
-		
+		preventDefaultsRegistration = Event.addNativePreviewHandler(preventDefaults);
 	}
 	
 	public void onMouseOut(MouseOutEvent event) {
-		
+		if (preventDefaultsRegistration != null) {
+			preventDefaultsRegistration.removeHandler();
+			preventDefaultsRegistration = null;
+		}
 	}
 
 	public void onMouseDown(MouseDownEvent event) {
 		dragging = true;
+		Event.setCapture(canvas.getElement());
 		xOffset = event.getX();
 		yOffset = event.getY();
 		fireEvent(new ViewPanStartEvent(toCenter(topLeft)));
@@ -99,6 +117,7 @@ public class CanvasView extends Composite implements MouseHandler {
 	
 	public void onMouseUp(MouseUpEvent event) {
 		dragging = false;
+		Event.releaseCapture(canvas.getElement());
 		fireEvent(new ViewPanEndEvent(toCenter(topLeft)));
 	}
 	

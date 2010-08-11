@@ -203,7 +203,6 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent, getProjection()).getCenter();
 		setCenter(ensuredCenter);
 		adjustViewAndViewportSize();
-//		mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, false));
 	}
 
 	public void onViewZoomed(ViewZoomedEvent event) {
