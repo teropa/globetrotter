@@ -1,8 +1,6 @@
 package teropa.globetrotter.client;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import teropa.globetrotter.client.common.Rectangle;
@@ -14,7 +12,6 @@ import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 
 public class Grid implements ViewPanHandler {
 
-	private final Size fullSize;
 	private final int tileWidth;
 	private final int tileHeight;
 	private final ViewContext ctx;
@@ -27,7 +24,6 @@ public class Grid implements ViewPanHandler {
 	private int[] coords;
 	
 	public Grid(Size tileSize, Size fullSize, ViewContext ctx) {
-		this.fullSize = fullSize;
 		this.tileWidth = tileSize.getWidth();
 		this.tileHeight = tileSize.getHeight();
 		this.ctx = ctx;

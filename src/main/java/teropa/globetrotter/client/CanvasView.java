@@ -102,12 +102,20 @@ public class CanvasView extends Composite implements MouseHandler {
 	
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
-			int xDelta = event.getX() - xOffset;
-			int yDelta = event.getY() - yOffset;
-			topLeft = new Point(topLeft.getX() - xDelta, topLeft.getY() - yDelta);
+			int minX = 0, minY = 0;
+			int maxX = virtualSize.getWidth() - getVisibleSize().getWidth();
+			int maxY = virtualSize.getHeight() - getVisibleSize().getHeight();
+			int x = Math.min(maxX, Math.max(minX, topLeft.getX() - (event.getX() - xOffset)));
+			int y = Math.min(maxY, Math.max(minY, topLeft.getY() - (event.getY() - yOffset)));
+			int xDelta = topLeft.getX() - x;
+			int yDelta = topLeft.getY() - y;
+
 			canvas.translate(xDelta, yDelta);
+			topLeft = new Point(x, y);
+
 			xOffset = event.getX();
 			yOffset = event.getY();
+			
 			fireEvent(new ViewPanEvent(toCenter(topLeft)));
 			draw();
 		}
