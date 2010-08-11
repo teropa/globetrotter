@@ -1,4 +1,4 @@
-package teropa.globetrotter.client.event;
+package teropa.globetrotter.client.event.internal;
 
 import teropa.globetrotter.client.common.Point;
 

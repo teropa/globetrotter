@@ -1,9 +1,11 @@
 package teropa.globetrotter.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
@@ -26,6 +28,7 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 	
 	private Size virtualSize;
 	private Point topLeft = new Point(0, 0);
+	private List<ImageAndCoords> currentImages = new ArrayList<CanvasView.ImageAndCoords>();
 	
 	private boolean dragging;
 	private int xOffset;
@@ -43,11 +46,18 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 	
 	public void draw() {
 		canvas.clear();
+		currentImages.clear();
 		for (Layer eachLayer : map.getLayers()) {
 			eachLayer.drawOn(this);
 		}
 	}
 
+	public void redraw() {
+		canvas.clear();
+		for (ImageAndCoords each : currentImages) {
+			canvas.drawImage(each.image, each.x, each.y);
+		}
+	}
 	public Size getSize() {
 		return this.virtualSize;
 	}
@@ -81,6 +91,7 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 		ImageLoader.loadImages(new String[] { url }, new CallBack() {
 			public void onImagesLoaded(ImageElement[] imageElements) {
 				canvas.drawImage(imageElements[0], visibleX, visibleY);
+				currentImages.add(new ImageAndCoords(imageElements[0], visibleX, visibleY));
 			}
 		});
 	}
@@ -101,6 +112,7 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 	
 	public void onMouseUp(MouseUpEvent event) {
 		dragging = false;
+		draw();
 	}
 	
 	public void onMouseMove(MouseMoveEvent event) {
@@ -112,8 +124,21 @@ public class CanvasView extends Composite implements MouseOverHandler, MouseOutH
 			canvas.translate(xDelta, yDelta);
 			xOffset = event.getX();
 			yOffset = event.getY();
-			draw();
+			redraw();
 		}
+	}
+	
+	private static class ImageAndCoords {
+		ImageElement image;
+		double x;
+		double y;
+		
+		public ImageAndCoords(ImageElement image, double x, double y) {
+			this.image = image;
+			this.x = x;
+			this.y = y;
+		}
+		
 	}
 	
 }

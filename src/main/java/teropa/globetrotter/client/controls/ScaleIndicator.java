@@ -2,7 +2,6 @@ package teropa.globetrotter.client.controls;
 
 import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Calc;
-import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -11,7 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ScaleIndicator extends Composite implements Control, MapViewChangedEvent.Handler {
+public class ScaleIndicator extends Composite implements Control {
 
 	private static enum Unit { METRIC, IMPERIAL };
 	private static final double PREFERRED_WIDTH_PX = 100.0;
@@ -33,21 +32,21 @@ public class ScaleIndicator extends Composite implements Control, MapViewChanged
 	
 	public void init(Map map) {
 		this.map = map;
-		map.addMapViewChangedHandler(this);
+//		map.addMapViewChangedHandler(this);
 		container.add(metricIndicator);
 		container.add(imperialIndicator);
 	}
 
-	public void onMapViewChanged(MapViewChangedEvent event) {
-		if (event.panEnded || event.zoomed) {
-			double viewWidthDeg = map.getVisibleExtent().getWidth();
-			double viewWidthMeters = viewWidthDeg * Calc.getLonDegreeLengthMeters(map.getCenter());
-			double viewWidthFeet = viewWidthMeters * ONE_FOOT_IN_METERS;
-			int viewWidthPx = map.getViewportSize().getWidth();
-			metricIndicator.adjust(viewWidthMeters / 1000, viewWidthPx);
-			imperialIndicator.adjust(viewWidthFeet / ONE_MILE_IN_FEET, viewWidthPx);
-		}
-	}
+//	public void onMapViewChanged(MapViewChangedEvent event) {
+//		if (event.panEnded || event.zoomed) {
+//			double viewWidthDeg = map.getVisibleExtent().getWidth();
+//			double viewWidthMeters = viewWidthDeg * Calc.getLonDegreeLengthMeters(map.getCenter());
+//			double viewWidthFeet = viewWidthMeters * ONE_FOOT_IN_METERS;
+//			int viewWidthPx = map.getViewportSize().getWidth();
+//			metricIndicator.adjust(viewWidthMeters / 1000, viewWidthPx);
+//			imperialIndicator.adjust(viewWidthFeet / ONE_MILE_IN_FEET, viewWidthPx);
+//		}
+//	}
 	
 	public Widget asWidget() {
 		return this;

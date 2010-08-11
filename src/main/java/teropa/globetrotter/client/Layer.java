@@ -1,11 +1,8 @@
 package teropa.globetrotter.client;
 
-import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.proj.Projection;
 
-import com.google.gwt.user.client.ui.Widget;
-
-public abstract class Layer implements MapViewChangedEvent.Handler {
+public abstract class Layer {
 
 	private static final String ID_PREFIX = "globetrotter_layer_" + System.currentTimeMillis() + "_";
 	private static int idCounter = 0;
@@ -15,8 +12,6 @@ public abstract class Layer implements MapViewChangedEvent.Handler {
 	protected final boolean base;
 	protected final Projection projection;
 	protected ViewContext context;
-	protected int zIndex;
-	protected boolean visible = true;
 
 	protected boolean initialized = false;
 	
@@ -31,10 +26,8 @@ public abstract class Layer implements MapViewChangedEvent.Handler {
 		this.id = ID_PREFIX + idCounter++;
 	}
 	
-	public void init(ViewContext ctx, int zIndex) {
+	public void init(ViewContext ctx) {
 		this.context = ctx;
-		this.zIndex = zIndex;
-		ctx.addMapViewChangedHandler(this);
 		this.initialized = true;
 	}
 
@@ -46,20 +39,8 @@ public abstract class Layer implements MapViewChangedEvent.Handler {
 		return base;
 	}
 
-	public boolean isVisible() {
-		return visible;
-	}
-	
 	public Projection getProjection() {
 		return projection;
-	}
-	
-	public final void setIsVisible(boolean visible) {
-		this.visible = visible;
-		onVisibilityChanged();
-	}
-
-	protected void onVisibilityChanged() {
 	}
 
 	public abstract void drawOn(CanvasView canvasView);

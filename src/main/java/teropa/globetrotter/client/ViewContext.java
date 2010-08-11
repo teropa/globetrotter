@@ -7,15 +7,14 @@ import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
-import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.proj.Projection;
 
 public interface ViewContext {
 
-	Projector getProjector();
-
 	boolean isDrawn();
 
+	Projection getProjection();
+	
 	Grid getGrid();
 
 	Size getTileSize();
@@ -38,8 +37,6 @@ public interface ViewContext {
 
 	Point getViewCenterPoint();
 	
-	HandlerRegistration addMapViewChangedHandler(MapViewChangedEvent.Handler handler);
-
 	Bounds getMaxExtent();
 
 

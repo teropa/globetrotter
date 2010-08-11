@@ -18,11 +18,10 @@ import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.MapLayerAddedEvent;
-import teropa.globetrotter.client.event.MapViewChangedEvent;
 import teropa.globetrotter.client.event.MapZoomedEvent;
-import teropa.globetrotter.client.event.ViewPanEndedEvent;
-import teropa.globetrotter.client.event.ViewPannedEvent;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.event.internal.ViewPanEndedEvent;
+import teropa.globetrotter.client.event.internal.ViewPannedEvent;
 import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -33,7 +32,6 @@ import com.google.gwt.user.client.ui.Composite;
 
 public class Map extends Composite implements ViewContext, ViewPannedEvent.Handler, ViewPanEndedEvent.Handler, ViewZoomedEvent.Handler {
 
-	private final Projector projector = new Projector(this);
 	private final CanvasView view = new CanvasView(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
@@ -65,13 +63,8 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		view.draw();
 	}
 	
-	public Projector getProjector() {
-		return projector;
-	}
-	
 	public void addLayer(Layer layer) {
-		int zIndex = layers.size() * 100;
-		layer.init(this, zIndex);
+		layer.init(this);
 		layers.add(layer);
 		if (layer.isBase()) {
 			baseLayer = layer;
@@ -99,7 +92,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		this.center = center;
 	}
 	
-	Projection getProjection() {
+	public Projection getProjection() {
 		if (baseLayer != null) {
 			return baseLayer.getProjection();
 		} else {
@@ -195,12 +188,10 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 	}
 
 	public void onViewPanEnded(ViewPanEndedEvent event) {
-		mapEvents.fireEvent(new MapViewChangedEvent(false, true, false, false));
 	}
 	
 	public void onViewPanned(ViewPannedEvent event) {
 		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize(), getProjection()));
-		mapEvents.fireEvent(new MapViewChangedEvent(true, false, false, false));
 	}
 
 	public void move(Direction dir, int amountPx) {
@@ -211,7 +202,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent, getProjection()).getCenter();
 		setCenter(ensuredCenter);
 		adjustViewAndViewportSize();
-		mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, false));
+//		mapEvents.fireEvent(new MapViewChangedEvent(true, true, false, false));
 	}
 
 	public void onViewZoomed(ViewZoomedEvent event) {
@@ -234,7 +225,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		}
 		adjustViewAndViewportSize();
 		grid = null;
-		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
+//		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 	
@@ -245,7 +236,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		setCenter(newCenter);
 		adjustViewAndViewportSize();
 		grid = null;
-		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
+//		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 		mapEvents.fireEvent(new MapZoomedEvent(this, resolutions[resolutionIndex]));
 	}
 
@@ -265,10 +256,6 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 //		viewport.addControl(control, at);
 	}
 	
-	public HandlerRegistration addMapViewChangedHandler(MapViewChangedEvent.Handler handler) {
-		return mapEvents.addHandler(MapViewChangedEvent.TYPE, handler);
-	}
-
 	public HandlerRegistration addMapZoomedHandler(MapZoomedEvent.Handler handler) {
 		return mapEvents.addHandler(MapZoomedEvent.TYPE, handler);
 	}
@@ -283,7 +270,7 @@ public class Map extends Composite implements ViewContext, ViewPannedEvent.Handl
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				drawn = true;
-				mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
+//				mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
 			}
 		});
 	}

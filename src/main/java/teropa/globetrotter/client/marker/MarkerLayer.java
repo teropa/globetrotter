@@ -9,7 +9,6 @@ import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
-import teropa.globetrotter.client.event.MapViewChangedEvent;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -96,18 +95,18 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		
 	}
 	
-	public void onMapViewChanged(MapViewChangedEvent evt) {
-		if (evt.effectiveExtentChanged && positioned) {
-			repositionMarkers();
-		}
-		if (evt.zoomed) {
-			positioned = false;
-		}
-		if ((evt.zoomed || evt.panned) && !positioned) {
-			replaceMarkers();
-			positioned = true;
-		}
-	}
+//	public void onMapViewChanged(MapViewChangedEvent evt) {
+//		if (evt.effectiveExtentChanged && positioned) {
+//			repositionMarkers();
+//		}
+//		if (evt.zoomed) {
+//			positioned = false;
+//		}
+//		if ((evt.zoomed || evt.panned) && !positioned) {
+//			replaceMarkers();
+//			positioned = true;
+//		}
+//	}
 
 	private void replaceMarkers() {
 		StringBuilder markup = new StringBuilder();
@@ -117,8 +116,8 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 			if (each.hasPopup()) {
 				onMarkerPopupRemove(each);
 			}
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
-			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc, zIndex + 1);
+			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc);
 		}
 //		final MarkerLayer self = this;
 //		DeferredCommand.addCommand(new Command() {
@@ -141,7 +140,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 
 	public void onMarkerPopupAdded(Marker marker) {
-		Point point = Calc.getPoint(marker.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
+		Point point = Calc.getPoint(marker.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
 		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
 		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
 		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());
@@ -155,7 +154,7 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		int size = markers.size();
 		for (int i=0 ; i<size ; i++) {
 			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjector().getProjection());
+			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
 			each.repositionTo(loc);
 		}
 	}
@@ -201,11 +200,9 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	}
 	
 	public void onMarkerMouseOver(Marker marker) {
-		marker.setZIndex(zIndex + 2);
 	}
 	
 	public void onMarkerMouseOut(Marker marker) {
-		marker.setZIndex(zIndex + 1);
 	}
 	
 	private Integer getMarkerIdx(NativeEvent event) {

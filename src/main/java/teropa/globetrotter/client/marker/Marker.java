@@ -89,7 +89,7 @@ public class Marker {
 		this.popup = null;
 	}
 	
-	public void appendMarkup(StringBuilder builder, String domId, Point location, int zIndex) {
+	public void appendMarkup(StringBuilder builder, String domId, Point location) {
 		this.domId = domId;
 		this.element = null;
 		Point loc = pinPosition.translateAroundPoint(location, size);
@@ -99,9 +99,7 @@ public class Marker {
 		builder.append(loc.getX());
 		builder.append("px; top: ");
 		builder.append(loc.getY());
-		builder.append("px; z-index: ");
-		builder.append(zIndex);
-		builder.append("\">");
+		builder.append("px;\">");
 		builder.append(imageProto.getHTML());
 		builder.append("</div>");
 	}
