@@ -8,6 +8,7 @@ import teropa.globetrotter.client.event.internal.ViewPanHandler;
 import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -15,7 +16,6 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -83,6 +83,7 @@ public class CanvasView extends Composite implements MouseHandler {
 		Point newTopLeft = toTopLeft(newCenterPoint);
 		canvas.translate(topLeft.getX() - newTopLeft.getX(), topLeft.getY() - newTopLeft.getY());
 		topLeft = newTopLeft;
+//		fireEvent(new ViewPanEvent(newCenterPoint));
 	}
 
 	public void addImage(ImageAndCoords image) {
@@ -123,23 +124,36 @@ public class CanvasView extends Composite implements MouseHandler {
 	
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
-			int minX = 0, minY = 0;
-			int maxX = virtualSize.getWidth() - getVisibleSize().getWidth();
-			int maxY = virtualSize.getHeight() - getVisibleSize().getHeight();
-			int x = Math.min(maxX, Math.max(minX, topLeft.getX() - (event.getX() - xOffset)));
-			int y = Math.min(maxY, Math.max(minY, topLeft.getY() - (event.getY() - yOffset)));
-			int xDelta = topLeft.getX() - x;
-			int yDelta = topLeft.getY() - y;
-
-			canvas.translate(xDelta, yDelta);
-			topLeft = new Point(x, y);
-
+			int wantedX = topLeft.getX() - (event.getX() - xOffset);
+			int wantedY = topLeft.getY() - (event.getY() - yOffset);
+			
+			moveTo(wantedX, wantedY);
+			
 			xOffset = event.getX();
 			yOffset = event.getY();
-			
-			fireEvent(new ViewPanEvent(toCenter(topLeft)));
-			draw();
 		}
+	}
+
+	public void moveTo(int newX, int newY) {
+		int maxX = virtualSize.getWidth() - getVisibleSize().getWidth();
+		int maxY = virtualSize.getHeight() - getVisibleSize().getHeight();
+		newX = Math.min(maxX, Math.max(0, newX));
+		newY = Math.min(maxY, Math.max(0, newY));
+		int xDelta = topLeft.getX() - newX;
+		int yDelta = topLeft.getY() - newY;
+
+		canvas.translate(xDelta, yDelta);
+		topLeft = new Point(newX, newY);
+
+		draw();
+		fireEvent(new ViewPanEvent(toCenter(topLeft)));
+	}
+	
+	public void move(int xDelta, int yDelta) {
+		int newX = topLeft.getX() + xDelta;
+		int newY = topLeft.getY() + yDelta;
+		GWT.log("Moving from "+topLeft+" to "+new Point(newX, newY));
+		moveTo(newX, newY);
 	}
 	
 	public void onClick(ClickEvent event) {

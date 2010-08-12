@@ -20,6 +20,8 @@ import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.ViewZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
+import teropa.globetrotter.client.event.internal.ViewPanHandler;
+import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.user.client.Command;
@@ -27,7 +29,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, ViewPanEndEvent.Handler, ViewZoomedEvent.Handler {
+public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZoomedEvent.Handler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final CanvasView view = new CanvasView(this);
@@ -48,6 +50,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		initWidget(container);
 		setWidth(width);
 		setHeight(height);
+		view.addViewPanHandler(this);
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				init();
@@ -188,6 +191,9 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		resizeView(-1);
 	}
 
+	public void onViewPanStarted(ViewPanStartEvent event) {
+	}
+	
 	public void onViewPanEnded(ViewPanEndEvent event) {
 	}
 	
@@ -196,13 +202,12 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	}
 
 	public void move(Direction dir, int amountPx) {
-		Point centerPoint = Calc.getPoint(getCenter(), getMaxExtent(), getViewSize(), getProjection());
-		Point newCenterPoint = Calc.addToPoint(centerPoint, amountPx, dir);
-		LonLat newCenter = Calc.getLonLat(newCenterPoint, getMaxExtent(), getViewSize(), getProjection());
-		Bounds newExtent = Calc.getExtent(newCenter, resolutions[resolutionIndex], getViewportSize(), getProjection());
-		LonLat ensuredCenter = Calc.keepInBounds(newExtent, maxExtent, getProjection()).getCenter();
-		setCenter(ensuredCenter);
-		adjustViewAndViewportSize();
+		switch(dir) {
+		case RIGHT: view.move(amountPx, 0); break;
+		case DOWN: view.move(0, amountPx); break;
+		case LEFT: view.move(-amountPx, 0); break;
+		case UP: view.move(0, -amountPx); break;
+		}
 	}
 
 	public void onViewZoomed(ViewZoomedEvent event) {
@@ -243,6 +248,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		view.setSize(fullSize);
 		Point centerPoint = getPoint(center, maxExtent, fullSize, getProjection());
 		view.position(centerPoint);
+		view.draw();
 	}
 
 	public boolean isDrawn() {
@@ -251,7 +257,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 
 	public void addControl(Control control, Position at) {
 		control.init(this);
-//		viewport.addControl(control, at);
+		container.add(control.asWidget(), 10, 10);
 	}
 	
 	@Override

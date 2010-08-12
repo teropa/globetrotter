@@ -70,7 +70,7 @@ public class Demo implements EntryPoint {
 //		map.addLayer(markers);
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
-		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
+//		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
 	}
 
 	
