@@ -11,7 +11,6 @@ import teropa.globetrotter.client.ImageAndCoords;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
@@ -50,7 +49,6 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void addTiles(Collection<Tile> newTiles) {
-		GWT.log("Adding "+newTiles.size()+" tiles");
 		for (final Tile each : newTiles) {
 			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {

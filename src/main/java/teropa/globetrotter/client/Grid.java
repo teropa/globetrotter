@@ -17,6 +17,8 @@ import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 
 public class Grid implements ViewPanHandler {
 
+	private static final int BUFFER = 2;
+	
 	private final int tileWidth;
 	private final int tileHeight;
 	private final ViewContext ctx;
@@ -153,21 +155,25 @@ public class Grid implements ViewPanHandler {
 		while (xStart < tileXs.length && tileXs[xStart] < area.x)
 			xStart++;
 		if (xStart > 0) xStart--;
-
+		xStart = Math.max(0, xStart - BUFFER);
+		
 		int xEnd = xStart;
 		while (xEnd < tileXs.length && tileXs[xEnd] < area.x + area.width)
 			xEnd++;
 		if (xEnd > xStart) xEnd--;
+		xEnd = Math.min(numCols - 1, xEnd + BUFFER);
 		
 		int yStart = 0;
 		while (yStart < tileYs.length && tileYs[yStart] < area.y)
 			yStart++;
 		if (yStart > 0) yStart--;
-
+		yStart = Math.max(0, yStart - BUFFER);
+		
 		int yEnd = yStart;
 		while (yEnd < tileYs.length && tileYs[yEnd] < area.y + area.height)
 			yEnd++;
 		if (yEnd > yStart) yEnd--;
+		yEnd = Math.min(numRows - 1, yEnd + BUFFER);
 		
 		return new int[] { xStart, xEnd, yStart, yEnd };
 	}

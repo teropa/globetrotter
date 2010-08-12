@@ -11,8 +11,6 @@ import teropa.globetrotter.client.proj.Projection;
 
 public interface ViewContext {
 
-	boolean isDrawn();
-
 	Projection getProjection();
 	
 	Grid getGrid();

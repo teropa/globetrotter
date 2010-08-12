@@ -40,7 +40,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	private LonLat center = new LonLat(0, 0);
 	private double[] resolutions = new double[] { 1.0, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005 };
 	private int resolutionIndex = 4;
-	private boolean drawn;
 	
 	private Size tileSize = new Size(256, 256);
 	
@@ -247,27 +246,12 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		view.draw();
 	}
 
-	public boolean isDrawn() {
-		return drawn;
-	}
-
 	public void addControl(Control control, Position at) {
 		control.init(this);
 		switch (at) {
 		case TOP_LEFT: container.add(control.asWidget(), 10, 10); break;
 		case MIDDLE_LEFT: container.add(control.asWidget(), 10, 100); break;
 		}
-	}
-	
-	@Override
-	protected void onLoad() {
-		super.onLoad();
-		DeferredCommand.addCommand(new Command() {
-			public void execute() {
-				drawn = true;
-//				mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
-			}
-		});
 	}
 
 	public List<Layer> getLayers() {
@@ -277,8 +261,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	public void addMapZoomedHandler(MapZoomedEvent.Handler handler) {
 		addHandler(handler, MapZoomedEvent.TYPE);
 	}
-
-
 
 }
 
