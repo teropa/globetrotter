@@ -1,25 +1,15 @@
 package teropa.globetrotter.client.event;
 
-import teropa.globetrotter.client.common.Point;
-
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 
-public class ViewZoomedEvent extends GwtEvent<ViewZoomedEvent.Handler> {
+public class MapZoomedEvent extends GwtEvent<MapZoomedEvent.Handler> {
 
 	public static Type<Handler> TYPE = new Type<Handler>();
 	
 	public static interface Handler extends EventHandler {
-		public void onViewZoomed(ViewZoomedEvent event);
-	}
-	
-	public final Point point;
-	public final int levels;
-	
-	public ViewZoomedEvent(Point point, int levels) {
-		this.point = point;
-		this.levels = levels;
+		public void onMapZoomed(MapZoomedEvent event);
 	}
 	
 	public Type<Handler> getAssociatedType() {
@@ -27,7 +17,7 @@ public class ViewZoomedEvent extends GwtEvent<ViewZoomedEvent.Handler> {
 	}
 	
 	protected void dispatch(Handler handler) {
-		handler.onViewZoomed(this);
+		handler.onMapZoomed(this);
 	}
 	
 }

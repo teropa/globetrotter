@@ -1,5 +1,6 @@
 package teropa.globetrotter.client;
 
+import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
@@ -10,6 +11,8 @@ import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -21,7 +24,7 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
 
-public class CanvasView extends Composite implements MouseHandler {
+public class CanvasView extends Composite implements MouseHandler, DoubleClickHandler {
 
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
@@ -51,6 +54,7 @@ public class CanvasView extends Composite implements MouseHandler {
 		canvas.addMouseUpHandler(this);
 		canvas.addMouseMoveHandler(this);
 		canvas.addClickHandler(this);
+		canvas.addDoubleClickHandler(this);
 		initWidget(canvas);
 		setWidth("100%");
 		setHeight("100%");
@@ -83,7 +87,6 @@ public class CanvasView extends Composite implements MouseHandler {
 		Point newTopLeft = toTopLeft(newCenterPoint);
 		canvas.translate(topLeft.getX() - newTopLeft.getX(), topLeft.getY() - newTopLeft.getY());
 		topLeft = newTopLeft;
-//		fireEvent(new ViewPanEvent(newCenterPoint));
 	}
 
 	public void addImage(ImageAndCoords image) {
@@ -160,6 +163,12 @@ public class CanvasView extends Composite implements MouseHandler {
 		
 	}
 
+	public void onDoubleClick(DoubleClickEvent event) {
+		int x = topLeft.getX() + (event.getNativeEvent().getClientX() - getAbsoluteLeft());
+		int y = topLeft.getY() + (event.getNativeEvent().getClientY() - getAbsoluteTop());
+		map.zoomIn(Calc.getLonLat(new Point(x, y), map.getMaxExtent(), map.getViewSize(), map.getProjection()));
+	}
+	
 	public HandlerRegistration addViewPanHandler(ViewPanHandler handler) {
 		final HandlerRegistration startRegistration = addHandler(handler, ViewPanStartEvent.TYPE);
 		final HandlerRegistration panRegistration = addHandler(handler, ViewPanEvent.TYPE);

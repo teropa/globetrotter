@@ -17,7 +17,7 @@ import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Control;
-import teropa.globetrotter.client.event.ViewZoomedEvent;
+import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.event.internal.ViewPanHandler;
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZoomedEvent.Handler {
+public class Map extends Composite implements ViewContext, ViewPanHandler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final CanvasView view = new CanvasView(this);
@@ -185,7 +185,11 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 	public void zoomIn() {
 		resizeView(1);
 	}
-	
+
+	public void zoomIn(LonLat newCenter) {
+		resizeView(1, newCenter);
+	}
+
 	public void zoomOut() {
 		resizeView(-1);
 	}
@@ -209,12 +213,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 		}
 	}
 
-	public void onViewZoomed(ViewZoomedEvent event) {
-		LonLat pointedAt = getLonLat(event.point, maxExtent, view.getSize(), getProjection());
-		resizeView(event.levels, pointedAt);
-	}
-	
-
 	private boolean newResolutionInBounds(int delta) {
 		if (delta > 0) {
 			return resolutionIndex + delta < resolutions.length;
@@ -228,6 +226,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 			resolutionIndex += delta;
 		}
 		adjustView();
+		fireEvent(new MapZoomedEvent());
 	}
 	
 	private void resizeView(int delta, LonLat newCenter) {
@@ -236,6 +235,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 		}
 		setCenter(newCenter);
 		adjustView();
+		fireEvent(new MapZoomedEvent());
 	}
 
 	private void adjustView() {
@@ -273,6 +273,11 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 	public List<Layer> getLayers() {
 		return layers;
 	}
+
+	public void addMapZoomedHandler(MapZoomedEvent.Handler handler) {
+		addHandler(handler, MapZoomedEvent.TYPE);
+	}
+
 
 
 }
