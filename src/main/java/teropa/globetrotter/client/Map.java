@@ -60,8 +60,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 	
 	private void init() {
 		container.add(view);
-		adjustViewAndViewportSize();
-		getGrid().init();
+		adjustView();
 	}
 	
 	public void addLayer(Layer layer) {
@@ -168,7 +167,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 	
 	public Grid getGrid() {
 		if (grid == null) {
-			grid = new Grid(getTileSize(), getFullSize(), this);
+			grid = new Grid(getTileSize(), this);
 		}
 		return grid;
 	}
@@ -228,9 +227,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 		if (newResolutionInBounds(delta)) {
 			resolutionIndex += delta;
 		}
-		adjustViewAndViewportSize();
-		grid = null;
-//		mapEvents.fireEvent(new MapViewChangedEvent(false, false, true, false));
+		adjustView();
 	}
 	
 	private void resizeView(int delta, LonLat newCenter) {
@@ -238,16 +235,15 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 			resolutionIndex += delta;
 		}
 		setCenter(newCenter);
-		adjustViewAndViewportSize();
-		grid = null;
-//		mapEvents.fireEvent(new MapViewChangedEvent(true, true, true, false));
+		adjustView();
 	}
 
-	private void adjustViewAndViewportSize() {
+	private void adjustView() {
 		Size fullSize = getPixelSize(maxExtent, resolutions[resolutionIndex]);
 		view.setSize(fullSize);
 		Point centerPoint = getPoint(center, maxExtent, fullSize, getProjection());
 		view.position(centerPoint);
+		getGrid().init(getFullSize());
 		view.draw();
 	}
 
@@ -257,7 +253,10 @@ public class Map extends Composite implements ViewContext, ViewPanHandler, ViewZ
 
 	public void addControl(Control control, Position at) {
 		control.init(this);
-		container.add(control.asWidget(), 10, 10);
+		switch (at) {
+		case TOP_LEFT: container.add(control.asWidget(), 10, 10); break;
+		case MIDDLE_LEFT: container.add(control.asWidget(), 10, 100); break;
+		}
 	}
 	
 	@Override

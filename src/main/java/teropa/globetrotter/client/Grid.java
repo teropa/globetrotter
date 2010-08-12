@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
+
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
@@ -19,24 +21,17 @@ public class Grid implements ViewPanHandler {
 	private final int tileHeight;
 	private final ViewContext ctx;
 	
-	private final int numCols;
-	private final int numRows;
-	private final int[] tileXs;
-	private final int[] tileYs;
+	private int numCols;
+	private int numRows;
+	private int[] tileXs;
+	private int[] tileYs;
 
 	private int[] coords;
 	
-	public Grid(Size tileSize, Size fullSize, ViewContext ctx) {
+	public Grid(Size tileSize, ViewContext ctx) {
 		this.tileWidth = tileSize.getWidth();
 		this.tileHeight = tileSize.getHeight();
-		this.ctx = ctx;
-		
-		numCols = fullSize.getWidth() / tileWidth;
-		numRows = fullSize.getHeight() / tileHeight;
-		
-		tileXs = initTileXs();
-		tileYs = initTileYs();
-		
+		this.ctx = ctx;		
 		ctx.getView().addViewPanHandler(this);
 	}
 
@@ -46,6 +41,26 @@ public class Grid implements ViewPanHandler {
 
 	public int getNumRows() {
 		return numRows;
+	}
+
+	public void init(Size fullSize) {
+		notifyAllTilesRemoved();
+		
+		numCols = fullSize.getWidth() / tileWidth;
+		numRows = fullSize.getHeight() / tileHeight;
+		
+		tileXs = initTileXs();
+		tileYs = initTileYs();
+
+		coords = getVisibleCoords(ctx.getVisibleRectangle());
+		GWT.log("vis: "+coords[0]+","+coords[1]+" "+coords[2]+","+coords[3]);
+		Set<Tile> tiles = new HashSet<Grid.Tile>();
+		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
+			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
+				tiles.add(makeTile(xIdx, yIdx));
+			}
+		}
+		notifyNewTiles(tiles);
 	}
 
 	private int[] initTileXs() {
@@ -64,24 +79,13 @@ public class Grid implements ViewPanHandler {
 		return res;
 	}
 
-	public void init() {
-		coords = getVisibleCoords(ctx.getVisibleRectangle());
-		Set<Tile> tiles = new HashSet<Grid.Tile>();
-		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
-			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
-				tiles.add(makeTile(xIdx, yIdx));
-			}
-		}
-		notifyNewTiles(tiles);
-	}
-
 	public void onViewPanStarted(ViewPanStartEvent event) {
 		coords = getVisibleCoords(ctx.getVisibleRectangle());
 	}
 	
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
-		
+		GWT.log("Panned... "+newCoords[0]+","+newCoords[1]+" "+newCoords[2]+","+newCoords[3]);
 		if (Arrays.equals(newCoords, coords)) {
 			return;
 		}
@@ -109,6 +113,12 @@ public class Grid implements ViewPanHandler {
 	private void notifyRemovedTiles(final Set<Tile> removedTiles) {
 		for (Layer each : ctx.getLayers()) {
 			each.removeTiles(removedTiles);
+		}
+	}
+
+	private void notifyAllTilesRemoved() {
+		for (Layer each : ctx.getLayers()) {
+			each.removeAllTiles();
 		}
 	}
 

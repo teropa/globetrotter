@@ -106,6 +106,12 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 		
 	}
 	
+	@Override
+	public void removeAllTiles() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 //	public void onMapViewChanged(MapViewChangedEvent evt) {
 //		if (evt.effectiveExtentChanged && positioned) {
 //			repositionMarkers();

@@ -49,6 +49,7 @@ public abstract class Layer {
 
 	public abstract void addTiles(Collection<Grid.Tile> newTiles);
 	public abstract void removeTiles(Collection<Grid.Tile> removedTiles);
+	public abstract void removeAllTiles();
 
 	
 

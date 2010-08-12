@@ -99,8 +99,10 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	public void onClick(ClickEvent event) {
 		if (event.getSource() == zoomIn) {
 			map.zoomIn();
+			positionKnob();
 		} else if (event.getSource() == zoomOut) {
 			map.zoomOut();
+			positionKnob();
 		}
 	}
 	
