@@ -11,6 +11,7 @@ import teropa.globetrotter.client.ImageAndCoords;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
@@ -48,7 +49,7 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	@Override
-	public void addTiles(Collection<Tile> newTiles) {
+	public void tilesActivated(Collection<Tile> newTiles) {
 		for (final Tile each : newTiles) {
 			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
@@ -61,12 +62,12 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	@Override
-	public void removeTiles(Collection<Tile> removedTiles) {
+	public void tilesDeactivated(Collection<Tile> removedTiles) {
 		images.keySet().removeAll(removedTiles);
 	}
 	
 	@Override
-	public void removeAllTiles() {
+	public void allTilesDeactivated() {
 		images.clear();
 	}
 	

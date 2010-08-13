@@ -2,20 +2,24 @@ package teropa.globetrotter.client;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.controls.Panner;
 import teropa.globetrotter.client.controls.Zoomer;
+import teropa.globetrotter.client.marker.Marker;
+import teropa.globetrotter.client.marker.MarkerLayer;
 import teropa.globetrotter.client.osm.OpenStreetMapLayer;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class Demo implements EntryPoint {
 
-	private int radarIdx = 0;
 	
 	public void onModuleLoad() {
 		final Map map = new Map("100%", "100%");
@@ -34,6 +38,13 @@ public class Demo implements EntryPoint {
 		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS);
 		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
 		
+		OpenStreetMapLayer overlay = new OpenStreetMapLayer("http://localhost/", "Test overlay", false);
+		map.addLayer(overlay);
+		
+		for (int i=0 ; i<map.getResolutions().length ; i++) {
+			double res = map.getResolutions()[i];
+			GWT.log("Size: "+Calc.getPixelSize(map.getMaxExtent(), res));
+		}
 		RootPanel.get("container").add(map);
 //		
 //		WMSBase canada = new TiledWMS("Canada", "http://www2.dmsolutions.ca/cgi-bin/mswms_gmap");
@@ -49,13 +60,13 @@ public class Demo implements EntryPoint {
 //		radar.setIsVisible(false);
 //		map.addLayer(radar);
 //		
-//		final MarkerLayer markers = new MarkerLayer("Capitals");
-//		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
-//		for (DemoCities.City city : DemoCities.CITIES) {
-//			Marker marker = new Marker(city.getLonLat());
-//			markers.addMarker(marker);
-//			citiesByMarker.put(marker, city);
-//		}
+		final MarkerLayer markers = new MarkerLayer("Capitals");
+		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
+		for (DemoCities.City city : DemoCities.CITIES) {
+			Marker marker = new Marker(city.getLonLat());
+			markers.addMarker(marker);
+			citiesByMarker.put(marker, city);
+		}
 //		markers.addMarkerClickHandler(new MarkerClickEvent.Handler() {
 //			public void onMarkerClick(MarkerClickEvent evt) {
 //				if (evt.marker.hasPopup()) {
@@ -67,7 +78,7 @@ public class Demo implements EntryPoint {
 //				}
 //			}
 //		});
-//		map.addLayer(markers);
+		map.addLayer(markers);
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);

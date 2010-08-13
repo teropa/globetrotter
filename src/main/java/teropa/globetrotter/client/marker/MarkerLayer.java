@@ -1,83 +1,53 @@
 package teropa.globetrotter.client.marker;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
-import teropa.globetrotter.client.AbsoluteFocusPanel;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.common.Calc;
+import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.widgetideas.graphics.client.ImageLoader;
+import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
-public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandler, MouseDownHandler, MouseOverHandler, EventListener {
+public class MarkerLayer extends Layer {
 	
-	private final AbsoluteFocusPanel container = new AbsoluteFocusPanel();
-	private final List<Marker> markers = new ArrayList<Marker>();
+	private final HashMap<Marker, ImageElement> markers = new HashMap<Marker, ImageElement>();
 	private final HandlerManager handlers = new HandlerManager(this);
-	
-	private boolean positioned = false;
-	
-	private boolean shouldReplace = false;
-	private final Command replaceCommand = new Command() {	
-		public void execute() {
-			if (shouldReplace) {
-				replaceMarkers();
-				shouldReplace = false;
-			}
-		}
-	};
 	
 	public MarkerLayer(String name) {
 		super(name, false);
-		container.addClickHandler(this);
-		container.addDoubleClickHandler(this);
-		container.addMouseDownHandler(this);
-		container.addMouseOverHandler(this);
 	}
 	
-	public void addMarker(Marker marker) {
-		markers.add(marker);
-		marker.setLayer(this);
-		shouldReplace = true;
-		DeferredCommand.addCommand(replaceCommand);
+	public void addMarker(final Marker marker) {
+		final ImageResource img = marker.getImage();
+		ImageLoader.loadImages(new String[] { img.getURL() }, new CallBack() {
+			public void onImagesLoaded(ImageElement[] imageElements) {
+				ImageElement imgEl = imageElements[0];
+				drawMarker(marker, imgEl);
+				markers.put(marker, imgEl);
+			}
+		});
 	}
 	
 	public void addMarkers(Collection<? extends Marker> newMarkers) {
-		for (Marker each : newMarkers) {
-			markers.add(each);
-			each.setLayer(this);
+		for (final Marker each : newMarkers) {
+			addMarker(each);
 		}
-		shouldReplace = true;
-		DeferredCommand.addCommand(replaceCommand);
 	}
 	
 	public void removeMarker(Marker marker) {
-		if (positioned) {
-			marker.remove();
-		}
 		markers.remove(marker);
-		marker.setLayer(null);
 	}
 		
 	public HandlerRegistration addMarkerClickHandler(MarkerClickEvent.Handler handler) {
@@ -90,160 +60,32 @@ public class MarkerLayer extends Layer implements ClickHandler, DoubleClickHandl
 	
 	@Override
 	public void drawOn(CanvasView canvasView) {
-		// TODO Auto-generated method stub
-		
+		for (Map.Entry<Marker, ImageElement> eachEntry : markers.entrySet()) {
+			Marker marker = eachEntry.getKey();
+			ImageElement imgEl = eachEntry.getValue();
+			drawMarker(marker, imgEl);
+		}
+	}
+
+	private void drawMarker(Marker marker, ImageElement imgEl) {
+		ImageResource img = marker.getImage();
+		LonLat normalizedLoc = getProjection().from(marker.getLoc());
+		LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+		Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+		Point translatedPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
+		context.getView().getCanvas().drawImage(imgEl, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());		
 	}
 	
 	@Override
-	public void addTiles(Collection<Grid.Tile> newTiles) {
-		// TODO Auto-generated method stub
-		
+	public void tilesActivated(Collection<Grid.Tile> newTiles) {
 	}
 	
 	@Override
-	public void removeTiles(Collection<Tile> removedTiles) {
-		// TODO Auto-generated method stub
-		
+	public void tilesDeactivated(Collection<Tile> removedTiles) {
 	}
 	
 	@Override
-	public void removeAllTiles() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-//	public void onMapViewChanged(MapViewChangedEvent evt) {
-//		if (evt.effectiveExtentChanged && positioned) {
-//			repositionMarkers();
-//		}
-//		if (evt.zoomed) {
-//			positioned = false;
-//		}
-//		if ((evt.zoomed || evt.panned) && !positioned) {
-//			replaceMarkers();
-//			positioned = true;
-//		}
-//	}
-
-	private void replaceMarkers() {
-		StringBuilder markup = new StringBuilder();
-		int size = markers.size();
-		for (int i=0 ; i<size ; i++) {
-			Marker each = markers.get(i);
-			if (each.hasPopup()) {
-				onMarkerPopupRemove(each);
-			}
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
-			each.appendMarkup(markup, getMarkerIdPrefix() + i, loc);
-		}
-//		final MarkerLayer self = this;
-//		DeferredCommand.addCommand(new Command() {
-//			public void execute() {
-//				int size = markers.size();
-//				for (int i=0 ; i<size ; i++) {
-//					Element markerElement = Document.get().getElementById(getMarkerIdPrefix() + i);
-//					Event.sinkEvents(markerElement, Event.ONMOUSEOVER | Event.ONMOUSEOUT);
-//					Event.setEventListener(markerElement, self);
-//				}
-//			}
-//		});
-		DOM.setInnerHTML(container.getElement(), markup.toString());
-		for (int i=0 ; i<size ; i++) {
-			Marker each = markers.get(i);
-			if (each.hasPopup()) {
-				onMarkerPopupAdded(each);
-			}
-		}
+	public void allTilesDeactivated() {
 	}
 
-	public void onMarkerPopupAdded(Marker marker) {
-		Point point = Calc.getPoint(marker.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
-		Point pinPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
-		Point popupPoint = marker.getPopupPosition().translateAroundSize(pinPoint, marker.getSize());
-		container.add(marker.getPopup(), popupPoint.getX(), popupPoint.getY());
-	}
-
-	public void onMarkerPopupRemove(Marker marker) {
-		container.remove(marker.getPopup());		
-	}
-
-	private void repositionMarkers() {
-		int size = markers.size();
-		for (int i=0 ; i<size ; i++) {
-			Marker each = markers.get(i);
-			Point loc = Calc.getPoint(each.getLoc(), context.getMaxExtent(), context.getViewSize(), context.getProjection());
-			each.repositionTo(loc);
-		}
-	}
-	
-	public void onClick(ClickEvent event) {
-		Integer idx = getMarkerIdx(event.getNativeEvent());
-		if (idx != null) {
-			event.stopPropagation();
-			handlers.fireEvent(new MarkerClickEvent(markers.get(idx), this));
-		}
-	}
-
-	public void onDoubleClick(DoubleClickEvent event) {
-		Integer idx = getMarkerIdx(event.getNativeEvent());
-		if (idx != null) {
-			event.stopPropagation();
-			handlers.fireEvent(new MarkerDoubleClickEvent(markers.get(idx), this));
-		}		
-	}
-	
-	public void onMouseDown(MouseDownEvent event) {
-		Integer idx = getMarkerIdx(event.getNativeEvent());
-		if (idx != null) {
-			event.stopPropagation();
-		}
-	}
-
-	public void onMouseOver(MouseOverEvent event) {
-	}
-	
-	public void onBrowserEvent(Event event) {
-		if (event.getTypeInt() == Event.ONMOUSEOVER) {
-			Integer idx = getMarkerIdx(event);
-			if (idx != null) {
-				onMarkerMouseOver(markers.get(idx));
-			}
-		} else if (event.getTypeInt() == Event.ONMOUSEOUT) {
-			Integer idx = getMarkerIdx(event);
-			if (idx != null) {
-				onMarkerMouseOut(markers.get(idx));
-			}
-		}
-	}
-	
-	public void onMarkerMouseOver(Marker marker) {
-	}
-	
-	public void onMarkerMouseOut(Marker marker) {
-	}
-	
-	private Integer getMarkerIdx(NativeEvent event) {
-		Element target = Element.as(event.getEventTarget());
-		String itemId = null;
-		while (isBlank(itemId) && target != container.getElement()) {
-			itemId = target.getId();
-			if (isBlank(itemId)) {
-				target = target.getParentElement();
-			}
-		}
-		if (isBlank(itemId)) {
-			return null;
-		} else {
-			return Integer.valueOf(itemId.substring(getMarkerIdPrefix().length()));
-		}
-	}
-
-	private boolean isBlank(String str) {
-		return str == null || "".equals(str);
-	}
-
-
-	private String getMarkerIdPrefix() {
-		return id + "_marker_";
-	}
 }

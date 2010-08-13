@@ -47,9 +47,9 @@ public abstract class Layer {
 
 	public abstract void drawOn(CanvasView canvasView);
 
-	public abstract void addTiles(Collection<Grid.Tile> newTiles);
-	public abstract void removeTiles(Collection<Grid.Tile> removedTiles);
-	public abstract void removeAllTiles();
+	public abstract void tilesActivated(Collection<Grid.Tile> newTiles);
+	public abstract void tilesDeactivated(Collection<Grid.Tile> removedTiles);
+	public abstract void allTilesDeactivated();
 
 	
 

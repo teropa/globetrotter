@@ -23,6 +23,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
 public class CanvasView extends Composite implements MouseHandler, DoubleClickHandler {
 
@@ -155,7 +156,6 @@ public class CanvasView extends Composite implements MouseHandler, DoubleClickHa
 	public void move(int xDelta, int yDelta) {
 		int newX = topLeft.getX() + xDelta;
 		int newY = topLeft.getY() + yDelta;
-		GWT.log("Moving from "+topLeft+" to "+new Point(newX, newY));
 		moveTo(newX, newY);
 	}
 	
@@ -194,6 +194,10 @@ public class CanvasView extends Composite implements MouseHandler, DoubleClickHa
 		return new Point(
 				topLeft.getX() + visibleSize.getWidth() / 2,
 				topLeft.getY() + visibleSize.getHeight() / 2);
+	}
+
+	public GWTCanvas getCanvas() {
+		return canvas;
 	}
 	
 }

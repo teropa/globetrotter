@@ -90,7 +90,7 @@ public abstract class Mercator extends Projection {
 	
 	@Override
 	public int leftToRight() {
-		return -1;
+		return 1;
 	}
 	
 	@Override
