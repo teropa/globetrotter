@@ -27,7 +27,17 @@ import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
 public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 	
-	private final HashMap<Marker, ImageElement> markers = new HashMap<Marker, ImageElement>();
+	private static class MarkerData {
+		public final ImageElement image;
+		public final LonLat projectedLoc;
+		
+		public MarkerData(ImageElement image, LonLat projectedPos) {
+			this.image = image;
+			this.projectedLoc = projectedPos;
+		}
+	}
+	
+	private final HashMap<Marker, MarkerData> markers = new HashMap<Marker, MarkerData>();
 	private final HandlerManager handlers = new HandlerManager(this);
 	
 	public MarkerLayer(String name) {
@@ -52,10 +62,12 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 			}
 
 			private void drawMatchingMarkers(ImageElement img) {
+				String src = img.getSrc();
 				for (Marker eachMarker : newMarkers) {
-					if (img.getSrc().equals(eachMarker.getImage().getURL())) {
-						drawMarker(eachMarker, img);
-						markers.put(eachMarker, img);							
+					if (src.equals(eachMarker.getImage().getURL())) {
+						MarkerData data = new MarkerData(img, projectLocation(eachMarker));
+						drawMarker(eachMarker, data);
+						markers.put(eachMarker, data);							
 					}
 				}
 			}
@@ -63,10 +75,9 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 		});
 	}
 
-	private HashSet<String> collectImageUrls(
-			final Collection<? extends Marker> newMarkers) {
+	private HashSet<String> collectImageUrls(Collection<? extends Marker> markers) {
 		HashSet<String> urls = new HashSet<String>();
-		for (Marker each : newMarkers) {
+		for (Marker each : markers) {
 			urls.add(each.getImage().getURL());
 		}
 		return urls;
@@ -86,33 +97,39 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 	
 	@Override
 	public void drawOn(View canvasView) {
-		for (Map.Entry<Marker, ImageElement> eachEntry : markers.entrySet()) {
+		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
 			Marker marker = eachEntry.getKey();
-			ImageElement imgEl = eachEntry.getValue();
-			drawMarker(marker, imgEl);
+			MarkerData data = eachEntry.getValue();
+			drawMarker(marker, data);
 		}
 	}
 
-	private void drawMarker(Marker marker, ImageElement imgEl) {
+	private void drawMarker(Marker marker, MarkerData data) {
 		ImageResource img = marker.getImage();
-		LonLat normalizedLoc = getProjection().from(marker.getLoc());
-		LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+		LonLat projectedLoc = data.projectedLoc;
 		Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
 		Point translatedPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
-		context.getView().getCanvas().drawImage(imgEl, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());		
+		context.getView().getCanvas().drawImage(data.image, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());		
+	}
+
+	private LonLat projectLocation(Marker marker) {
+		LonLat normalizedLoc = getProjection().from(marker.getLoc());
+		LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+		return projectedLoc;
 	}
 	
 	
 	public void onViewClicked(ViewClickEvent event) {
 		Point p = event.point;
-		for (Marker each : markers.keySet()) {
-			LonLat normalizedLoc = getProjection().from(each.getLoc());
-			LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
+			Marker marker = eachEntry.getKey();
+			MarkerData data = eachEntry.getValue();
+			LonLat projectedLoc = data.projectedLoc;
 			Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
-			Point translatedPoint = each.getPinPosition().translateAroundPoint(point, each.getSize());
-			if (p.getX() >= translatedPoint.getX() && p.getX() <= translatedPoint.getX() + each.getSize().getWidth() &&
-				p.getY() >= translatedPoint.getY() && p.getY() <= translatedPoint.getY() + each.getSize().getHeight()) {
-				Window.alert(each.toString());
+			Point translatedPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
+			if (p.getX() >= translatedPoint.getX() && p.getX() <= translatedPoint.getX() + marker.getSize().getWidth() &&
+				p.getY() >= translatedPoint.getY() && p.getY() <= translatedPoint.getY() + marker.getSize().getHeight()) {
+				Window.alert(marker.toString());
 				break;
 			}
 		}
@@ -133,16 +150,16 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 	@Override
 	public void updateTile(Tile tile) {
 		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), 256, 256);
-		for (Marker each : markers.keySet()) {
-			LonLat normalizedLoc = getProjection().from(each.getLoc());
-			LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
+			Marker marker = eachEntry.getKey();
+			MarkerData data = eachEntry.getValue();
+			LonLat projectedLoc = data.projectedLoc;
 			Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
-			Point translatedPoint = each.getPinPosition().translateAroundPoint(point, each.getSize());
-			Rectangle markerRect = new Rectangle(translatedPoint.getX(), translatedPoint.getY(), each.getSize().getWidth(), each.getSize().getHeight());
+			Point translatedPoint = marker.getPinPosition().translateAroundPoint(point, marker.getSize());
+			Rectangle markerRect = new Rectangle(translatedPoint.getX(), translatedPoint.getY(), marker.getSize().getWidth(), marker.getSize().getHeight());
 			if (Calc.intersect(tileRect, markerRect)) {
-				ImageElement imgEl = markers.get(each);
-				ImageResource img = each.getImage();
-				context.getView().getCanvas().drawImage(imgEl, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());				
+				ImageResource img = marker.getImage();
+				context.getView().getCanvas().drawImage(data.image, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());				
 			}
 		}
 	}
