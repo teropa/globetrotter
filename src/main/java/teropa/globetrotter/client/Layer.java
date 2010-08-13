@@ -45,11 +45,11 @@ public abstract class Layer {
 		return projection;
 	}
 
-	public abstract void drawOn(CanvasView canvasView);
+	public abstract void drawOn(View canvasView);
 
-	public abstract void tilesActivated(Collection<Grid.Tile> newTiles);
-	public abstract void tilesDeactivated(Collection<Grid.Tile> removedTiles);
-	public abstract void allTilesDeactivated();
+	public abstract void onTilesActivated(Collection<Grid.Tile> newTiles);
+	public abstract void onTilesDeactivated(Collection<Grid.Tile> removedTiles);
+	public abstract void onAllTilesDeactivated();
 
 	
 

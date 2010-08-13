@@ -37,7 +37,7 @@ public interface ViewContext {
 	
 	Bounds getMaxExtent();
 
-	CanvasView getView();
+	View getView();
 
 	List<Layer> getLayers();
 

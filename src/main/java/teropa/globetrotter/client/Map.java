@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Composite;
 public class Map extends Composite implements ViewContext, ViewPanHandler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
-	private final CanvasView view = new CanvasView(this);
+	private final View view = new View(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
 	
@@ -122,7 +122,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		return tileSize;
 	}
 
-	public CanvasView getView() {
+	public View getView() {
 		return view;
 	}
 	

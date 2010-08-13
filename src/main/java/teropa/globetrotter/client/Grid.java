@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
-
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
@@ -55,7 +53,6 @@ public class Grid implements ViewPanHandler {
 		tileYs = initTileYs();
 
 		coords = getVisibleCoords(ctx.getVisibleRectangle());
-		GWT.log("vis: "+coords[0]+","+coords[1]+" "+coords[2]+","+coords[3]);
 		Set<Tile> tiles = new HashSet<Grid.Tile>();
 		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
 			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
@@ -87,7 +84,6 @@ public class Grid implements ViewPanHandler {
 	
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
-		GWT.log("Panned... "+newCoords[0]+","+newCoords[1]+" "+newCoords[2]+","+newCoords[3]);
 		if (Arrays.equals(newCoords, coords)) {
 			return;
 		}
@@ -114,19 +110,19 @@ public class Grid implements ViewPanHandler {
 
 	private void notifyRemovedTiles(final Set<Tile> removedTiles) {
 		for (Layer each : ctx.getLayers()) {
-			each.tilesDeactivated(removedTiles);
+			each.onTilesDeactivated(removedTiles);
 		}
 	}
 
 	private void notifyAllTilesRemoved() {
 		for (Layer each : ctx.getLayers()) {
-			each.allTilesDeactivated();
+			each.onAllTilesDeactivated();
 		}
 	}
 
 	private void notifyNewTiles(final Set<Tile> newTiles) {
 		for (Layer each : ctx.getLayers()) {
-			each.tilesActivated(newTiles);
+			each.onTilesActivated(newTiles);
 		}
 	}
 

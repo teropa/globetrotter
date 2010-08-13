@@ -41,10 +41,6 @@ public class Demo implements EntryPoint {
 		OpenStreetMapLayer overlay = new OpenStreetMapLayer("http://localhost/", "Test overlay", false);
 		map.addLayer(overlay);
 		
-		for (int i=0 ; i<map.getResolutions().length ; i++) {
-			double res = map.getResolutions()[i];
-			GWT.log("Size: "+Calc.getPixelSize(map.getMaxExtent(), res));
-		}
 		RootPanel.get("container").add(map);
 //		
 //		WMSBase canada = new TiledWMS("Canada", "http://www2.dmsolutions.ca/cgi-bin/mswms_gmap");

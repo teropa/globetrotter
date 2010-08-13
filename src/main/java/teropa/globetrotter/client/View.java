@@ -3,13 +3,13 @@ package teropa.globetrotter.client;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
+import teropa.globetrotter.client.event.internal.ViewClickEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.event.internal.ViewPanHandler;
 import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
@@ -25,7 +25,7 @@ import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
-public class CanvasView extends Composite implements MouseHandler, DoubleClickHandler {
+public class View extends Composite implements MouseHandler, DoubleClickHandler {
 
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
@@ -47,7 +47,7 @@ public class CanvasView extends Composite implements MouseHandler, DoubleClickHa
 	};
 	private HandlerRegistration preventDefaultsRegistration;
 	
-	public CanvasView(Map map) {
+	public View(Map map) {
 		this.map = map;
 		canvas.addMouseOverHandler(this);
 		canvas.addMouseOutHandler(this);
@@ -160,7 +160,9 @@ public class CanvasView extends Composite implements MouseHandler, DoubleClickHa
 	}
 	
 	public void onClick(ClickEvent event) {
-		
+		int x = topLeft.getX() + (event.getNativeEvent().getClientX() - getAbsoluteLeft());
+		int y = topLeft.getY() + (event.getNativeEvent().getClientY() - getAbsoluteTop());
+		fireEvent(new ViewClickEvent(new Point(x, y)));
 	}
 
 	public void onDoubleClick(DoubleClickEvent event) {
@@ -180,6 +182,10 @@ public class CanvasView extends Composite implements MouseHandler, DoubleClickHa
 				endRegistration.removeHandler();
 			}
 		};
+	}
+	
+	public HandlerRegistration addViewClickHandler(ViewClickEvent.Handler handler) {
+		return addHandler(handler, ViewClickEvent.TYPE);
 	}
 	
 	private Point toTopLeft(Point center) {

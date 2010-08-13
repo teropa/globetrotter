@@ -5,28 +5,37 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import teropa.globetrotter.client.CanvasView;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
+import teropa.globetrotter.client.View;
+import teropa.globetrotter.client.ViewContext;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.event.internal.ViewClickEvent;
 
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
-public class MarkerLayer extends Layer {
+public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 	
 	private final HashMap<Marker, ImageElement> markers = new HashMap<Marker, ImageElement>();
 	private final HandlerManager handlers = new HandlerManager(this);
 	
 	public MarkerLayer(String name) {
 		super(name, false);
+	}
+
+	@Override
+	public void init(ViewContext ctx) {
+		super.init(ctx);
+		ctx.getView().addViewClickHandler(this);
 	}
 	
 	public void addMarker(final Marker marker) {
@@ -59,7 +68,7 @@ public class MarkerLayer extends Layer {
 	}
 	
 	@Override
-	public void drawOn(CanvasView canvasView) {
+	public void drawOn(View canvasView) {
 		for (Map.Entry<Marker, ImageElement> eachEntry : markers.entrySet()) {
 			Marker marker = eachEntry.getKey();
 			ImageElement imgEl = eachEntry.getValue();
@@ -76,16 +85,32 @@ public class MarkerLayer extends Layer {
 		context.getView().getCanvas().drawImage(imgEl, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());		
 	}
 	
-	@Override
-	public void tilesActivated(Collection<Grid.Tile> newTiles) {
+	
+	public void onViewClicked(ViewClickEvent event) {
+		Point p = event.point;
+		for (Marker each : markers.keySet()) {
+			LonLat normalizedLoc = getProjection().from(each.getLoc());
+			LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+			Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point translatedPoint = each.getPinPosition().translateAroundPoint(point, each.getSize());
+			if (p.getX() >= translatedPoint.getX() && p.getX() <= translatedPoint.getX() + each.getSize().getWidth() &&
+				p.getY() >= translatedPoint.getY() && p.getY() <= translatedPoint.getY() + each.getSize().getHeight()) {
+				Window.alert(each.toString());
+				break;
+			}
+		}
 	}
 	
 	@Override
-	public void tilesDeactivated(Collection<Tile> removedTiles) {
+	public void onTilesActivated(Collection<Grid.Tile> newTiles) {
 	}
 	
 	@Override
-	public void allTilesDeactivated() {
+	public void onTilesDeactivated(Collection<Tile> removedTiles) {
+	}
+	
+	@Override
+	public void onAllTilesDeactivated() {
 	}
 
 }
