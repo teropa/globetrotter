@@ -50,6 +50,7 @@ public abstract class Layer {
 	public abstract void onTilesActivated(Collection<Grid.Tile> newTiles);
 	public abstract void onTilesDeactivated(Collection<Grid.Tile> removedTiles);
 	public abstract void onAllTilesDeactivated();
+	public abstract void updateTile(Grid.Tile tile);
 
 	
 

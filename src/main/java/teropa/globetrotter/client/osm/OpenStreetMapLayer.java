@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.ImageAndCoords;
 import teropa.globetrotter.client.Layer;
+import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.dom.client.ImageElement;
@@ -49,12 +49,15 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void onTilesActivated(Collection<Tile> newTiles) {
+		final OpenStreetMapLayer _this = this;
 		for (final Tile each : newTiles) {
 			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
-					images.put(each, new ImageAndCoords(imageElements[0], each.getLeftX(), each.getTopY()));
-					context.getView().draw();
+					ImageAndCoords img = new ImageAndCoords(imageElements[0], each.getLeftX(), each.getTopY());
+					images.put(each, img);
+					context.getView().drawImage(img);
+					context.getView().tileUpdated(each, _this);
 				}
 			});
 		}
@@ -71,9 +74,17 @@ public class OpenStreetMapLayer extends Layer {
 	}
 	
 	@Override
+	public void updateTile(Tile tile) {
+		ImageAndCoords mine = images.get(tile);
+		if (mine != null) {
+			context.getView().drawImage(mine);
+		}
+	}
+	
+	@Override
 	public void drawOn(View canvasView) {
 		for (ImageAndCoords each : images.values()) {
-			canvasView.addImage(each);
+			canvasView.drawImage(each);
 		}
 	}
 	

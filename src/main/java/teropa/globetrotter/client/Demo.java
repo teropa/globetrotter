@@ -60,9 +60,9 @@ public class Demo implements EntryPoint {
 		final HashMap<Marker, DemoCities.City> citiesByMarker = new HashMap<Marker, DemoCities.City>();
 		for (DemoCities.City city : DemoCities.CITIES) {
 			Marker marker = new Marker(city.getLonLat());
-			markers.addMarker(marker);
 			citiesByMarker.put(marker, city);
 		}
+		markers.addMarkers(citiesByMarker.keySet());
 //		markers.addMarkerClickHandler(new MarkerClickEvent.Handler() {
 //			public void onMarkerClick(MarkerClickEvent evt) {
 //				if (evt.marker.hasPopup()) {

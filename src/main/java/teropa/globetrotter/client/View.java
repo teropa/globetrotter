@@ -1,5 +1,6 @@
 package teropa.globetrotter.client;
 
+import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
@@ -90,7 +91,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		topLeft = newTopLeft;
 	}
 
-	public void addImage(ImageAndCoords image) {
+	public void drawImage(ImageAndCoords image) {
 		canvas.drawImage(image.getImage(), image.getX(), image.getY());
 	}
 
@@ -204,6 +205,19 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 
 	public GWTCanvas getCanvas() {
 		return canvas;
+	}
+
+	public void tileUpdated(Tile tile, Layer fromLayer) {
+		int layerIdx = 0;
+		for (int i=0 ; i < map.getLayers().size() ; i++) {
+			if (map.getLayers().get(i) == fromLayer) {
+				layerIdx = i;
+				break;
+			}
+		}
+		for (int i = layerIdx + 1 ; i < map.getLayers().size() ; i++) {
+			map.getLayers().get(i).updateTile(tile);
+		}
 	}
 	
 }

@@ -13,6 +13,7 @@ import teropa.globetrotter.client.ViewContext;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
+import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.event.internal.ViewClickEvent;
 
 import com.google.gwt.dom.client.ImageElement;
@@ -38,7 +39,13 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 		ctx.getView().addViewClickHandler(this);
 	}
 	
-	public void addMarker(final Marker marker) {
+	public void addMarkers(Collection<? extends Marker> newMarkers) {
+		for (final Marker each : newMarkers) {
+			addMarker(each);
+		}
+	}
+
+	private void addMarker(final Marker marker) {
 		final ImageResource img = marker.getImage();
 		ImageLoader.loadImages(new String[] { img.getURL() }, new CallBack() {
 			public void onImagesLoaded(ImageElement[] imageElements) {
@@ -48,13 +55,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 			}
 		});
 	}
-	
-	public void addMarkers(Collection<? extends Marker> newMarkers) {
-		for (final Marker each : newMarkers) {
-			addMarker(each);
-		}
-	}
-	
+
 	public void removeMarker(Marker marker) {
 		markers.remove(marker);
 	}
@@ -111,6 +112,23 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 	
 	@Override
 	public void onAllTilesDeactivated() {
+	}
+	
+	@Override
+	public void updateTile(Tile tile) {
+		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), 256, 256);
+		for (Marker each : markers.keySet()) {
+			LonLat normalizedLoc = getProjection().from(each.getLoc());
+			LonLat projectedLoc = context.getProjection().to(normalizedLoc);
+			Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point translatedPoint = each.getPinPosition().translateAroundPoint(point, each.getSize());
+			Rectangle markerRect = new Rectangle(translatedPoint.getX(), translatedPoint.getY(), each.getSize().getWidth(), each.getSize().getHeight());
+			if (Calc.intersect(tileRect, markerRect)) {
+				ImageElement imgEl = markers.get(each);
+				ImageResource img = each.getImage();
+				context.getView().getCanvas().drawImage(imgEl, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), translatedPoint.getX(), translatedPoint.getY(), img.getWidth(), img.getHeight());				
+			}
+		}
 	}
 
 }
