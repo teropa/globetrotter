@@ -3,6 +3,7 @@ package teropa.globetrotter.client.marker;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import teropa.globetrotter.client.Grid;
@@ -39,21 +40,36 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler {
 		ctx.getView().addViewClickHandler(this);
 	}
 	
-	public void addMarkers(Collection<? extends Marker> newMarkers) {
-		for (final Marker each : newMarkers) {
-			addMarker(each);
-		}
+	public void addMarkers(final Collection<? extends Marker> newMarkers) {
+		HashSet<String> urls = collectImageUrls(newMarkers);
+		
+		ImageLoader.loadImages(urls.toArray(new String[urls.size()]), new CallBack() {
+
+			public void onImagesLoaded(ImageElement[] imageElements) {
+				for (ImageElement eachImg : imageElements) {
+					drawMatchingMarkers(eachImg);
+				}
+			}
+
+			private void drawMatchingMarkers(ImageElement img) {
+				for (Marker eachMarker : newMarkers) {
+					if (img.getSrc().equals(eachMarker.getImage().getURL())) {
+						drawMarker(eachMarker, img);
+						markers.put(eachMarker, img);							
+					}
+				}
+			}
+			
+		});
 	}
 
-	private void addMarker(final Marker marker) {
-		final ImageResource img = marker.getImage();
-		ImageLoader.loadImages(new String[] { img.getURL() }, new CallBack() {
-			public void onImagesLoaded(ImageElement[] imageElements) {
-				ImageElement imgEl = imageElements[0];
-				drawMarker(marker, imgEl);
-				markers.put(marker, imgEl);
-			}
-		});
+	private HashSet<String> collectImageUrls(
+			final Collection<? extends Marker> newMarkers) {
+		HashSet<String> urls = new HashSet<String>();
+		for (Marker each : newMarkers) {
+			urls.add(each.getImage().getURL());
+		}
+		return urls;
 	}
 
 	public void removeMarker(Marker marker) {
