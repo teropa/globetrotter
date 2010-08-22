@@ -109,20 +109,26 @@ public class Grid implements ViewPanHandler {
 	}
 
 	private void notifyRemovedTiles(final Set<Tile> removedTiles) {
-		for (Layer each : ctx.getLayers()) {
-			each.onTilesDeactivated(removedTiles);
+		List<Layer> layers = ctx.getLayers();
+		int sz = layers.size();
+		for (int i=0 ; i<sz ; i++) {
+			layers.get(i).onTilesDeactivated(removedTiles);
 		}
 	}
 
 	private void notifyAllTilesRemoved() {
-		for (Layer each : ctx.getLayers()) {
-			each.onAllTilesDeactivated();
+		List<Layer> layers = ctx.getLayers();
+		int sz = layers.size();
+		for (int i=0 ; i<sz ; i++) {
+			layers.get(i).onAllTilesDeactivated();
 		}
 	}
 
 	private void notifyNewTiles(final Set<Tile> newTiles) {
-		for (Layer each : ctx.getLayers()) {
-			each.onTilesActivated(newTiles);
+		List<Layer> layers = ctx.getLayers();
+		int sz = layers.size();
+		for (int i=0 ; i<sz ; i++) {
+			layers.get(i).onTilesActivated(newTiles);
 		}
 	}
 

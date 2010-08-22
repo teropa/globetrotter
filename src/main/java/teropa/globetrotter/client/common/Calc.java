@@ -8,7 +8,6 @@ import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
-import teropa.globetrotter.client.proj.GoogleMercator;
 import teropa.globetrotter.client.proj.Projection;
 
 public class Calc {

@@ -1,6 +1,7 @@
 package teropa.globetrotter.client;
 
 import teropa.globetrotter.client.Grid.Tile;
+import teropa.globetrotter.client.canvas.MouseCanvas;
 import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
@@ -24,7 +25,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
 public class View extends Composite implements MouseHandler, DoubleClickHandler {
 
@@ -203,7 +203,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 				topLeft.getY() + visibleSize.getHeight() / 2);
 	}
 
-	public GWTCanvas getCanvas() {
+	public MouseCanvas getCanvas() {
 		return canvas;
 	}
 

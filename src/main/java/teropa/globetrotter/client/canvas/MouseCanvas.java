@@ -1,4 +1,4 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.canvas;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,7 +25,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
 public class MouseCanvas extends GWTCanvas implements HasMouseDownHandlers, HasMouseUpHandlers, HasMouseMoveHandlers, HasMouseOverHandlers, HasMouseOutHandlers, HasClickHandlers, HasDoubleClickHandlers {
-
+	
 	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
 		return addDomHandler(handler, MouseDownEvent.getType());
 	}
