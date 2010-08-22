@@ -169,7 +169,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	public void onDoubleClick(DoubleClickEvent event) {
 		int x = topLeft.getX() + (event.getNativeEvent().getClientX() - getAbsoluteLeft());
 		int y = topLeft.getY() + (event.getNativeEvent().getClientY() - getAbsoluteTop());
-		map.zoomIn(Calc.getLonLat(new Point(x, y), map.getMaxExtent(), map.getViewSize(), map.getProjection()));
+		map.zoomIn(map.calc().getLonLat(new Point(x, y), map.getMaxExtent(), map.getViewSize(), map.getProjection()));
 	}
 	
 	public HandlerRegistration addViewPanHandler(ViewPanHandler handler) {

@@ -1,9 +1,5 @@
 package teropa.globetrotter.client;
 
-import static teropa.globetrotter.client.common.Calc.getLonLat;
-import static teropa.globetrotter.client.common.Calc.getPixelSize;
-import static teropa.globetrotter.client.common.Calc.getPoint;
-import static teropa.globetrotter.client.common.Calc.narrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +29,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final View view = new View(this);
+	private final Calc calc = new Calc(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private Layer baseLayer;
 	
@@ -140,8 +137,8 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	
 
 	public Bounds getVisibleExtent() {
-		Bounds extent = Calc.getExtent(center, resolutions[resolutionIndex], getViewportSize(), getProjection());
-		return narrow(extent, maxExtent, getProjection());
+		Bounds extent = calc.getExtent(center, resolutions[resolutionIndex], getViewportSize(), getProjection());
+		return calc.narrow(extent, maxExtent, getProjection());
 	}
 
 	public double getResolution() {
@@ -161,7 +158,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 
 	public Point getViewCenterPoint() {
-		return Calc.getPoint(getCenter(), getMaxExtent(), getViewSize(), getProjection());
+		return calc.getPoint(getCenter(), getMaxExtent(), getViewSize(), getProjection());
 	}
 	
 	public Grid getGrid() {
@@ -172,7 +169,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 	
 	private Size getFullSize() {
-		return Calc.getPixelSize(getMaxExtent(), getResolution());
+		return calc().getPixelSize(getMaxExtent(), getResolution());
 	}
 	
 	public Rectangle getVisibleRectangle() {
@@ -200,7 +197,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 	
 	public void onViewPanned(ViewPanEvent event) {
-		setCenter(getLonLat(event.newCenterPoint, maxExtent, view.getSize(), getProjection()));
+		setCenter(calc.getLonLat(event.newCenterPoint, maxExtent, view.getSize(), getProjection()));
 	}
 
 	public void move(Direction dir, int amountPx) {
@@ -238,9 +235,9 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 
 	private void adjustView() {
-		Size fullSize = getPixelSize(maxExtent, resolutions[resolutionIndex]);
+		Size fullSize = calc.getPixelSize(maxExtent, resolutions[resolutionIndex]);
 		view.setSize(fullSize);
-		Point centerPoint = getPoint(center, maxExtent, fullSize, getProjection());
+		Point centerPoint = calc.getPoint(center, maxExtent, fullSize, getProjection());
 		view.position(centerPoint);
 		getGrid().init(getFullSize());
 		view.draw();
@@ -258,6 +255,10 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		return layers;
 	}
 
+	public Calc calc() {
+		return calc;
+	}
+	
 	public void addMapZoomedHandler(MapZoomedEvent.Handler handler) {
 		addHandler(handler, MapZoomedEvent.TYPE);
 	}

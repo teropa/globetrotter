@@ -3,6 +3,7 @@ package teropa.globetrotter.client;
 import java.util.List;
 
 import teropa.globetrotter.client.common.Bounds;
+import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Rectangle;
@@ -43,6 +44,8 @@ public interface ViewContext {
 	List<Layer> getLayers();
 
 	void addMapZoomedHandler(MapZoomedEvent.Handler handler);
+
+	Calc calc();
 
 
 }

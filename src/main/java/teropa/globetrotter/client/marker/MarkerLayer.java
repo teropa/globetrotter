@@ -114,7 +114,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 		int imgHeight = imgResource.getHeight();
 		Point pt = getMarkerPoint(marker, data);
 		Rectangle markerRect = new Rectangle(pt.getX(), pt.getY(), imgWidth, imgHeight);
-		if (Calc.intersect(visibleRect, markerRect)) {
+		if (context.calc().intersect(visibleRect, markerRect)) {
 			context.getView().getCanvas().drawImage(
 					data.image,
 					imgResource.getLeft(),
@@ -152,7 +152,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	private Point getMarkerPoint(Marker marker, MarkerData data) {
 		LonLat projectedLoc = data.projectedLoc;
 		if (data.pointInCurrentSize == null) {
-			Point point = Calc.getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point point = context.calc().getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
 			data.pointInCurrentSize = marker.getPinPosition().translateAroundPoint(point, marker.getSize());			
 		}
 		Point pt = data.pointInCurrentSize;
@@ -185,7 +185,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 			MarkerData data = eachEntry.getValue();
 			Point pt = getMarkerPoint(marker, data);
 			Rectangle markerRect = new Rectangle(pt.getX(), pt.getY(), marker.getSize().getWidth(), marker.getSize().getHeight());
-			if (Calc.intersect(tileRect, markerRect)) {
+			if (context.calc().intersect(tileRect, markerRect)) {
 				ImageResource img = marker.getImage();
 				context.getView().getCanvas().drawImage(data.image, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), pt.getX(), pt.getY(), img.getWidth(), img.getHeight());				
 			}

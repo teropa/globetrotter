@@ -77,9 +77,9 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 		int r = getOffsetWidth() / 2;
 		Point mousePoint = new Point(x, y);
 		Point centerPoint = new Point(r, r);
-		if (Calc.getDistance(mousePoint, centerPoint) <= r) {
+		if (map.calc().getDistance(mousePoint, centerPoint) <= r) {
 			Point mouseFromCenter = new Point(mousePoint.getX() - centerPoint.getX(), centerPoint.getY() - mousePoint.getY());
-			double angle = Calc.getAngle(mouseFromCenter);
+			double angle = map.calc().getAngle(mouseFromCenter);
 			double sin = Math.sin(angle);
 			double cos = Math.cos(angle);
 			if (sin <= 0.5 && sin >= -0.5) {
