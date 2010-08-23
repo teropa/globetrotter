@@ -10,7 +10,6 @@ import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.ViewContext;
-import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Rectangle;
@@ -152,7 +151,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	private Point getMarkerPoint(Marker marker, MarkerData data) {
 		LonLat projectedLoc = data.projectedLoc;
 		if (data.pointInCurrentSize == null) {
-			Point point = context.calc().getPoint(projectedLoc, context.getMaxExtent(), context.getViewSize(), context.getProjection());
+			Point point = context.calc().getPoint(projectedLoc);
 			data.pointInCurrentSize = marker.getPinPosition().translateAroundPoint(point, marker.getSize());			
 		}
 		Point pt = data.pointInCurrentSize;

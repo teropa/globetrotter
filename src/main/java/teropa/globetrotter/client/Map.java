@@ -123,10 +123,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		return view;
 	}
 	
-	public Size getViewSize() {
-		return view.getSize();
-	}
-	
 	public Bounds getMaxExtent() {
 		return maxExtent;
 	}
@@ -135,12 +131,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		this.maxExtent = maxExtent;
 	}
 	
-
-	public Bounds getVisibleExtent() {
-		Bounds extent = calc.getExtent(center, resolutions[resolutionIndex], getViewportSize(), getProjection());
-		return calc.narrow(extent, maxExtent, getProjection());
-	}
-
 	public double getResolution() {
 		return resolutions[resolutionIndex];
 	}
@@ -158,7 +148,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 
 	public Point getViewCenterPoint() {
-		return calc.getPoint(getCenter(), getMaxExtent(), getViewSize(), getProjection());
+		return calc.getPoint(getCenter());
 	}
 	
 	public Grid getGrid() {
@@ -166,10 +156,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 			grid = new Grid(getTileSize(), this);
 		}
 		return grid;
-	}
-	
-	private Size getFullSize() {
-		return calc().getPixelSize(getMaxExtent(), getResolution());
 	}
 	
 	public Rectangle getVisibleRectangle() {
@@ -197,7 +183,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 	
 	public void onViewPanned(ViewPanEvent event) {
-		setCenter(calc.getLonLat(event.newCenterPoint, maxExtent, view.getSize(), getProjection()));
+		setCenter(calc.getLonLat(event.newCenterPoint));
 	}
 
 	public void move(Direction dir, int amountPx) {
@@ -235,11 +221,10 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 
 	private void adjustView() {
-		Size fullSize = calc.getPixelSize(maxExtent, resolutions[resolutionIndex]);
-		view.setSize(fullSize);
-		Point centerPoint = calc.getPoint(center, maxExtent, fullSize, getProjection());
+		Size fullSize = calc.getVirtualPixelSize();
+		Point centerPoint = calc.getPoint(center);
 		view.position(centerPoint);
-		getGrid().init(getFullSize());
+		getGrid().init(fullSize);
 		view.draw();
 	}
 

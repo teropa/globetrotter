@@ -2,7 +2,6 @@ package teropa.globetrotter.client;
 
 import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.canvas.MouseCanvas;
-import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewClickEvent;
@@ -31,7 +30,6 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
 	
-	private Size virtualSize;
 	private Point topLeft = new Point(0, 0);
 	
 	private boolean dragging;
@@ -67,14 +65,6 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		for (Layer eachLayer : map.getLayers()) {
 			eachLayer.drawOn(this);
 		}
-	}
-	
-	public Size getSize() {
-		return this.virtualSize;
-	}
-	
-	public void setSize(Size size) {
-		this.virtualSize = size;
 	}
 
 	public Size getVisibleSize() {
@@ -140,6 +130,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	}
 
 	public void moveTo(int newX, int newY) {
+		Size virtualSize = map.calc().getVirtualPixelSize();
 		int maxX = virtualSize.getWidth() - getVisibleSize().getWidth();
 		int maxY = virtualSize.getHeight() - getVisibleSize().getHeight();
 		newX = Math.min(maxX, Math.max(0, newX));
@@ -169,7 +160,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	public void onDoubleClick(DoubleClickEvent event) {
 		int x = topLeft.getX() + (event.getNativeEvent().getClientX() - getAbsoluteLeft());
 		int y = topLeft.getY() + (event.getNativeEvent().getClientY() - getAbsoluteTop());
-		map.zoomIn(map.calc().getLonLat(new Point(x, y), map.getMaxExtent(), map.getViewSize(), map.getProjection()));
+		map.zoomIn(map.calc().getLonLat(new Point(x, y)));
 	}
 	
 	public HandlerRegistration addViewPanHandler(ViewPanHandler handler) {

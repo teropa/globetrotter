@@ -18,8 +18,6 @@ public interface ViewContext {
 	Grid getGrid();
 
 	Size getTileSize();
-	
-	Bounds getVisibleExtent();
 
 	Rectangle getVisibleRectangle();
 	
@@ -32,8 +30,6 @@ public interface ViewContext {
 	int getResolutionIndex();
 	
 	Point getViewportLocation();
-
-	Size getViewSize();
 
 	Point getViewCenterPoint();
 	

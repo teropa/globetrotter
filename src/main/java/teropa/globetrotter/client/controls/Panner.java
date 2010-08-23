@@ -1,7 +1,6 @@
 package teropa.globetrotter.client.controls;
 
 import teropa.globetrotter.client.Map;
-import teropa.globetrotter.client.common.Calc;
 import teropa.globetrotter.client.common.Direction;
 import teropa.globetrotter.client.common.Point;
 
