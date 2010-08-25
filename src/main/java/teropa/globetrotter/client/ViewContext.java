@@ -20,8 +20,6 @@ public interface ViewContext {
 	Size getTileSize();
 
 	Rectangle getVisibleRectangle();
-	
-	Size getViewportSize();
 
 	LonLat getCenter();
 

@@ -1,9 +1,9 @@
 package teropa.globetrotter.client.marker;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
@@ -27,17 +27,19 @@ import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoomedEvent.Handler {
 	
 	private static class MarkerData {
+		public final Marker marker;
 		public final ImageElement image;
 		public final LonLat projectedLoc;
 		public Point pointInCurrentSize;
 		
-		public MarkerData(ImageElement image, LonLat projectedPos) {
+		public MarkerData(Marker marker, ImageElement image, LonLat projectedPos) {
+			this.marker = marker;
 			this.image = image;
 			this.projectedLoc = projectedPos;
 		}
 	}
 	
-	private final HashMap<Marker, MarkerData> markers = new HashMap<Marker, MarkerData>();
+	private final List<MarkerData> markers = new ArrayList<MarkerData>();
 	private final HandlerManager handlers = new HandlerManager(this);
 	
 	public MarkerLayer(String name) {
@@ -67,9 +69,9 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 				String src = img.getSrc();
 				for (Marker eachMarker : newMarkers) {
 					if (src.equals(eachMarker.getImage().getURL())) {
-						MarkerData data = new MarkerData(img, projectLocation(eachMarker));
-						drawMarker(eachMarker, data, visibleRect);
-						markers.put(eachMarker, data);							
+						MarkerData data = new MarkerData(eachMarker, img, projectLocation(eachMarker));
+						drawMarker(data, visibleRect);
+						markers.add(data);					
 					}
 				}
 			}
@@ -100,18 +102,17 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	@Override
 	public void drawOn(View canvasView) {
 		Rectangle visibleRect = context.getVisibleRectangle();
-		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
-			Marker marker = eachEntry.getKey();
-			MarkerData data = eachEntry.getValue();
-			drawMarker(marker, data, visibleRect);
+		int sz = markers.size();
+		for (int i=0 ; i<sz ; i++) {
+			drawMarker(markers.get(i), visibleRect);
 		}
 	}
 
-	private void drawMarker(Marker marker, MarkerData data, Rectangle visibleRect) {
-		ImageResource imgResource = marker.getImage();
+	private void drawMarker(MarkerData data, Rectangle visibleRect) {
+		ImageResource imgResource = data.marker.getImage();
 		int imgWidth = imgResource.getWidth();
 		int imgHeight = imgResource.getHeight();
-		Point pt = getMarkerPoint(marker, data);
+		Point pt = getMarkerPoint(data);
 		Rectangle markerRect = new Rectangle(pt.getX(), pt.getY(), imgWidth, imgHeight);
 		if (context.calc().intersect(visibleRect, markerRect)) {
 			context.getView().getCanvas().drawImage(
@@ -136,31 +137,31 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	
 	public void onViewClicked(ViewClickEvent event) {
 		Point p = event.point;
-		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
-			Marker marker = eachEntry.getKey();
-			MarkerData data = eachEntry.getValue();
-			Point pt = getMarkerPoint(marker, data);
-			if (p.getX() >= pt.getX() && p.getX() <= pt.getX() + marker.getSize().getWidth() &&
-				p.getY() >= pt.getY() && p.getY() <= pt.getY() + marker.getSize().getHeight()) {
-				Window.alert(marker.toString());
+		int sz = markers.size();
+		for (int i=0 ; i<sz ; i++) {
+			MarkerData data = markers.get(i);
+			Point pt = getMarkerPoint(data);
+			if (p.getX() >= pt.getX() && p.getX() <= pt.getX() + data.marker.getSize().getWidth() &&
+				p.getY() >= pt.getY() && p.getY() <= pt.getY() + data.marker.getSize().getHeight()) {
+				Window.alert(data.marker.toString());
 				break;
 			}
 		}
 	}
 
-	private Point getMarkerPoint(Marker marker, MarkerData data) {
-		LonLat projectedLoc = data.projectedLoc;
+	private Point getMarkerPoint(MarkerData data) {
 		if (data.pointInCurrentSize == null) {
-			Point point = context.calc().getPoint(projectedLoc);
-			data.pointInCurrentSize = marker.getPinPosition().translateAroundPoint(point, marker.getSize());			
+			Point point = context.calc().getPoint(data.projectedLoc);
+			data.pointInCurrentSize = data.marker.getPinPosition().translateAroundPoint(point, data.marker.getSize());			
 		}
 		Point pt = data.pointInCurrentSize;
 		return pt;
 	}
 
 	public void onMapZoomed(MapZoomedEvent event) {
-		for (MarkerData each : markers.values()) {
-			each.pointInCurrentSize = null;
+		int sz = markers.size();
+		for (int i=0 ; i<sz ; i++) {
+			markers.get(i).pointInCurrentSize = null;
 		}
 	}
 	
@@ -178,14 +179,14 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	
 	@Override
 	public void updateTile(Tile tile) {
-		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), 256, 256);
-		for (Map.Entry<Marker, MarkerData> eachEntry : markers.entrySet()) {
-			Marker marker = eachEntry.getKey();
-			MarkerData data = eachEntry.getValue();
-			Point pt = getMarkerPoint(marker, data);
-			Rectangle markerRect = new Rectangle(pt.getX(), pt.getY(), marker.getSize().getWidth(), marker.getSize().getHeight());
+		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
+		int sz = markers.size();
+		for (int i=0 ; i<sz ; i++) {
+			MarkerData data = markers.get(i);
+			Point pt = getMarkerPoint(data);
+			Rectangle markerRect = new Rectangle(pt.getX(), pt.getY(), data.marker.getSize().getWidth(), data.marker.getSize().getHeight());
 			if (context.calc().intersect(tileRect, markerRect)) {
-				ImageResource img = marker.getImage();
+				ImageResource img = data.marker.getImage();
 				context.getView().getCanvas().drawImage(data.image, img.getLeft(), img.getTop(), img.getWidth(), img.getHeight(), pt.getX(), pt.getY(), img.getWidth(), img.getHeight());				
 			}
 		}

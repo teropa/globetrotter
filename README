@@ -1,45 +1,16 @@
 ToDo
 ====
 
-- Cancel tiles still loading which aren't needed anymore?
-- Restricted extent
-- Check scale indicator on very small resolutions and near the poles
-- Check if user geoposition is inside max extent
+- Zoom anim
+- Pan anim
+- Zoomer UI
+- large extent
+- dateline wrap
+- elastic pan?
+- draw kun tilet ei ladattu...
+- wheel control
+- keyboard control
+- copyright text
+- mouse pointer
 
-
-
-
-getTiles
-- 146 calls
-- 12.34 percent
-- 330 own time
-- 1403 time
-- 9.614 avg
-
-- 170 calls
-- 12.35 percent
-- 370 own time
-- 1581 time
-- 9.314 avg
-
-
-2938 / 636470
-2573 / 570306
-2783 / 611851
-2646 / 588575
-2873 / 646662
-2084 / 449344
-2144 / 485592
-1854 / 399184
-1868 / 406672
-1560 / 314601
-1488 / 288579
-1873 / 402417
-
-
-487 / 48798
-464 / 46866
-468 / 47054
-
-522 / 54813
-273 / 25030
+- readme

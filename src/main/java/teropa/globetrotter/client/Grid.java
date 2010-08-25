@@ -8,12 +8,9 @@ import java.util.Set;
 
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
-import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
-import teropa.globetrotter.client.event.internal.ViewPanHandler;
-import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 
-public class Grid implements ViewPanHandler {
+public class Grid implements ViewPanEvent.Handler {
 
 	private static final int BUFFER = 2;
 	
@@ -78,10 +75,6 @@ public class Grid implements ViewPanHandler {
 		return res;
 	}
 
-	public void onViewPanStarted(ViewPanStartEvent event) {
-		coords = getVisibleCoords(ctx.getVisibleRectangle());
-	}
-	
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
 		if (Arrays.equals(newCoords, coords)) {
@@ -130,9 +123,6 @@ public class Grid implements ViewPanHandler {
 		for (int i=0 ; i<sz ; i++) {
 			layers.get(i).onTilesActivated(newTiles);
 		}
-	}
-
-	public void onViewPanEnded(ViewPanEndEvent event) {
 	}
 
 	private List<Tile> makeTiles(int fromX, int toX, int fromY, int toY) {
@@ -208,6 +198,14 @@ public class Grid implements ViewPanHandler {
 		
 		public int getTopY() {
 			return topY;
+		}
+		
+		public int getWidth() {
+			return tileWidth;
+		}
+		
+		public int getHeight() {
+			return tileHeight;
 		}
 		
 		@Override

@@ -14,18 +14,17 @@ import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.MapZoomedEvent;
-import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
-import teropa.globetrotter.client.event.internal.ViewPanHandler;
-import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.proj.Projection;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 
-public class Map extends Composite implements ViewContext, ViewPanHandler {
+public class Map extends Composite implements ViewContext, ViewPanEvent.Handler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private final View view = new View(this);
@@ -56,7 +55,11 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	
 	private void init() {
 		container.add(view);
-		adjustView();
+		Size fullSize = calc.getVirtualPixelSize();
+		Point centerPoint = calc.getPoint(center);
+		view.position(centerPoint);
+		getGrid().init(fullSize);
+		view.draw();
 	}
 	
 	public void addLayer(Layer layer) {
@@ -135,10 +138,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		return resolutions[resolutionIndex];
 	}
 
-	public Size getViewportSize() {
-		return view.getVisibleSize();
-	}
-
 	public Point getViewportLocation() {
 		return view.getTopLeft();
 	}
@@ -159,7 +158,7 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 	
 	public Rectangle getVisibleRectangle() {
-		Size portSize = getViewportSize();
+		Size portSize = view.getVisibleSize();
 		Point topLeft = getViewportLocation();
 		return new Rectangle(topLeft.getX(), topLeft.getY(), portSize.getWidth(), portSize.getHeight());
 	}
@@ -176,12 +175,6 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 		resizeView(-1);
 	}
 
-	public void onViewPanStarted(ViewPanStartEvent event) {
-	}
-	
-	public void onViewPanEnded(ViewPanEndEvent event) {
-	}
-	
 	public void onViewPanned(ViewPanEvent event) {
 		setCenter(calc.getLonLat(event.newCenterPoint));
 	}
@@ -204,28 +197,55 @@ public class Map extends Composite implements ViewContext, ViewPanHandler {
 	}
 	
 	private void resizeView(int delta) {
-		if (newResolutionInBounds(delta)) {
-			resolutionIndex += delta;
-		}
-		adjustView();
-		fireEvent(new MapZoomedEvent());
+		resizeView(delta, center);
 	}
 	
 	private void resizeView(int delta, LonLat newCenter) {
+		int prevResolutionIndex = resolutionIndex;
+		LonLat prevCenter = center;
 		if (newResolutionInBounds(delta)) {
 			resolutionIndex += delta;
 		}
 		setCenter(newCenter);
-		adjustView();
+		adjustView(resolutions[prevResolutionIndex], resolutions[resolutionIndex], prevCenter, newCenter);
 		fireEvent(new MapZoomedEvent());
 	}
 
-	private void adjustView() {
-		Size fullSize = calc.getVirtualPixelSize();
-		Point centerPoint = calc.getPoint(center);
-		view.position(centerPoint);
-		getGrid().init(fullSize);
+	private void adjustView(double fromRes, double toRes, LonLat fromCenter, LonLat toCenter) {
+		final double resScale = fromRes / toRes;
+		
+		double width = getView().getVisibleSize().getWidth();
+		double height = getView().getVisibleSize().getHeight();
+
+		Point fromCenterPoint = calc().getPoint(fromCenter);
+		Point toCenterPoint = calc().getPoint(toCenter);
+		double xMove = fromCenterPoint.getX() - toCenterPoint.getX();
+		double yMove = fromCenterPoint.getY() - toCenterPoint.getY();
+		
+		view.getCanvas().saveContext();		
+		if (resScale >= 1) {
+			view.getCanvas().translate(
+					-view.getTopLeft().getX() - width / resScale + xMove,
+					-view.getTopLeft().getY() - height / resScale + yMove);		
+			view.getCanvas().scale(resScale, resScale);
+		} else {
+			view.getCanvas().scale(resScale, resScale);
+			view.getCanvas().translate(
+					view.getTopLeft().getX() + width - width * resScale,
+					view.getTopLeft().getY() + height - height * resScale);
+		}
 		view.draw();
+		
+		DeferredCommand.addCommand(new Command() {
+			public void execute() {
+				view.getCanvas().restoreContext();
+				Size fullSize = calc.getVirtualPixelSize();
+				Point centerPoint = calc.getPoint(center);
+				view.position(centerPoint);
+				getGrid().init(fullSize);
+				view.draw();								
+			}
+		});
 	}
 
 	public void addControl(Control control, Position at) {

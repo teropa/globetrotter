@@ -5,10 +5,7 @@ import teropa.globetrotter.client.canvas.MouseCanvas;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewClickEvent;
-import teropa.globetrotter.client.event.internal.ViewPanEndEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
-import teropa.globetrotter.client.event.internal.ViewPanHandler;
-import teropa.globetrotter.client.event.internal.ViewPanStartEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -68,7 +65,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	}
 
 	public Size getVisibleSize() {
-		return new Size(getOffsetWidth(), getOffsetHeight());
+		return new Size(canvas.getCoordWidth(), canvas.getCoordHeight());
 	}
 
 	public Point getTopLeft() {
@@ -81,15 +78,10 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		topLeft = newTopLeft;
 	}
 
-	public void drawImage(ImageAndCoords image) {
-		canvas.drawImage(image.getImage(), image.getX(), image.getY());
-	}
-
 	@Override
 	protected void onLoad() {
-		Size visibleSize = getVisibleSize();
-		canvas.setCoordWidth(visibleSize.getWidth());
-		canvas.setCoordHeight(visibleSize.getHeight());
+		canvas.setCoordWidth(getOffsetWidth());
+		canvas.setCoordHeight(getOffsetHeight());
 	}
 	
 	public void onMouseOver(MouseOverEvent event) {
@@ -108,13 +100,11 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		Event.setCapture(canvas.getElement());
 		xOffset = event.getX();
 		yOffset = event.getY();
-		fireEvent(new ViewPanStartEvent(toCenter(topLeft)));
 	}
 	
 	public void onMouseUp(MouseUpEvent event) {
 		dragging = false;
 		Event.releaseCapture(canvas.getElement());
-		fireEvent(new ViewPanEndEvent(toCenter(topLeft)));
 	}
 	
 	public void onMouseMove(MouseMoveEvent event) {
@@ -131,8 +121,9 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 
 	public void moveTo(int newX, int newY) {
 		Size virtualSize = map.calc().getVirtualPixelSize();
-		int maxX = virtualSize.getWidth() - getVisibleSize().getWidth();
-		int maxY = virtualSize.getHeight() - getVisibleSize().getHeight();
+		Size visibleSize = getVisibleSize();
+		int maxX = virtualSize.getWidth() - visibleSize.getWidth();
+		int maxY = virtualSize.getHeight() - visibleSize.getHeight();
 		newX = Math.min(maxX, Math.max(0, newX));
 		newY = Math.min(maxY, Math.max(0, newY));
 		int xDelta = topLeft.getX() - newX;
@@ -163,17 +154,12 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		map.zoomIn(map.calc().getLonLat(new Point(x, y)));
 	}
 	
-	public HandlerRegistration addViewPanHandler(ViewPanHandler handler) {
-		final HandlerRegistration startRegistration = addHandler(handler, ViewPanStartEvent.TYPE);
-		final HandlerRegistration panRegistration = addHandler(handler, ViewPanEvent.TYPE);
-		final HandlerRegistration endRegistration = addHandler(handler, ViewPanEndEvent.TYPE);
-		return new HandlerRegistration() {
-			public void removeHandler() {
-				startRegistration.removeHandler();
-				panRegistration.removeHandler();
-				endRegistration.removeHandler();
-			}
-		};
+	public Point getCenterPoint() {
+		return toCenter(topLeft);
+	}
+	
+	public HandlerRegistration addViewPanHandler(ViewPanEvent.Handler handler) {
+		return addHandler(handler, ViewPanEvent.TYPE);
 	}
 	
 	public HandlerRegistration addViewClickHandler(ViewClickEvent.Handler handler) {
@@ -193,7 +179,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 				topLeft.getX() + visibleSize.getWidth() / 2,
 				topLeft.getY() + visibleSize.getHeight() / 2);
 	}
-
+	
 	public MouseCanvas getCanvas() {
 		return canvas;
 	}

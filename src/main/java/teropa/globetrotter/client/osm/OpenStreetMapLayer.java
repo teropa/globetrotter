@@ -6,7 +6,6 @@ import java.util.Map;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
-import teropa.globetrotter.client.ImageAndCoords;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.proj.GoogleMercator;
@@ -40,7 +39,7 @@ public class OpenStreetMapLayer extends Layer {
 		0.5971642834779395};
 
 	private final String baseUrl;
-	private final Map<Tile, ImageAndCoords> images = new HashMap<Grid.Tile, ImageAndCoords>();
+	private final Map<Tile, ImageElement> images = new HashMap<Grid.Tile, ImageElement>();
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
 		super(name, base, new GoogleMercator());
@@ -54,9 +53,8 @@ public class OpenStreetMapLayer extends Layer {
 			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
-					ImageAndCoords img = new ImageAndCoords(imageElements[0], each.getLeftX(), each.getTopY());
-					images.put(each, img);
-					context.getView().drawImage(img);
+					images.put(each, imageElements[0]);
+					context.getView().getCanvas().drawImage(imageElements[0], each.getLeftX(), each.getTopY(), each.getWidth(), each.getHeight());
 					context.getView().tileUpdated(each, _this);
 				}
 			});
@@ -75,16 +73,18 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void updateTile(Tile tile) {
-		ImageAndCoords mine = images.get(tile);
+		ImageElement mine = images.get(tile);
 		if (mine != null) {
-			context.getView().drawImage(mine);
+			context.getView().getCanvas().drawImage(mine, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
 		}
 	}
 	
 	@Override
 	public void drawOn(View canvasView) {
-		for (ImageAndCoords each : images.values()) {
-			canvasView.drawImage(each);
+		for(Map.Entry<Tile, ImageElement> each : images.entrySet()) {
+			Tile tile = each.getKey();
+			ImageElement img = each.getValue();
+			canvasView.getCanvas().drawImage(img, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
 		}
 	}
 	
