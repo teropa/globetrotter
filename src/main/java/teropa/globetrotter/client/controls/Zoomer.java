@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -74,6 +75,7 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		container.addMouseMoveHandler(this);
 		container.addMouseOverHandler(this);
 		container.addMouseOutHandler(this);
+		container.addMouseWheelHandler(this);
 		knob.addMouseDownHandler(this);
 		zoomIn.addClickHandler(this);
 		zoomOut.addClickHandler(this);
@@ -137,6 +139,14 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		}
 	}
 
+	public void onMouseWheel(MouseWheelEvent event) {
+		if (event.getDeltaY() > 0) {
+			map.zoomOut();
+		} else {
+			map.zoomIn();
+		}	
+	}
+	
 	public void onPreviewNativeEvent(NativePreviewEvent event) {
 		switch (event.getTypeInt()) {
 		case Event.ONMOUSEDOWN:

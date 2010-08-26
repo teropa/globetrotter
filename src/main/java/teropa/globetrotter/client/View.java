@@ -8,6 +8,7 @@ import teropa.globetrotter.client.event.internal.ViewClickEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
@@ -16,6 +17,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
@@ -55,6 +57,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		canvas.addMouseMoveHandler(this);
 		canvas.addClickHandler(this);
 		canvas.addDoubleClickHandler(this);
+		canvas.addMouseWheelHandler(this);
 		initWidget(canvas);
 		setWidth("100%");
 		setHeight("100%");
@@ -130,6 +133,14 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		}
 	}
 
+	public void onMouseWheel(MouseWheelEvent event) {
+		if (event.getDeltaY() > 0) {
+			map.zoomOut();
+		} else {
+			map.zoomIn();
+		}
+	}
+	
 	public void moveTo(int newX, int newY) {
 		Size virtualSize = map.calc().getVirtualPixelSize();
 		Size visibleSize = getVisibleSize();

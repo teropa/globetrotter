@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.HasMouseMoveHandlers;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
 import com.google.gwt.event.dom.client.HasMouseOverHandlers;
 import com.google.gwt.event.dom.client.HasMouseUpHandlers;
+import com.google.gwt.event.dom.client.HasMouseWheelHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -21,10 +22,12 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
-public class MouseCanvas extends GWTCanvas implements HasMouseDownHandlers, HasMouseUpHandlers, HasMouseMoveHandlers, HasMouseOverHandlers, HasMouseOutHandlers, HasClickHandlers, HasDoubleClickHandlers {
+public class MouseCanvas extends GWTCanvas implements HasMouseDownHandlers, HasMouseUpHandlers, HasMouseMoveHandlers, HasMouseOverHandlers, HasMouseOutHandlers, HasClickHandlers, HasDoubleClickHandlers, HasMouseWheelHandlers {
 	
 	public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
 		return addDomHandler(handler, MouseDownEvent.getType());
@@ -52,5 +55,9 @@ public class MouseCanvas extends GWTCanvas implements HasMouseDownHandlers, HasM
 	
 	public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
 		return addDomHandler(handler, DoubleClickEvent.getType());
+	}
+	
+	public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
+		return addDomHandler(handler, MouseWheelEvent.getType());
 	}
 }
