@@ -20,7 +20,6 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
 
@@ -143,7 +142,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 			Point pt = getMarkerPoint(data);
 			if (p.getX() >= pt.getX() && p.getX() <= pt.getX() + data.marker.getSize().getWidth() &&
 				p.getY() >= pt.getY() && p.getY() <= pt.getY() + data.marker.getSize().getHeight()) {
-				Window.alert(data.marker.toString());
+				handlers.fireEvent(new MarkerClickEvent(data.marker, this));
 				break;
 			}
 		}
