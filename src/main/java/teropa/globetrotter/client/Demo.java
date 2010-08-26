@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import teropa.globetrotter.client.common.Position;
+import teropa.globetrotter.client.controls.CopyrightText;
 import teropa.globetrotter.client.controls.Panner;
 import teropa.globetrotter.client.controls.Zoomer;
 import teropa.globetrotter.client.marker.Marker;
@@ -14,6 +15,7 @@ import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class Demo implements EntryPoint {
@@ -43,6 +45,9 @@ public class Demo implements EntryPoint {
 		
 		map.addControl(new Panner(), Position.TOP_LEFT);
 		map.addControl(new Zoomer(), Position.MIDDLE_LEFT);
+		
+		HTML copy = new HTML("(c) <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (and) contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>");
+		map.addControl(new CopyrightText(copy), Position.BOTTOM_LEFT);
 		
 		RootPanel.get("container").add(map);
 	}

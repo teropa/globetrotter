@@ -2,6 +2,7 @@ package teropa.globetrotter.client;
 
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import teropa.globetrotter.client.common.Bounds;
@@ -28,6 +29,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	private final View view = new View(this);
 	private final Calc calc = new Calc(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
+	private final LinkedHashMap<Control, Position> controls = new LinkedHashMap<Control, Position>();
 	private Layer baseLayer;
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
@@ -58,6 +60,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		view.position(centerPoint);
 		getGrid().init(fullSize);
 		view.draw();
+		positionControls();
 	}
 	
 	public void addLayer(Layer layer) {
@@ -248,9 +251,21 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 
 	public void addControl(Control control, Position at) {
 		control.init(this);
+		controls.put(control, at);
+		positionControl(control, at);
+	}
+
+	private void positionControls() {
+		for (Control each : controls.keySet()) {
+			positionControl(each, controls.get(each));
+		}
+	}
+
+	private void positionControl(Control control, Position at) {
 		switch (at) {
 		case TOP_LEFT: container.add(control.asWidget(), 10, 10); break;
 		case MIDDLE_LEFT: container.add(control.asWidget(), 10, 100); break;
+		case BOTTOM_LEFT: container.add(control.asWidget(), 10, getOffsetHeight() - 10 - control.asWidget().getOffsetHeight()); break;
 		}
 	}
 
