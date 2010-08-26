@@ -24,10 +24,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Zoomer extends Composite implements Control, MouseHandler, NativePreviewHandler, MapZoomedEvent.Handler {
 	
-	private static final int WIDTH = 45;
-	private static final int LEFT_MARGIN = 15;
-	private static final int BUTTON_HEIGHT = 38;
-	private static final int NOTCH_HEIGHT = 21;
+	private static final int LEFT_MARGIN = 17;
+	private static final int WIDTH = 25 + LEFT_MARGIN;
+	private static final int BUTTON_HEIGHT = 24;
+	private static final int NOTCH_HEIGHT = 17;
 
 	private final ZoomerImages images = GWT.create(ZoomerImages.class);
 	
@@ -78,7 +78,11 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		container.addMouseWheelHandler(this);
 		knob.addMouseDownHandler(this);
 		zoomIn.addClickHandler(this);
+		zoomIn.addMouseOverHandler(this);
+		zoomIn.addMouseOutHandler(this);
 		zoomOut.addClickHandler(this);
+		zoomOut.addMouseOverHandler(this);
+		zoomOut.addMouseOutHandler(this);
 		map.addMapZoomedHandler(this);
 	}
 
@@ -129,13 +133,26 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	}
 
 	public void onMouseOver(MouseOverEvent event) {
-		preventDefaultMouseEventsRegistration = Event.addNativePreviewHandler(this);
+		if (event.getSource() == zoomIn) {
+			zoomIn.setResource(images.zoomerInOver());
+		} else if (event.getSource() == zoomOut) {
+			zoomOut.setResource(images.zoomerOutOver());
+		} else {
+			preventDefaultMouseEventsRegistration = Event.addNativePreviewHandler(this);
+		}
+
 	}
 	
 	public void onMouseOut(MouseOutEvent event) {
-		if (preventDefaultMouseEventsRegistration != null) {
-			preventDefaultMouseEventsRegistration.removeHandler();
-			preventDefaultMouseEventsRegistration = null;
+		if (event.getSource() == zoomIn) {
+			zoomIn.setResource(images.zoomerIn());
+		} else if (event.getSource() == zoomOut) {
+			zoomOut.setResource(images.zoomerOut());
+		} else {
+			if (preventDefaultMouseEventsRegistration != null) {
+				preventDefaultMouseEventsRegistration.removeHandler();
+				preventDefaultMouseEventsRegistration = null;
+			}
 		}
 	}
 
