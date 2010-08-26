@@ -16,6 +16,7 @@ support for WMS are forthcoming.
 1. `mvn package` in the project directory
 1. Copy `target/globetrotter-0.0.1-SNAPSHOT.jar` and `war/WEB-INF/lib/gwt-incubator-20100204-r1747.jar` to your project libraries
 1. Add the following to your GWT XML descriptor:
+    
     <inherits name='teropa.globetrotter.GlobeTrotter'/>
 
 ## Usage
