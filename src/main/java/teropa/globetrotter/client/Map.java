@@ -20,6 +20,7 @@ import teropa.globetrotter.client.proj.Projection;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.widgetideas.graphics.client.Color;
@@ -43,6 +44,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	private Size tileSize = new Size(256, 256);
 	
 	private Grid grid;
+	private Timer reinitTimer;
 	
 	public Map(String width, String height) {
 		initWidget(container);
@@ -226,13 +228,15 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	}
 
 	private void adjustView(double fromRes, double toRes, LonLat fromCenter, LonLat toCenter) {
+		if (reinitTimer != null) reinitTimer.cancel();
 		zoomEffect(fromRes, toRes, fromCenter, toCenter);
-		DeferredCommand.addCommand(new Command() {
-			public void execute() {
-				view.getCanvas().restoreContext();
-				reinitGrid();								
+		reinitTimer = new Timer() {
+			public void run() {
+				reinitGrid();				
+				reinitTimer = null;
 			}
-		});
+		};
+		reinitTimer.schedule(10);
 	}
 
 	private void zoomEffect(double fromRes, double toRes, LonLat fromCenter, LonLat toCenter) {
@@ -259,6 +263,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 					view.getTopLeft().getY() + height - height * resScale);
 		}
 		view.draw(true);
+		view.getCanvas().restoreContext();
 	}
 
 	private void reinitGrid() {
