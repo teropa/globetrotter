@@ -18,7 +18,6 @@ import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -33,6 +32,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	private final Calc calc = new Calc(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private final LinkedHashMap<Control, Position> controls = new LinkedHashMap<Control, Position>();
+	private KeyboardControls keyboardControls;
 	private Layer baseLayer;
 	
 	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
@@ -64,6 +64,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		getGrid().init(fullSize);
 		view.draw(false);
 		positionControls();
+		this.keyboardControls = new KeyboardControls(this);
 	}
 	
 	public void addLayer(Layer layer) {
@@ -189,6 +190,15 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		case DOWN: view.move(0, amountPx); break;
 		case LEFT: view.move(-amountPx, 0); break;
 		case UP: view.move(0, -amountPx); break;
+		}
+	}
+	
+	public void setKeyboardControlsEnabled(boolean enabled) {
+		if (enabled && keyboardControls == null) {
+			keyboardControls = new KeyboardControls(this);
+		} else if (!enabled && keyboardControls != null) {
+			keyboardControls.destroy();
+			keyboardControls = null;
 		}
 	}
 
