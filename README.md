@@ -27,4 +27,4 @@ See [Demo.java](http://github.com/teropa/globetrotter/blob/master/src/main/java/
 
 Copyright (c) 2010 Tero Parviainen
 
-MIT license (see LICENSE).
+MIT license (see [LICENSE](http://github.com/teropa/globetrotter/blob/master/LICENSE)).
