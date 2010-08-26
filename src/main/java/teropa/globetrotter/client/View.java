@@ -104,11 +104,14 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	
 	public void onMouseUp(MouseUpEvent event) {
 		dragging = false;
+		removeStyleName("moveCursor");
 		Event.releaseCapture(canvas.getElement());
 	}
 	
 	public void onMouseMove(MouseMoveEvent event) {
 		if (dragging) {
+			addStyleName("moveCursor");
+			
 			int wantedX = topLeft.getX() - (event.getX() - xOffset);
 			int wantedY = topLeft.getY() - (event.getY() - yOffset);
 			
