@@ -18,10 +18,13 @@ import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.widgetideas.graphics.client.Color;
+import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
 public class Map extends Composite implements ViewContext, ViewPanEvent.Handler {
 
@@ -59,7 +62,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		Point centerPoint = calc.getPoint(center);
 		view.position(centerPoint);
 		getGrid().init(fullSize);
-		view.draw();
+		view.draw(false);
 		positionControls();
 	}
 	
@@ -213,6 +216,16 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	}
 
 	private void adjustView(double fromRes, double toRes, LonLat fromCenter, LonLat toCenter) {
+		zoomEffect(fromRes, toRes, fromCenter, toCenter);
+		DeferredCommand.addCommand(new Command() {
+			public void execute() {
+				view.getCanvas().restoreContext();
+				reinitGrid();								
+			}
+		});
+	}
+
+	private void zoomEffect(double fromRes, double toRes, LonLat fromCenter, LonLat toCenter) {
 		final double resScale = fromRes / toRes;
 		
 		double width = getView().getVisibleSize().getWidth();
@@ -235,18 +248,42 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 					view.getTopLeft().getX() + width - width * resScale,
 					view.getTopLeft().getY() + height - height * resScale);
 		}
-		view.draw();
+		view.draw(true);
+	}
+
+	private void reinitGrid() {
+		Size fullSize = calc.getVirtualPixelSize();
+		Point centerPoint = calc.getPoint(center);
+		view.position(centerPoint);
+		clearAreasOutsideGrid(fullSize, centerPoint);
+		getGrid().init(fullSize);
+		view.draw(false);
+	}
+
+	private void clearAreasOutsideGrid(Size fullSize, Point centerPoint) {
+		Size viewSize = view.getVisibleSize();
+		Point topLeft = view.getTopLeft();
 		
-		DeferredCommand.addCommand(new Command() {
-			public void execute() {
-				view.getCanvas().restoreContext();
-				Size fullSize = calc.getVirtualPixelSize();
-				Point centerPoint = calc.getPoint(center);
-				view.position(centerPoint);
-				getGrid().init(fullSize);
-				view.draw();								
-			}
-		});
+		GWTCanvas canvas = view.getCanvas();
+		canvas.saveContext();
+		canvas.setFillStyle(Color.WHITE);
+		
+		int heightOutside = viewSize.getHeight() - fullSize.getHeight();
+		int heightTop = -topLeft.getY();
+		int heightBottom = viewSize.getHeight() - (-topLeft.getY() + fullSize.getHeight());
+		if (heightOutside > 0) {
+			canvas.fillRect(topLeft.getX(), topLeft.getY(), viewSize.getWidth(), heightTop);
+			canvas.fillRect(topLeft.getX(), topLeft.getY() + viewSize.getHeight() - heightBottom, viewSize.getWidth(), heightBottom);
+		}
+		
+		int widthOutside = viewSize.getWidth() - fullSize.getWidth();
+		int widthLeft = -topLeft.getX();
+		int widthRight = viewSize.getWidth() - (-topLeft.getX() + fullSize.getWidth());
+		if (widthOutside > 0) {
+			canvas.fillRect(topLeft.getX(), topLeft.getY(), widthLeft, viewSize.getHeight());
+			canvas.fillRect(topLeft.getX() + viewSize.getWidth() - widthRight, topLeft.getY(), widthRight, viewSize.getHeight());
+		}
+		canvas.restoreContext();
 	}
 
 	public void addControl(Control control, Position at) {

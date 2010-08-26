@@ -16,13 +16,16 @@ public class Calc {
 	}
 	
 	public Size getVirtualPixelSize() {
+		return getVirtualPixelSize(map.getResolution());
+	}
+
+	public Size getVirtualPixelSize(double resolution) {
 		Bounds bounds = map.getMaxExtent();
-		double resolution = map.getResolution();
 		int width = (int)round(bounds.getWidth() / resolution);
 		int height = (int)round(bounds.getHeight() / resolution);
 		return new Size(width, height);
 	}
-		
+
 	public LonLat getLonLat(Point point) {
 		Bounds extent = map.getMaxExtent();
 		Size area = getVirtualPixelSize();

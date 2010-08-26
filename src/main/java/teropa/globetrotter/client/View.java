@@ -21,9 +21,12 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.widgetideas.graphics.client.Color;
 
 public class View extends Composite implements MouseHandler, DoubleClickHandler {
 
+	private static final int PAN_BUMPER = 50;
+	
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
 	
@@ -57,8 +60,13 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		setHeight("100%");
 	}
 	
-	public void draw() {
-		canvas.clear();
+	public void draw(boolean clear) {
+		if (clear) {
+			canvas.saveContext();
+			canvas.setFillStyle(Color.WHITE);
+			canvas.fillRect(topLeft.getX(), topLeft.getY(), getVisibleSize().getWidth(), getVisibleSize().getHeight());
+			canvas.restoreContext();
+		}
 		for (Layer eachLayer : map.getLayers()) {
 			eachLayer.drawOn(this);
 		}
@@ -125,17 +133,21 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	public void moveTo(int newX, int newY) {
 		Size virtualSize = map.calc().getVirtualPixelSize();
 		Size visibleSize = getVisibleSize();
-		int maxX = virtualSize.getWidth() - visibleSize.getWidth();
-		int maxY = virtualSize.getHeight() - visibleSize.getHeight();
-		newX = Math.min(maxX, Math.max(0, newX));
-		newY = Math.min(maxY, Math.max(0, newY));
+		
+		int maxX = virtualSize.getWidth() - PAN_BUMPER;
+		int maxY = virtualSize.getHeight() - PAN_BUMPER;
+		int minX = PAN_BUMPER - visibleSize.getWidth();
+		int minY = PAN_BUMPER - visibleSize.getHeight();
+		
+		newX = Math.min(maxX, Math.max(minX, newX));
+		newY = Math.min(maxY, Math.max(minY, newY));
 		int xDelta = topLeft.getX() - newX;
 		int yDelta = topLeft.getY() - newY;
 
 		canvas.translate(xDelta, yDelta);
 		topLeft = new Point(newX, newY);
 
-		draw();
+		draw(true);
 		fireEvent(new ViewPanEvent(toCenter(topLeft)));
 	}
 	
