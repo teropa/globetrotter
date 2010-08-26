@@ -8,7 +8,6 @@ import teropa.globetrotter.client.event.internal.ViewClickEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.util.MouseHandler;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
@@ -94,7 +93,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		canvas.setCoordWidth(getOffsetWidth());
 		canvas.setCoordHeight(getOffsetHeight());
 	}
-	
+
 	public void onMouseOver(MouseOverEvent event) {
 		preventDefaultsRegistration = Event.addNativePreviewHandler(preventDefaults);
 	}

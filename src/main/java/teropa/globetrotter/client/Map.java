@@ -1,6 +1,5 @@
 package teropa.globetrotter.client;
 
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,7 +28,7 @@ import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 public class Map extends Composite implements ViewContext, ViewPanEvent.Handler {
 
 	private final AbsolutePanel container = new AbsolutePanel();
-	private final View view = new View(this);
+	private View view = new View(this);
 	private final Calc calc = new Calc(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private final LinkedHashMap<Control, Position> controls = new LinkedHashMap<Control, Position>();
@@ -48,9 +47,11 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	
 	public Map(String width, String height) {
 		initWidget(container);
+		container.add(view);
 		setWidth(width);
 		setHeight(height);
 		view.addViewPanHandler(this);
+		this.keyboardControls = new KeyboardControls(this);
 		DeferredCommand.addCommand(new Command() {
 			public void execute() {
 				init();
@@ -59,16 +60,21 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	}
 	
 	private void init() {
-		container.add(view);
 		Size fullSize = calc.getVirtualPixelSize();
 		Point centerPoint = calc.getPoint(center);
 		view.position(centerPoint);
 		getGrid().init(fullSize);
-		view.draw(false);
 		positionControls();
-		this.keyboardControls = new KeyboardControls(this);
 	}
-	
+
+	public void layout() {
+		container.remove(view);
+		grid = null;
+		view = new View(this);
+		container.add(view);
+		init();				
+	}
+
 	public void addLayer(Layer layer) {
 		layer.init(this);
 		layers.add(layer);
@@ -145,10 +151,6 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		return resolutions[resolutionIndex];
 	}
 
-	public Point getViewportLocation() {
-		return view.getTopLeft();
-	}
-	
 	public LonLat getCenter() {
 		return center;
 	}
@@ -166,7 +168,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 	
 	public Rectangle getVisibleRectangle() {
 		Size portSize = view.getVisibleSize();
-		Point topLeft = getViewportLocation();
+		Point topLeft = view.getTopLeft();
 		return new Rectangle(topLeft.getX(), topLeft.getY(), portSize.getWidth(), portSize.getHeight());
 	}
 	

@@ -26,8 +26,6 @@ public interface ViewContext {
 	double getResolution();
 
 	int getResolutionIndex();
-	
-	Point getViewportLocation();
 
 	Point getViewCenterPoint();
 	
