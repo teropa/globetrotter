@@ -48,6 +48,10 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 		initWidget(container);
 		setStyleName("Zoomer");
 		setWidth(WIDTH + "px");
+		
+		knob.setTitle("Drag to zoom");
+		zoomIn.setTitle("Zoom in [+]");
+		zoomOut.setTitle("Zoom out [-]");
 	}
 	
 	public void init(final Map map) {

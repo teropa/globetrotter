@@ -63,15 +63,19 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 			removeHighlight();
 		} else if (dir == Direction.UP) {
 			img.setResource(images.pannerUp());
+			img.setTitle("Move up");
 		} else if (dir == Direction.RIGHT) {
 			img.setResource(images.pannerRight());
+			img.setTitle("Move right");
 		} else if (dir == Direction.DOWN) {
 			img.setResource(images.pannerDown());
+			img.setTitle("Move down");
 		} else if (dir == Direction.LEFT) {
 			img.setResource(images.pannerLeft());
+			img.setTitle("Move left");
 		}
 	}
-
+	
 	private Direction getDirection(int x, int y) {
 		int r = getOffsetWidth() / 2;
 		Point mousePoint = new Point(x, y);

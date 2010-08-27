@@ -91,6 +91,5 @@ public class OpenStreetMapLayer extends Layer {
 	protected String getUrl(int zoom, int x, int y) {
 		return baseUrl + zoom + "/" + x + "/" + y + ".png";
 	}
-	
 
 }
