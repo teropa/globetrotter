@@ -46,12 +46,15 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	
 	public Zoomer() {
 		initWidget(container);
-		setStyleName("Zoomer");
+		addStyleName("Zoomer");
 		setWidth(WIDTH + "px");
 		
 		knob.setTitle("Drag to zoom");
+		knob.addStyleName("ZoomerKnob");
 		zoomIn.setTitle("Zoom in [+]");
+		zoomIn.addStyleName("ZoomerIn");
 		zoomOut.setTitle("Zoom out [-]");
+		zoomOut.addStyleName("ZoomerOut");
 	}
 	
 	public void init(final Map map) {
@@ -93,7 +96,10 @@ public class Zoomer extends Composite implements Control, MouseHandler, NativePr
 	private void initTrack() {
 		for (int i=0 ; i < numLevels ; i++) {
 			int y = BUTTON_HEIGHT + i * NOTCH_HEIGHT;
-			container.add(new Image(images.zoomerTrack()), LEFT_MARGIN, y);
+			Image img = new Image(images.zoomerTrack());
+			img.addStyleName("ZoomerTrack");
+			img.setTitle("Zoom here");
+			container.add(img, LEFT_MARGIN, y);
 		}
 	}
 

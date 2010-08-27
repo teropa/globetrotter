@@ -26,6 +26,7 @@ public class Panner extends Composite implements Control, ClickHandler, MouseOve
 	
 	public Panner() {
 		initWidget(img);
+		addStyleName("Panner");
 		img.addClickHandler(this);
 		img.addMouseOverHandler(this);
 		img.addMouseOutHandler(this);

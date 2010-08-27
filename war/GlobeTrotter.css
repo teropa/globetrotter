@@ -10,10 +10,16 @@
 	cursor: pointer;
 }
 
-
 .CityPopup {
 	font-size: 12px;
 	padding: 5px;
 	border: 1px solid #666;
 	background-color: #ccffcc;
+}
+
+.Panner, .ZoomerIn, .ZoomerOut, .ZoomerTrack {
+	cursor: pointer;
+}
+.ZoomerKnob {
+	cursor: move;
 }
