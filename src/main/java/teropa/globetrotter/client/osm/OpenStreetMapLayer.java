@@ -38,8 +38,8 @@ public class OpenStreetMapLayer extends Layer {
 		1.194328566955879,
 		0.5971642834779395};
 
-	private final String baseUrl;
-	private final Map<Tile, ImageElement> images = new HashMap<Grid.Tile, ImageElement>();
+	protected final String baseUrl;
+	protected final Map<Tile, ImageElement> images = new HashMap<Grid.Tile, ImageElement>();
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
 		super(name, base, new GoogleMercator());
@@ -88,7 +88,7 @@ public class OpenStreetMapLayer extends Layer {
 		}
 	}
 	
-	private String getUrl(int zoom, int x, int y) {
+	protected String getUrl(int zoom, int x, int y) {
 		return baseUrl + zoom + "/" + x + "/" + y + ".png";
 	}
 	
