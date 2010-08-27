@@ -34,7 +34,7 @@ public class Demo implements EntryPoint {
 		// Tell the map to recalculate its layout when window size changes
 		Window.addResizeHandler(new ResizeHandler() {
 			public void onResize(ResizeEvent event) {
-				map.layout();
+				map.onResize();
 			}
 		});
 		

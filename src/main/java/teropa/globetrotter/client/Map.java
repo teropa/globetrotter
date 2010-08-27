@@ -22,10 +22,11 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.widgetideas.graphics.client.Color;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
-public class Map extends Composite implements ViewContext, ViewPanEvent.Handler {
+public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, RequiresResize {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private View view = new View(this);
@@ -66,8 +67,8 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler 
 		getGrid().init(fullSize);
 		positionControls();
 	}
-
-	public void layout() {
+	
+	public void onResize() {
 		container.remove(view);
 		grid = null;
 		view = new View(this);

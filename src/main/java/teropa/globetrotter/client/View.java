@@ -37,6 +37,8 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	private int xOffset;
 	private int yOffset;
 	
+	private Color backgroundColor = Color.WHITE;
+	
 	private NativePreviewHandler preventDefaults = new NativePreviewHandler() {
 		public void onPreviewNativeEvent(NativePreviewEvent event) {
 			int type = event.getTypeInt();
@@ -65,7 +67,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	public void draw(boolean clear) {
 		if (clear) {
 			canvas.saveContext();
-			canvas.setFillStyle(Color.WHITE);
+			canvas.setFillStyle(backgroundColor);
 			canvas.fillRect(topLeft.getX(), topLeft.getY(), getVisibleSize().getWidth(), getVisibleSize().getHeight());
 			canvas.restoreContext();
 		}
@@ -74,6 +76,10 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		}
 	}
 
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+	
 	public Size getVisibleSize() {
 		return new Size(canvas.getCoordWidth(), canvas.getCoordHeight());
 	}
