@@ -16,6 +16,7 @@ public abstract class Layer {
 	protected ViewContext context;
 
 	protected boolean initialized = false;
+	protected boolean visible = true;
 	
 	public Layer(String name, boolean base) {
 		this(name, base, Projection.WGS_84);
@@ -45,6 +46,11 @@ public abstract class Layer {
 		return projection;
 	}
 
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+		if (initialized) context.getView().draw(true);
+	}
+	
 	public abstract void drawOn(View canvasView);
 
 	public abstract void onTilesActivated(Collection<Grid.Tile> newTiles);

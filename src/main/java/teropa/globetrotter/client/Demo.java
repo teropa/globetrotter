@@ -60,8 +60,9 @@ public class Demo implements EntryPoint {
 				Window.alert("Marker clicked.");
 			}
 		});
-		
+
 		map.addLayer(markerLayer);
+		
 	}
 
 	private void initControls(final Map map) {
