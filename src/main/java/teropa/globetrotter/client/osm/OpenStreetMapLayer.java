@@ -50,7 +50,7 @@ public class OpenStreetMapLayer extends Layer {
 	public void onTilesActivated(Collection<Tile> newTiles) {
 		final OpenStreetMapLayer _this = this;
 		for (final Tile each : newTiles) {
-			String url = getUrl(context.getResolutionIndex(), each.getCol(), each.getRow());
+			String url = getUrl(getZoomLevel(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
 					images.put(each, imageElements[0]);
@@ -59,6 +59,16 @@ public class OpenStreetMapLayer extends Layer {
 				}
 			});
 		}
+	}
+
+	private int getZoomLevel() {
+		int res = (int)Math.round(context.getResolution());
+		for (int i=0 ; i<SUPPORTED_RESOLUTIONS.length ; i++) {
+			if (res == (int)Math.round(SUPPORTED_RESOLUTIONS[i])) {
+				return i;
+			}
+		}
+		return 0;
 	}
 	
 	@Override

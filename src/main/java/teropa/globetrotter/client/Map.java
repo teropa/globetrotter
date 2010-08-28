@@ -112,8 +112,9 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		}
 	}
 
-	public void setResolutions(double[] resolutions) {
+	public void setResolutions(double[] resolutions, int initialIndex) {
 		this.resolutions = resolutions;
+		this.resolutionIndex = initialIndex;
 	}
 	
 	public double[] getResolutions() {
