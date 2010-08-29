@@ -54,7 +54,7 @@ public class OpenStreetMapLayer extends Layer {
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
 					images.put(each, imageElements[0]);
-					context.getView().getCanvas().drawImage(imageElements[0], each.getLeftX(), each.getTopY(), each.getWidth(), each.getHeight());
+//					context.getView().getCanvas().drawImage(imageElements[0], each.getLeftX(), each.getTopY(), each.getWidth(), each.getHeight());
 					context.getView().tileUpdated(each, _this);
 				}
 			});

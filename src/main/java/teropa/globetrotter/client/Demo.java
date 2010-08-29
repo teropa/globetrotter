@@ -3,6 +3,7 @@ package teropa.globetrotter.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.controls.CopyrightText;
 import teropa.globetrotter.client.controls.Panner;
@@ -26,7 +27,7 @@ public class Demo implements EntryPoint {
 		final Map map = new Map("100%", "100%");
 		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS, 4);
 		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
-
+		
 		initBaseLayer(map);
 		initMarkerLayer(map);
 		initControls(map);

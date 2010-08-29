@@ -224,14 +224,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	}
 
 	public void tileUpdated(Tile tile, Layer fromLayer) {
-		int layerIdx = 0;
-		for (int i=0 ; i < map.getLayers().size() ; i++) {
-			if (map.getLayers().get(i) == fromLayer) {
-				layerIdx = i;
-				break;
-			}
-		}
-		for (int i = layerIdx + 1 ; i < map.getLayers().size() ; i++) {
+		for (int i = 0 ; i < map.getLayers().size() ; i++) {
 			map.getLayers().get(i).updateTile(tile);
 		}
 	}
