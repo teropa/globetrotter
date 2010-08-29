@@ -24,7 +24,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.widgetideas.graphics.client.Color;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
 public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, RequiresResize {
@@ -285,25 +284,28 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		Size viewSize = view.getVisibleSize();
 		Point topLeft = view.getTopLeft();
 		
+		int fromTopLeftToRight = fullSize.getWidth() - topLeft.getX();
+		int widthOnRight = viewSize.getWidth() - fromTopLeftToRight;
+		
+		int fromTopLeftToBottom = fullSize.getHeight() - topLeft.getY();
+		int heightOnBottom = viewSize.getHeight() - fromTopLeftToBottom;
+		
 		GWTCanvas canvas = view.getCanvas();
 		canvas.saveContext();
-		canvas.setFillStyle(Color.WHITE);
-		
-		int heightOutside = viewSize.getHeight() - fullSize.getHeight();
-		int heightTop = -topLeft.getY();
-		int heightBottom = viewSize.getHeight() - (-topLeft.getY() + fullSize.getHeight());
-		if (heightOutside > 0) {
-			canvas.fillRect(topLeft.getX(), topLeft.getY(), viewSize.getWidth(), heightTop);
-			canvas.fillRect(topLeft.getX(), topLeft.getY() + viewSize.getHeight() - heightBottom, viewSize.getWidth(), heightBottom);
+		canvas.setFillStyle(view.getBackgroundColor());
+		if (widthOnRight > 0) {
+			canvas.fillRect(topLeft.getX() + fromTopLeftToRight, topLeft.getY(), widthOnRight, viewSize.getHeight());
+		}
+		if (topLeft.getX() < 0) {
+			canvas.fillRect(topLeft.getX(), topLeft.getY(), -topLeft.getX(), viewSize.getHeight());
+		}
+		if (heightOnBottom > 0) {
+			canvas.fillRect(topLeft.getX(), topLeft.getY() + fromTopLeftToBottom, viewSize.getWidth(), heightOnBottom);
+		}
+		if (topLeft.getY() < 0) {
+			canvas.fillRect(topLeft.getX(), topLeft.getY(), viewSize.getWidth(), -topLeft.getY());
 		}
 		
-		int widthOutside = viewSize.getWidth() - fullSize.getWidth();
-		int widthLeft = -topLeft.getX();
-		int widthRight = viewSize.getWidth() - (-topLeft.getX() + fullSize.getWidth());
-		if (widthOutside > 0) {
-			canvas.fillRect(topLeft.getX(), topLeft.getY(), widthLeft, viewSize.getHeight());
-			canvas.fillRect(topLeft.getX() + viewSize.getWidth() - widthRight, topLeft.getY(), widthRight, viewSize.getHeight());
-		}
 		canvas.restoreContext();
 	}
 

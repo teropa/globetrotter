@@ -79,6 +79,10 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 			eachLayer.drawOn(this);
 		}
 	}
+	
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
 
 	public void setBackgroundColor(Color backgroundColor) {
 		this.backgroundColor = backgroundColor;
