@@ -2,7 +2,9 @@ package teropa.globetrotter.client.osm;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import teropa.globetrotter.client.Grid;
 import teropa.globetrotter.client.Grid.Tile;
@@ -39,6 +41,8 @@ public class OpenStreetMapLayer extends Layer {
 		0.5971642834779395};
 
 	protected final String baseUrl;
+	
+	protected Set<Tile> tiles = new HashSet<Tile>();
 	protected final Map<Tile, ImageElement> images = new HashMap<Grid.Tile, ImageElement>();
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
@@ -48,14 +52,16 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void onTilesActivated(Collection<Tile> newTiles) {
+		tiles.addAll(newTiles);
 		final OpenStreetMapLayer _this = this;
 		for (final Tile each : newTiles) {
 			String url = getUrl(getZoomLevel(), each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
-					images.put(each, imageElements[0]);
-//					context.getView().getCanvas().drawImage(imageElements[0], each.getLeftX(), each.getTopY(), each.getWidth(), each.getHeight());
-					context.getView().tileUpdated(each, _this);
+					if (tiles.contains(each)) {
+						images.put(each, imageElements[0]);
+						context.getView().tileUpdated(each, _this);
+					}
 				}
 			});
 		}
@@ -73,11 +79,13 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void onTilesDeactivated(Collection<Tile> removedTiles) {
+		tiles.removeAll(removedTiles);
 		images.keySet().removeAll(removedTiles);
 	}
 	
 	@Override
 	public void onAllTilesDeactivated() {
+		tiles.clear();
 		images.clear();
 	}
 	
