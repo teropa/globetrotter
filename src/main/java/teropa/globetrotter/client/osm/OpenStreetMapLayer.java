@@ -61,7 +61,7 @@ public class OpenStreetMapLayer extends Layer {
 		}
 	}
 
-	private int getZoomLevel() {
+	protected int getZoomLevel() {
 		int res = (int)Math.round(context.getResolution());
 		for (int i=0 ; i<SUPPORTED_RESOLUTIONS.length ; i++) {
 			if (res == (int)Math.round(SUPPORTED_RESOLUTIONS[i])) {
