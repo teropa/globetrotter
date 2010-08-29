@@ -17,6 +17,7 @@ import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
 
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
@@ -29,7 +30,8 @@ import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, RequiresResize {
 
 	private final AbsolutePanel container = new AbsolutePanel();
-	private View view = new View(this);
+	private HandlerManager viewHandlers = new HandlerManager(this);
+	private View view = new View(this, viewHandlers);
 	private final Calc calc = new Calc(this);
 	private final List<Layer> layers = new ArrayList<Layer>();
 	private final LinkedHashMap<Control, Position> controls = new LinkedHashMap<Control, Position>();
@@ -71,7 +73,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	public void onResize() {
 		container.remove(view);
 		grid = null;
-		view = new View(this);
+		view = new View(this, viewHandlers);
 		container.add(view);
 		init();				
 	}

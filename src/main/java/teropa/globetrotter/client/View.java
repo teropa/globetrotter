@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
@@ -30,6 +31,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	
 	private final MouseCanvas canvas = new MouseCanvas();
 	private final Map map;
+	private final HandlerManager handlers;
 	
 	private Point topLeft = new Point(0, 0);
 	
@@ -49,8 +51,10 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	};
 	private HandlerRegistration preventDefaultsRegistration;
 	
-	public View(Map map) {
+	
+	public View(Map map, HandlerManager handlers) {
 		this.map = map;
+		this.handlers = handlers;
 		canvas.addMouseOverHandler(this);
 		canvas.addMouseOutHandler(this);
 		canvas.addMouseDownHandler(this);
@@ -164,7 +168,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		topLeft = new Point(newX, newY);
 
 		draw(true);
-		fireEvent(new ViewPanEvent(toCenter(topLeft)));
+		handlers.fireEvent(new ViewPanEvent(toCenter(topLeft)));
 	}
 	
 	public void move(int xDelta, int yDelta) {
@@ -176,7 +180,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	public void onClick(ClickEvent event) {
 		int x = topLeft.getX() + (event.getNativeEvent().getClientX() - getAbsoluteLeft());
 		int y = topLeft.getY() + (event.getNativeEvent().getClientY() - getAbsoluteTop());
-		fireEvent(new ViewClickEvent(new Point(x, y)));
+		handlers.fireEvent(new ViewClickEvent(new Point(x, y)));
 	}
 
 	public void onDoubleClick(DoubleClickEvent event) {
@@ -190,11 +194,11 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 	}
 	
 	public HandlerRegistration addViewPanHandler(ViewPanEvent.Handler handler) {
-		return addHandler(handler, ViewPanEvent.TYPE);
+		return handlers.addHandler(ViewPanEvent.TYPE, handler);
 	}
 	
 	public HandlerRegistration addViewClickHandler(ViewClickEvent.Handler handler) {
-		return addHandler(handler, ViewClickEvent.TYPE);
+		return handlers.addHandler(ViewClickEvent.TYPE, handler);
 	}
 	
 	private Point toTopLeft(Point center) {
