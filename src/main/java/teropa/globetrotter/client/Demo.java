@@ -3,7 +3,6 @@ package teropa.globetrotter.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import teropa.globetrotter.client.common.LonLat;
 import teropa.globetrotter.client.common.Position;
 import teropa.globetrotter.client.controls.CopyrightText;
 import teropa.globetrotter.client.controls.Panner;

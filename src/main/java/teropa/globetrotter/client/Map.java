@@ -71,7 +71,10 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	
 	public void onResize() {
 		container.remove(view);
-		grid = null;
+		if (grid != null) {
+			grid.destroy();
+			grid = null;
+		}
 		view = new View(this, viewHandlers);
 		container.add(view);
 		init();				

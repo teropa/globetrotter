@@ -10,6 +10,8 @@ import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 
+import com.google.gwt.event.shared.HandlerRegistration;
+
 public class Grid implements ViewPanEvent.Handler {
 
 	private static final int BUFFER = 2;
@@ -17,6 +19,7 @@ public class Grid implements ViewPanEvent.Handler {
 	private final int tileWidth;
 	private final int tileHeight;
 	private final ViewContext ctx;
+	private final HandlerRegistration panRegistration;
 	
 	private int numCols;
 	private int numRows;
@@ -29,7 +32,7 @@ public class Grid implements ViewPanEvent.Handler {
 		this.tileWidth = tileSize.getWidth();
 		this.tileHeight = tileSize.getHeight();
 		this.ctx = ctx;		
-		ctx.getView().addViewPanHandler(this);
+		this.panRegistration = ctx.getView().addViewPanHandler(this);
 	}
 
 	public int getNumCols() {
@@ -57,6 +60,10 @@ public class Grid implements ViewPanEvent.Handler {
 			}
 		}
 		notifyNewTiles(tiles);
+	}
+	
+	public void destroy() {
+		panRegistration.removeHandler();
 	}
 
 	private int[] initTileXs() {
