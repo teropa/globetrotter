@@ -2,6 +2,7 @@ package teropa.globetrotter.client;
 
 import java.util.Collection;
 
+import teropa.globetrotter.client.grid.Tile;
 import teropa.globetrotter.client.proj.Projection;
 import teropa.globetrotter.client.proj.WGS84;
 
@@ -54,10 +55,10 @@ public abstract class Layer {
 	
 	public abstract void drawOn(View canvasView);
 
-	public abstract void onTilesActivated(Collection<Grid.Tile> newTiles);
-	public abstract void onTilesDeactivated(Collection<Grid.Tile> removedTiles);
+	public abstract void onTilesActivated(Collection<Tile> newTiles);
+	public abstract void onTilesDeactivated(Collection<Tile> removedTiles);
 	public abstract void onAllTilesDeactivated();
-	public abstract void updateTile(Grid.Tile tile);
+	public abstract void updateTile(Tile tile);
 
 	
 

@@ -1,4 +1,4 @@
-package teropa.globetrotter.client;
+package teropa.globetrotter.client.grid;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import teropa.globetrotter.client.Layer;
+import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.common.Direction;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
@@ -120,6 +122,14 @@ public class Grid implements ViewPanEvent.Handler {
 		return res;
 	}
 
+	public int getTileWidth() {
+		return tileWidth;
+	}
+
+	public int getTileHeight() {
+		return tileHeight;
+	}
+
 	public void onViewPanned(ViewPanEvent event) {
 		final int[] newCoords = getVisibleCoords(map.getVisibleRectangle());
 		if (Arrays.equals(newCoords, coords)) {
@@ -129,7 +139,7 @@ public class Grid implements ViewPanEvent.Handler {
 		final int oldXFrom = coords[0], oldXTo = coords[1], oldYFrom = coords[2], oldYTo = coords[3];
 		final int newXFrom = newCoords[0], newXTo = newCoords[1], newYFrom = newCoords[2], newYTo = newCoords[3];
 		
-		final Set<Tile> removedTiles = new HashSet<Grid.Tile>();
+		final Set<Tile> removedTiles = new HashSet<Tile>();
 		removedTiles.addAll(makeTiles(oldXFrom, newXFrom - 1, oldYFrom, oldYTo));
 		removedTiles.addAll(makeTiles(newXTo + 1, oldXTo, oldYFrom, oldYTo));
 		removedTiles.addAll(makeTiles(oldXFrom, oldXTo, oldYFrom, newYFrom - 1));
@@ -214,65 +224,7 @@ public class Grid implements ViewPanEvent.Handler {
 		
 		return new int[] { xStart, xEnd, yStart, yEnd };
 	}
-	
-	public class Tile {
-		
-		private final int col;
-		private final int row;
-		private final int leftX;
-		private final int topY;
-		
-		public Tile(int col, int row, int leftX, int topY) {
-			this.col = col;
-			this.row = row;
-			this.leftX = leftX;
-			this.topY = topY;
-		}
-		
-		public int getCol() {
-			return col;
-		}
 
-		public int getRow() {
-			return row;
-		}
-		
-		public int getLeftX() {
-			return leftX;
-		}
-		
-		public int getTopY() {
-			return topY;
-		}
-		
-		public int getWidth() {
-			return tileWidth;
-		}
-		
-		public int getHeight() {
-			return tileHeight;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) return false;
-			Tile o = (Tile)obj;
-			return col == o.col && row == o.row;
-		}
-		
-		@Override
-		public int hashCode() {
-			int hash = 42;
-			hash = 37 * hash + col;
-			hash = 37 * hash + row;
-			return hash;
-		}
-		
-		@Override
-		public String toString() {
-			return "Tile ["+col+","+row+"]";
-		}
-	}
 
 	
 }

@@ -6,10 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import teropa.globetrotter.client.Grid;
-import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.View;
+import teropa.globetrotter.client.grid.Tile;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.dom.client.ImageElement;
@@ -43,7 +42,7 @@ public class OpenStreetMapLayer extends Layer {
 	protected final String baseUrl;
 	
 	protected Set<Tile> tiles = new HashSet<Tile>();
-	protected final Map<Tile, ImageElement> images = new HashMap<Grid.Tile, ImageElement>();
+	protected final Map<Tile, ImageElement> images = new HashMap<Tile, ImageElement>();
 	
 	public OpenStreetMapLayer(String baseUrl, String name, boolean base) {
 		super(name, base, new GoogleMercator());
@@ -94,16 +93,18 @@ public class OpenStreetMapLayer extends Layer {
 	public void updateTile(Tile tile) {
 		ImageElement mine = images.get(tile);
 		if (mine != null) {
-			map.getView().getCanvas().drawImage(mine, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
+			map.getView().getCanvas().drawImage(mine, tile.getLeftX(), tile.getTopY(), map.getGrid().getTileWidth(), map.getGrid().getTileHeight());
 		}
 	}
 	
 	@Override
 	public void drawOn(View canvasView) {
+		int tileWidth = map.getGrid().getTileWidth();
+		int tileHeight = map.getGrid().getTileHeight();
 		for(Map.Entry<Tile, ImageElement> each : images.entrySet()) {
 			Tile tile = each.getKey();
 			ImageElement img = each.getValue();
-			canvasView.getCanvas().drawImage(img, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
+			canvasView.getCanvas().drawImage(img, tile.getLeftX(), tile.getTopY(), tileWidth, tileHeight);
 		}
 	}
 	

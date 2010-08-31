@@ -15,6 +15,7 @@ import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
+import teropa.globetrotter.client.grid.Grid;
 import teropa.globetrotter.client.proj.Projection;
 import teropa.globetrotter.client.proj.WGS84;
 

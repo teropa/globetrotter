@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import teropa.globetrotter.client.Grid;
-import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.Map;
 import teropa.globetrotter.client.View;
@@ -15,6 +13,7 @@ import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewClickEvent;
+import teropa.globetrotter.client.grid.Tile;
 
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.shared.HandlerManager;
@@ -165,7 +164,7 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	}
 	
 	@Override
-	public void onTilesActivated(Collection<Grid.Tile> newTiles) {
+	public void onTilesActivated(Collection<Tile> newTiles) {
 	}
 	
 	@Override
@@ -178,7 +177,9 @@ public class MarkerLayer extends Layer implements ViewClickEvent.Handler, MapZoo
 	
 	@Override
 	public void updateTile(Tile tile) {
-		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
+		int tileWidth = map.getGrid().getTileWidth();
+		int tileHeight = map.getGrid().getTileHeight();
+		Rectangle tileRect = new Rectangle(tile.getLeftX(), tile.getTopY(), tileWidth, tileHeight);
 		int sz = markers.size();
 		for (int i=0 ; i<sz ; i++) {
 			MarkerData data = markers.get(i);

@@ -1,11 +1,11 @@
 package teropa.globetrotter.client;
 
-import teropa.globetrotter.client.Grid.Tile;
 import teropa.globetrotter.client.canvas.MouseCanvas;
 import teropa.globetrotter.client.common.Point;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewClickEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
+import teropa.globetrotter.client.grid.Tile;
 import teropa.globetrotter.client.util.MouseHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
