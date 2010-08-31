@@ -20,7 +20,7 @@ public class Grid implements ViewPanEvent.Handler {
 	
 	private final int tileWidth;
 	private final int tileHeight;
-	private final ViewContext ctx;
+	private final Map map;
 	private final HandlerRegistration panRegistration;
 	
 	private int numCols;
@@ -30,11 +30,11 @@ public class Grid implements ViewPanEvent.Handler {
 
 	private int[] coords;
 	
-	public Grid(Size tileSize, ViewContext ctx) {
+	public Grid(Size tileSize, Map map) {
 		this.tileWidth = tileSize.getWidth();
 		this.tileHeight = tileSize.getHeight();
-		this.ctx = ctx;		
-		this.panRegistration = ctx.getView().addViewPanHandler(this);
+		this.map = map;		
+		this.panRegistration = map.getView().addViewPanHandler(this);
 	}
 
 	public int getNumCols() {
@@ -54,7 +54,7 @@ public class Grid implements ViewPanEvent.Handler {
 		tileXs = initTileXs();
 		tileYs = initTileYs();
 
-		coords = getVisibleCoords(ctx.getVisibleRectangle());
+		coords = getVisibleCoords(map.getVisibleRectangle());
 
 		notifyNewTiles(getTileSpiral());
 	}
@@ -121,7 +121,7 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 
 	public void onViewPanned(ViewPanEvent event) {
-		final int[] newCoords = getVisibleCoords(ctx.getVisibleRectangle());
+		final int[] newCoords = getVisibleCoords(map.getVisibleRectangle());
 		if (Arrays.equals(newCoords, coords)) {
 			return;
 		}
@@ -147,7 +147,7 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 
 	private void notifyRemovedTiles(final Set<Tile> removedTiles) {
-		List<Layer> layers = ctx.getLayers();
+		List<Layer> layers = map.getLayers();
 		int sz = layers.size();
 		for (int i=0 ; i<sz ; i++) {
 			layers.get(i).onTilesDeactivated(removedTiles);
@@ -155,7 +155,7 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 
 	private void notifyAllTilesRemoved() {
-		List<Layer> layers = ctx.getLayers();
+		List<Layer> layers = map.getLayers();
 		int sz = layers.size();
 		for (int i=0 ; i<sz ; i++) {
 			layers.get(i).onAllTilesDeactivated();
@@ -163,7 +163,7 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 
 	private void notifyNewTiles(final Collection<Tile> newTiles) {
-		List<Layer> layers = ctx.getLayers();
+		List<Layer> layers = map.getLayers();
 		int sz = layers.size();
 		for (int i=0 ; i<sz ; i++) {
 			layers.get(i).onTilesActivated(newTiles);

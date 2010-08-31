@@ -61,7 +61,7 @@ public class OpenStreetMapLayer extends Layer {
 				public void onImagesLoaded(ImageElement[] imageElements) {
 					if (tiles.contains(each)) {
 						images.put(each, imageElements[0]);
-						context.getView().tileUpdated(each, _this);
+						map.getView().tileUpdated(each, _this);
 					}
 				}
 			});
@@ -69,7 +69,7 @@ public class OpenStreetMapLayer extends Layer {
 	}
 
 	protected int getZoomLevel() {
-		int res = (int)Math.round(context.getResolution() * 100);
+		int res = (int)Math.round(map.getResolution() * 100);
 		for (int i=0 ; i<SUPPORTED_RESOLUTIONS.length ; i++) {
 			if (res == (int)Math.round(SUPPORTED_RESOLUTIONS[i] * 100)) {
 				return i;
@@ -94,7 +94,7 @@ public class OpenStreetMapLayer extends Layer {
 	public void updateTile(Tile tile) {
 		ImageElement mine = images.get(tile);
 		if (mine != null) {
-			context.getView().getCanvas().drawImage(mine, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
+			map.getView().getCanvas().drawImage(mine, tile.getLeftX(), tile.getTopY(), tile.getWidth(), tile.getHeight());
 		}
 	}
 	

@@ -11,7 +11,6 @@ import teropa.globetrotter.client.marker.Marker;
 import teropa.globetrotter.client.marker.MarkerClickEvent;
 import teropa.globetrotter.client.marker.MarkerLayer;
 import teropa.globetrotter.client.osm.OpenStreetMapLayer;
-import teropa.globetrotter.client.proj.GoogleMercator;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ResizeEvent;

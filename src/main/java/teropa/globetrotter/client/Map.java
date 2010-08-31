@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.widgetideas.graphics.client.GWTCanvas;
 
-public class Map extends Composite implements ViewContext, ViewPanEvent.Handler, RequiresResize {
+public class Map extends Composite implements ViewPanEvent.Handler, RequiresResize {
 
 	private final AbsolutePanel container = new AbsolutePanel();
 	private HandlerManager viewHandlers = new HandlerManager(this);
@@ -42,6 +42,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	private LonLat center = new LonLat(0, 0);
 	private double[] resolutions = new double[] { 1.0, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005 };
 	private int resolutionIndex = 4;
+	private boolean wrapDateLine = true;
 	
 	private Size tileSize = new Size(256, 256);
 	
@@ -124,6 +125,14 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	
 	public double[] getResolutions() {
 		return resolutions;
+	}
+	
+	public boolean isWrapDateLine() {
+		return wrapDateLine;
+	}
+	
+	public void setWrapDateLine(boolean wrapDateLine) {
+		this.wrapDateLine = wrapDateLine;
 	}
 	
 	public void zoomTo(int resolutionIndex) {

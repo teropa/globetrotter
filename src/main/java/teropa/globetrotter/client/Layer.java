@@ -14,7 +14,7 @@ public abstract class Layer {
 	protected final String name;
 	protected final boolean base;
 	protected final Projection projection;
-	protected ViewContext context;
+	protected Map map;
 
 	protected boolean initialized = false;
 	protected boolean visible = true;
@@ -30,8 +30,8 @@ public abstract class Layer {
 		this.id = ID_PREFIX + idCounter++;
 	}
 	
-	public void init(ViewContext ctx) {
-		this.context = ctx;
+	public void init(Map map) {
+		this.map = map;
 		this.initialized = true;
 	}
 
@@ -49,7 +49,7 @@ public abstract class Layer {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-		if (initialized) context.getView().draw(true);
+		if (initialized) map.getView().draw(true);
 	}
 	
 	public abstract void drawOn(View canvasView);
