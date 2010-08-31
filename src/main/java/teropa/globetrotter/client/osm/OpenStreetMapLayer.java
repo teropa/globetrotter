@@ -12,6 +12,7 @@ import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
@@ -52,10 +53,12 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void onTilesActivated(Collection<Tile> newTiles) {
+		GWT.log("Notified tile add on zoom level "+getZoomLevel()+" res "+context.getResolutionIndex());
 		tiles.addAll(newTiles);
 		final OpenStreetMapLayer _this = this;
+		int zoomLevel = getZoomLevel();
 		for (final Tile each : newTiles) {
-			String url = getUrl(getZoomLevel(), each.getCol(), each.getRow());
+			String url = getUrl(zoomLevel, each.getCol(), each.getRow());
 			ImageLoader.loadImages(new String[] { url }, new CallBack() {
 				public void onImagesLoaded(ImageElement[] imageElements) {
 					if (tiles.contains(each)) {
@@ -68,9 +71,9 @@ public class OpenStreetMapLayer extends Layer {
 	}
 
 	protected int getZoomLevel() {
-		int res = (int)Math.round(context.getResolution());
+		int res = (int)Math.round(context.getResolution() * 100);
 		for (int i=0 ; i<SUPPORTED_RESOLUTIONS.length ; i++) {
-			if (res == (int)Math.round(SUPPORTED_RESOLUTIONS[i])) {
+			if (res == (int)Math.round(SUPPORTED_RESOLUTIONS[i] * 100)) {
 				return i;
 			}
 		}
