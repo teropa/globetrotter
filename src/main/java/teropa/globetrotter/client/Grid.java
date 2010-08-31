@@ -2,14 +2,18 @@ package teropa.globetrotter.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import teropa.globetrotter.client.common.Direction;
 import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class Grid implements ViewPanEvent.Handler {
@@ -53,13 +57,57 @@ public class Grid implements ViewPanEvent.Handler {
 		tileYs = initTileYs();
 
 		coords = getVisibleCoords(ctx.getVisibleRectangle());
-		Set<Tile> tiles = new HashSet<Grid.Tile>();
-		for (int xIdx = coords[0] ; xIdx <= coords[1] ; xIdx++) {
-			for (int yIdx = coords[2] ; yIdx <= coords[3] ; yIdx++) {
-				tiles.add(makeTile(xIdx, yIdx));
+
+		notifyNewTiles(getTileSpiral());
+	}
+
+	// Following adopted from http://trac.openlayers.org/browser/trunk/openlayers/lib/OpenLayers/Layer/Grid.js
+	private List<Tile> getTileSpiral() {
+		List<Tile> spiral = new ArrayList<Tile>();
+		
+		int w = coords[1] - coords[0] + 1;
+		int h = coords[3] - coords[2] + 1;
+		
+		int row = 0;
+		int col = -1;
+		Direction dir = Direction.RIGHT;
+		int directionsTried = 0;
+		
+		while (directionsTried < 4) {
+			int testRow = row;
+			int testCol = col;
+			
+			switch (dir) {
+			case RIGHT: testCol++; break;
+			case DOWN: testRow++; break;
+			case LEFT: testCol--; break;
+			case UP: testRow--; break;
+			}
+
+			Tile tile = null;
+			if (testRow < h && testRow >= 0 && testCol < w && testCol >= 0) {
+				tile = makeTile(coords[0] + testCol, coords[2] + testRow);
+			}
+			
+			if (tile != null && !spiral.contains(tile)) {
+				spiral.add(tile);
+				
+				directionsTried = 0;
+				row = testRow;
+				col = testCol;
+			} else {
+				switch(dir) {
+				case UP: dir = Direction.RIGHT; break;
+				case RIGHT: dir = Direction.DOWN; break;
+				case DOWN: dir = Direction.LEFT; break;
+				case LEFT: dir = Direction.UP; break;
+				}
+				directionsTried++;
 			}
 		}
-		notifyNewTiles(tiles);
+		
+		Collections.reverse(spiral);
+		return spiral;
 	}
 	
 	public void destroy() {
@@ -124,7 +172,7 @@ public class Grid implements ViewPanEvent.Handler {
 		}
 	}
 
-	private void notifyNewTiles(final Set<Tile> newTiles) {
+	private void notifyNewTiles(final Collection<Tile> newTiles) {
 		List<Layer> layers = ctx.getLayers();
 		int sz = layers.size();
 		for (int i=0 ; i<sz ; i++) {
