@@ -13,7 +13,6 @@ import teropa.globetrotter.client.common.Rectangle;
 import teropa.globetrotter.client.common.Size;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class Grid implements ViewPanEvent.Handler {
@@ -65,8 +64,8 @@ public class Grid implements ViewPanEvent.Handler {
 	private List<Tile> getTileSpiral() {
 		List<Tile> spiral = new ArrayList<Tile>();
 		
-		int w = coords[1] - coords[0] + 1;
-		int h = coords[3] - coords[2] + 1;
+		int w = 1 + coords[1] - coords[0];
+		int h = 1 + coords[3] - coords[2];
 		
 		int row = 0;
 		int col = -1;
@@ -90,23 +89,15 @@ public class Grid implements ViewPanEvent.Handler {
 			}
 			
 			if (tile != null && !spiral.contains(tile)) {
-				spiral.add(tile);
-				
+				spiral.add(0, tile);
 				directionsTried = 0;
 				row = testRow;
 				col = testCol;
 			} else {
-				switch(dir) {
-				case UP: dir = Direction.RIGHT; break;
-				case RIGHT: dir = Direction.DOWN; break;
-				case DOWN: dir = Direction.LEFT; break;
-				case LEFT: dir = Direction.UP; break;
-				}
+				dir = dir.nextClockwise();
 				directionsTried++;
 			}
 		}
-		
-		Collections.reverse(spiral);
 		return spiral;
 	}
 	
