@@ -16,6 +16,7 @@ import teropa.globetrotter.client.controls.Control;
 import teropa.globetrotter.client.event.MapZoomedEvent;
 import teropa.globetrotter.client.event.internal.ViewPanEvent;
 import teropa.globetrotter.client.proj.Projection;
+import teropa.globetrotter.client.proj.WGS84;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
@@ -37,7 +38,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	private KeyboardControls keyboardControls;
 	private Layer baseLayer;
 	
-	private Bounds maxExtent = new Bounds(-180, -90, 180, 90);
+	private Bounds maxExtent;
 	private LonLat center = new LonLat(0, 0);
 	private double[] resolutions = new double[] { 1.0, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005 };
 	private int resolutionIndex = 4;
@@ -112,7 +113,7 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 		if (baseLayer != null) {
 			return baseLayer.getProjection();
 		} else {
-			return Projection.WGS_84;
+			return new WGS84();
 		}
 	}
 
@@ -146,7 +147,11 @@ public class Map extends Composite implements ViewContext, ViewPanEvent.Handler,
 	}
 	
 	public Bounds getMaxExtent() {
-		return maxExtent;
+		if (maxExtent != null) {
+			return maxExtent;
+		} else {
+			return baseLayer.getProjection().getMaxExtent();
+		}
 	}
 	
 	public void setMaxExtent(Bounds maxExtent) {

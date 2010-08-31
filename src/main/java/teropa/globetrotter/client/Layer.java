@@ -3,6 +3,7 @@ package teropa.globetrotter.client;
 import java.util.Collection;
 
 import teropa.globetrotter.client.proj.Projection;
+import teropa.globetrotter.client.proj.WGS84;
 
 public abstract class Layer {
 
@@ -19,7 +20,7 @@ public abstract class Layer {
 	protected boolean visible = true;
 	
 	public Layer(String name, boolean base) {
-		this(name, base, Projection.WGS_84);
+		this(name, base, new WGS84());
 	}
 	
 	public Layer(String name, boolean base, Projection projection) {

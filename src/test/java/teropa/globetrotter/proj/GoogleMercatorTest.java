@@ -66,7 +66,7 @@ public class GoogleMercatorTest {
 	
 	@Test
 	public void zoomLevels() {
-		double full = GoogleMercator.MAX_EXTENT.getWidth();
+		double full = new GoogleMercator().getMaxExtent().getWidth();
 		for (int n=0 ; n<19 ; n++) {
 			double numTiles = Math.pow(2, n);
 			double size = numTiles * 256;

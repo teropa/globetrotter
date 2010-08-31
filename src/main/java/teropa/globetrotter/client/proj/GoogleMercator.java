@@ -20,7 +20,7 @@ import teropa.globetrotter.client.common.Bounds;
  */
 public class GoogleMercator extends Mercator {
 
-	public static final Bounds MAX_EXTENT = new Bounds(-2.0037508342789244E7, -2.0037508342789244E7, 2.0037508342789244E7, 2.0037508342789244E7);
+	private static final Bounds MAX_EXTENT = new Bounds(-2.0037508342789244E7, -2.0037508342789244E7, 2.0037508342789244E7, 2.0037508342789244E7);
 	
 	public GoogleMercator() {
 		super(0.0, true, 0, 0, 0, 6378137, 0, 0, 1);
@@ -28,6 +28,11 @@ public class GoogleMercator extends Mercator {
 	
 	public String getSRS() {
 		return "EPSG:3785";
+	}
+	
+	@Override
+	public Bounds getMaxExtent() {
+		return MAX_EXTENT;
 	}
 	
 }

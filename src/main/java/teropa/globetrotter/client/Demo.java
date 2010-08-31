@@ -25,7 +25,6 @@ public class Demo implements EntryPoint {
 	public void onModuleLoad() {
 		final Map map = new Map("100%", "100%");
 		map.setResolutions(OpenStreetMapLayer.SUPPORTED_RESOLUTIONS, 4);
-		map.setMaxExtent(GoogleMercator.MAX_EXTENT);
 		
 		initBaseLayer(map);
 		initMarkerLayer(map);
