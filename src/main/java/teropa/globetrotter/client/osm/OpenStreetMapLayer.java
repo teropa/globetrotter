@@ -12,7 +12,6 @@ import teropa.globetrotter.client.Layer;
 import teropa.globetrotter.client.View;
 import teropa.globetrotter.client.proj.GoogleMercator;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader;
 import com.google.gwt.widgetideas.graphics.client.ImageLoader.CallBack;
@@ -53,7 +52,6 @@ public class OpenStreetMapLayer extends Layer {
 	
 	@Override
 	public void onTilesActivated(Collection<Tile> newTiles) {
-		GWT.log("Notified tile add on zoom level "+getZoomLevel()+" res "+context.getResolutionIndex());
 		tiles.addAll(newTiles);
 		final OpenStreetMapLayer _this = this;
 		int zoomLevel = getZoomLevel();
