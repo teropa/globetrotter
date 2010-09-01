@@ -193,8 +193,9 @@ public class Grid implements ViewPanEvent.Handler {
 	
 	private Tile makeTile(int xIdx, int yIdx) {
 		int x = getTileX(xIdx);
+		int wrappedX = x % fullSize.getWidth();
 		int y = tileYs[yIdx];
-		return new Tile(getIndexWrapping(tileXs, xIdx % tileXs.length), yIdx, x, y);
+		return new Tile(getIndexWrapping(tileXs, xIdx % tileXs.length), yIdx, x, y, wrappedX);
 	}
 
 	private int getTileX(int xIdx) {

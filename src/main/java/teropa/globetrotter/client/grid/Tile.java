@@ -6,12 +6,14 @@ public class Tile {
 	private final int row;
 	private final int leftX;
 	private final int topY;
+	private final int wrappedLeftX;
 	
-	public Tile(int col, int row, int leftX, int topY) {
+	public Tile(int col, int row, int leftX, int topY, int wrappedX) {
 		this.col = col;
 		this.row = row;
 		this.leftX = leftX;
 		this.topY = topY;
+		this.wrappedLeftX = wrappedX;
 	}
 	
 	public int getCol() {
@@ -28,6 +30,10 @@ public class Tile {
 	
 	public int getTopY() {
 		return topY;
+	}
+	
+	public int getWrappedLeftX() {
+		return wrappedLeftX;
 	}
 	
 	@Override
@@ -47,6 +53,6 @@ public class Tile {
 	
 	@Override
 	public String toString() {
-		return "Tile ["+col+","+row+"]";
+		return "Tile ["+col+","+row+"]["+leftX+","+topY+"]";
 	}
 }
