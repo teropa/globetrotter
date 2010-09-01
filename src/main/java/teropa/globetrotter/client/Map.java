@@ -135,7 +135,11 @@ public class Map extends Composite implements ViewPanEvent.Handler, RequiresResi
 	public void setWrapDateLine(boolean wrapDateLine) {
 		this.wrapDateLine = wrapDateLine;
 	}
-	
+
+	public boolean shouldWrapDateLine() {
+		return isWrapDateLine() && isShowingProjectionMaxExtent();
+	}
+
 	public void zoomTo(int resolutionIndex) {
 		resizeView(resolutionIndex - this.resolutionIndex);
 	}
@@ -162,6 +166,10 @@ public class Map extends Composite implements ViewPanEvent.Handler, RequiresResi
 		} else {
 			return baseLayer.getProjection().getMaxExtent();
 		}
+	}
+
+	public boolean isShowingProjectionMaxExtent() {
+		return getMaxExtent().equals(baseLayer.getProjection().getMaxExtent());
 	}
 	
 	public void setMaxExtent(Bounds maxExtent) {
@@ -358,6 +366,7 @@ public class Map extends Composite implements ViewPanEvent.Handler, RequiresResi
 	public void addMapZoomedHandler(MapZoomedEvent.Handler handler) {
 		addHandler(handler, MapZoomedEvent.TYPE);
 	}
+
 
 }
 

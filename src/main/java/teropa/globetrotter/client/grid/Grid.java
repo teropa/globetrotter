@@ -19,12 +19,13 @@ import com.google.gwt.event.shared.HandlerRegistration;
 public class Grid implements ViewPanEvent.Handler {
 
 	private static final int BUFFER = 2;
-	
+
 	private final int tileWidth;
 	private final int tileHeight;
-	private final Map map;
+	public final Map map;
 	private final HandlerRegistration panRegistration;
-	
+
+	private Size fullSize;
 	private int numCols;
 	private int numRows;
 	private int[] tileXs;
@@ -48,6 +49,7 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 
 	public void init(Size fullSize) {
+		this.fullSize = fullSize;
 		notifyAllTilesRemoved();
 		
 		numCols = fullSize.getWidth() / tileWidth;
@@ -65,13 +67,12 @@ public class Grid implements ViewPanEvent.Handler {
 	private List<Tile> getTileSpiral() {
 		List<Tile> spiral = new ArrayList<Tile>();
 		
-		int w = 1 + coords[1] - coords[0];
-		int h = 1 + coords[3] - coords[2];
+		int xFrom = coords[0], xTo = coords[1], yFrom = coords[2], yTo = coords[3];
 		
-		int row = 0;
-		int col = -1;
-		Direction dir = Direction.RIGHT;
+		int row = yFrom;
+		int col = xFrom - 1;
 		int directionsTried = 0;
+		Direction dir = Direction.RIGHT;
 		
 		while (directionsTried < 4) {
 			int testRow = row;
@@ -85,8 +86,8 @@ public class Grid implements ViewPanEvent.Handler {
 			}
 
 			Tile tile = null;
-			if (testRow < h && testRow >= 0 && testCol < w && testCol >= 0) {
-				tile = makeTile(coords[0] + testCol, coords[2] + testRow);
+			if (testRow <= yTo && testRow >= yFrom && testCol <= xTo && testCol >= xFrom) {
+				tile = makeTile(testCol, testRow);
 			}
 			
 			if (tile != null && !spiral.contains(tile)) {
@@ -113,7 +114,7 @@ public class Grid implements ViewPanEvent.Handler {
 		}
 		return res;
 	}
-
+	
 	private int[] initTileYs() {
 		int[] res = new int[numRows];
 		for (int i=0 ; i<numRows ; i++) {
@@ -191,40 +192,84 @@ public class Grid implements ViewPanEvent.Handler {
 	}
 	
 	private Tile makeTile(int xIdx, int yIdx) {
-		int x = tileXs[xIdx];
+		int x = getTileX(xIdx);
 		int y = tileYs[yIdx];
-		return new Tile(xIdx, yIdx, x, y);
+		return new Tile(getIndexWrapping(tileXs, xIdx % tileXs.length), yIdx, x, y);
+	}
+
+	private int getTileX(int xIdx) {
+		if (xIdx < 0) {
+			int idx = -xIdx;
+			return -fullSize.getWidth() * (idx / tileXs.length) - getWrapping(tileXs, idx % tileXs.length);
+		} else {
+			return fullSize.getWidth() * (xIdx / tileXs.length) + getWrapping(tileXs, xIdx % tileXs.length);
+		}
 	}
 	
 
 	private int[] getVisibleCoords(Rectangle area) {
+		int xStart = getVisibleStartX(area);
+		int xEnd = getVisibleEndX(area, xStart);
+		int yStart = getVisibleStartY(area);
+		int yEnd = getVisibleEndY(area, yStart);
+		return new int[] { xStart, xEnd, yStart, yEnd };
+	}
+
+	private int getVisibleStartX(Rectangle area) {
 		int xStart = 0;
-		while (xStart < tileXs.length && tileXs[xStart] < area.x)
-			xStart++;
-		if (xStart > 0) xStart--;
-		xStart = Math.max(0, xStart - BUFFER);
-		
+		if (map.shouldWrapDateLine()) {
+			xStart = ((area.x - fullSize.getWidth()) / fullSize.getWidth()) * tileXs.length;
+			while (getTileX(xStart) < area.x)
+				xStart++;
+			xStart -= BUFFER + 1;			
+		} else {
+			while (xStart < tileXs.length && tileXs[xStart] < area.x)
+				xStart++;
+			if (xStart > 0) xStart--;
+			xStart = Math.max(0, xStart - BUFFER);
+		}
+		return xStart;
+	}
+
+	private int getVisibleEndX(Rectangle area, int xStart) {
 		int xEnd = xStart;
-		while (xEnd < tileXs.length && tileXs[xEnd] < area.x + area.width)
-			xEnd++;
-		if (xEnd > xStart) xEnd--;
-		xEnd = Math.min(numCols - 1, xEnd + BUFFER);
-		
+		if (map.shouldWrapDateLine()) {
+			while (getTileX(xEnd) < area.x + area.width)
+				xEnd++;
+			if (xEnd > xStart) xEnd--;
+			xEnd += BUFFER;
+		} else {
+			while (xEnd < tileXs.length && tileXs[xEnd] < area.x + area.width)
+				xEnd++;
+			if (xEnd > xStart) xEnd--;
+			xEnd = Math.min(numCols - 1, xEnd + BUFFER);
+		}
+		return xEnd;
+	}
+
+	private int getVisibleStartY(Rectangle area) {
 		int yStart = 0;
 		while (yStart < tileYs.length && tileYs[yStart] < area.y)
 			yStart++;
 		if (yStart > 0) yStart--;
 		yStart = Math.max(0, yStart - BUFFER);
-		
+		return yStart;
+	}
+
+	private int getVisibleEndY(Rectangle area, int yStart) {
 		int yEnd = yStart;
 		while (yEnd < tileYs.length && tileYs[yEnd] < area.y + area.height)
 			yEnd++;
 		if (yEnd > yStart) yEnd--;
 		yEnd = Math.min(numRows - 1, yEnd + BUFFER);
-		
-		return new int[] { xStart, xEnd, yStart, yEnd };
+		return yEnd;
 	}
-
-
 	
+	private int getWrapping(int[] arr, int idx) {
+		return arr[getIndexWrapping(arr, idx)];
+	}
+	
+	private int getIndexWrapping(int[] arr, int idx) {
+		return idx < 0 ? arr.length + idx : idx;
+	}
 }

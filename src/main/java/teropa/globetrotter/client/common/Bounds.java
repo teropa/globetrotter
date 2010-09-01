@@ -53,6 +53,7 @@ public class Bounds {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this) return true;
 		Bounds o = (Bounds)obj;
 		return hashDouble(lowerLeftX) == hashDouble(o.lowerLeftX) &&
 			hashDouble(lowerLeftY) == hashDouble(o.lowerLeftY) &&

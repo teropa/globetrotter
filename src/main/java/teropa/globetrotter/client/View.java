@@ -163,7 +163,7 @@ public class View extends Composite implements MouseHandler, DoubleClickHandler 
 		int minX = PAN_BUMPER - visibleSize.getWidth();
 		int minY = PAN_BUMPER - visibleSize.getHeight();
 		
-		newX = Math.min(maxX, Math.max(minX, newX));
+		newX = map.shouldWrapDateLine() ? newX : Math.min(maxX, Math.max(minX, newX));
 		newY = Math.min(maxY, Math.max(minY, newY));
 		int xDelta = topLeft.getX() - newX;
 		int yDelta = topLeft.getY() - newY;

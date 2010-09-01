@@ -34,14 +34,14 @@ public class Tile {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		Tile o = (Tile)obj;
-		return col == o.col && row == o.row;
+		return leftX == o.leftX && topY == o.topY;
 	}
 	
 	@Override
 	public int hashCode() {
 		int hash = 42;
-		hash = 37 * hash + col;
-		hash = 37 * hash + row;
+		hash = 37 * hash + leftX;
+		hash = 37 * hash + topY;
 		return hash;
 	}
 	
